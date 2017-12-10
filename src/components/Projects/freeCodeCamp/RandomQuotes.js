@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 
 const qoute_url =
-  'http://api.forismatic.com/api/1.0/?method=getQuote&key=457653&format=json&lang=en';
+  'https://api.forismatic.com/api/1.0/?method=getQuote&key=457653&format=json&lang=en';
 
 class RandomQuotes extends Component {
   state = {

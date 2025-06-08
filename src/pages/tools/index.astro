@@ -36,9 +36,40 @@ const DEVELOPMENT = [
 		iconBgColor: '#06A67F'
 	},
 ]
+
+const HOSTING = [
+	{
+		name: 'Vercel',
+		description: 'Provider',
+		href: 'https://vercel.com/',
+		iconPath: 'vercel',
+		iconBgColor: '#2C2C32'
+	},
+	{
+		name: 'Supabase',
+		description: 'Provider',
+		href: 'https://supabase.com/',
+		iconPath: 'tabler:brand-supabase',
+		iconBgColor: '#06A67F'
+	},
+	{
+		name: 'Posthog',
+		description: 'Observability',
+		href: 'https://posthog.com/',
+		iconPath: 'posthog',
+		iconBgColor: '#06A67F'
+	},
+	{
+		name: 'AWS',
+		description: 'Cloud',
+		href: 'https://aws.amazon.com/',
+		iconPath: 'tabler:brand-aws',
+		iconBgColor: '#06A67F'
+	},
+]
 ---
 
-<PageLayout meta={{ title: 'Home' }}>
+<PageLayout meta={{ title: 'Tools' }}>
 	<div class='w-full'>
 		<Button title='Back' href='/' style='button'>
 			<svg
@@ -63,6 +94,7 @@ const DEVELOPMENT = [
 			</div>
 
 			<ToolSection title='Development' tools={DEVELOPMENT} />
+			<ToolSection title='Hosting' tools={HOSTING} />
 			<ToolSection title='Design' tools={DESIGN} />
 			
 		</div>

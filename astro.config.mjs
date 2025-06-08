@@ -4,10 +4,12 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
-// @ts-check
 import { defineConfig } from "astro/config";
+import rehypeExternalLinks from "rehype-external-links";
+// import remarkUnwrapImages from "remark-unwrap-images";
 
 import { expressiveCodeOptions } from "./src/site.config";
+import { remarkReadingTime } from "./src/utils/remarkReadingTime.ts";
 
 // https://astro.build/config
 export default defineConfig({
@@ -25,5 +27,23 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+  },
+
+  markdown: {
+    remarkPlugins: [remarkReadingTime],
+    rehypePlugins: [
+      [
+        rehypeExternalLinks,
+        {
+          target: "_blank",
+          rel: ["nofollow, noopener, noreferrer"],
+        },
+      ],
+    ],
+    remarkRehype: {
+      footnoteLabelProperties: {
+        className: [""],
+      },
+    },
   },
 });

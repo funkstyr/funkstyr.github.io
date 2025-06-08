@@ -1,3 +1,4 @@
+import "dotenv/config";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import expressiveCode from "astro-expressive-code";
@@ -11,7 +12,7 @@ import { expressiveCodeOptions } from "./src/site.config";
 export default defineConfig({
   site: process.env.SITE_URL,
   prefetch: true,
-  output: "server",
+  //   output: "server",
 
   integrations: [
     expressiveCode(expressiveCodeOptions),

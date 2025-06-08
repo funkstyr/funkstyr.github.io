@@ -20,12 +20,15 @@
     "@astrojs/mdx": "^4.3.0",
     "@astrojs/rss": "^4.0.12",
     "@astrojs/sitemap": "^3.4.1",
+    "@iconify-json/tabler": "^1.2.19",
+    "@tailwindcss/vite": "^4.1.8",
     "astro": "^5.9.1",
     "astro-expressive-code": "^0.41.2",
     "astro-icon": "^1.1.5",
     "clsx": "^2.1.1",
     "dotenv": "^16.5.0",
-    "sharp": "^0.34.2"
+    "sharp": "^0.34.2",
+    "tailwindcss": "^4.1.8"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4"

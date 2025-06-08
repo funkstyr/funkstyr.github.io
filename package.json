@@ -6,13 +6,27 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "quality:_": "",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "type-check": "tsc --noEmit",
+    "up-deps": "bunx taze -r -w minor",
+    "up-deps:major": "bunx taze -r -w major",
+    "clean": "git clean -xdf node_modules"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.4",
     "@astrojs/mdx": "^4.3.0",
     "@astrojs/rss": "^4.0.12",
     "@astrojs/sitemap": "^3.4.1",
     "astro": "^5.9.1",
+    "astro-expressive-code": "^0.41.2",
+    "astro-icon": "^1.1.5",
+    "clsx": "^2.1.1",
     "sharp": "^0.34.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4"
   }
 }

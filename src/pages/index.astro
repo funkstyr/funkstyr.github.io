@@ -8,15 +8,15 @@ import Card from '../components/Card.astro'
 import ProjectCard from '../components/ProjectCard.astro'
 import Label from '../components/Label.astro'
 import SkillLayout from '../components/SkillLayout.astro'
-import PostPreview from '../components/blog/PostPreview.astro'
+// import PostPreview from '../components/blog/PostPreview.astro'
 import astro from '../assets/about-astro.png'
 
 import { getAllPosts, sortMDByDate } from '../utils'
 
-const languages = ['lorem', 'ipsum']
-const frontend = ['lorem', 'ipsum', 'lorem', 'ipsum', 'lorem', 'ipsum', 'lorem']
-const backend = ['lorem', 'ipsum', 'lorem', 'ipsum']
-const others = ['lorem', 'ipsum', 'lorem', 'ipsum', 'lorem']
+const languages = ['Typescript', 'C#', 'SQL']
+const frontend = ['React', 'Redux', 'Next.js', 'Playwright', 'Testing Library']
+const backend = ['.Net Core', 'Hono', 'Trpc', 'Supabase', 'Postgres']
+const others = ['Docker', 'Kubernetes', 'AWS', 'Turborepo', "Nginx"]
 
 const MAX_POSTS = 10
 const allPosts = await getAllPosts()
@@ -45,6 +45,7 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 							></path></svg
 						>
 					</Label>
+
 					<Label title='Raleigh, NC'>
 						<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='h-5 w-5' slot='icon'
 							><path
@@ -53,6 +54,7 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 							></path></svg
 						>
 					</Label>
+
 					<Label
 						title='Linkedin'
 						as='a'
@@ -76,13 +78,14 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 
 		<Section title='About'>
 			<p class='text-muted-foreground'>
-				Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis atque quia omnis
-				consectetur, voluptas praesentium veniam blanditiis ratione asperiores accusantium laborum
-				odit commodi quis deserunt incidunt et dolor iure ut! Lorem ipsum dolor sit, amet
-				consectetur adipisicing elit. Alias quia, doloribus ut beatae perspiciatis voluptatibus.
+				Fullstack developer that specializes in React.
+				<br/>
+				Sometimes dabble in .Net Core.
+				<br/>
+				Currently enjoy developing in a bun monorepo.
 			</p>
 		</Section>
-		{
+		<!-- {
 			allPostsByDate.length > 0 && (
 				<Section title='Posts'>
 					<ul class='flex flex-col gap-y-2'>
@@ -94,107 +97,133 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 					</ul>
 				</Section>
 			)
-		}
+		} -->
 
 		<Section title='Experience'>
 			<Card
-				heading='Lorem Ipsum'
-				subheading='Sit amet consectetur'
-				date='Dec 2022 - Nov 2023'
-				imagePath='/src/assets/about-astro.png'
-				altText='Lorem, ipsum dolor sit'
+				heading='Highlight'
+				subheading='Sr Software Engineer'
+				date='May 2022 - Current'
+				altText='Highlight experience'
 				imageClass='h-12 w-auto md:-left-16'
 			>
 				<ul class='ml-4 list-disc text-muted-foreground'>
-					<li>
-						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolore debitis recusandae, ut
-						molestiae laboriosam pariatur!
-
-						<li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, pariatur!</li>
-					</li>
+					<li>Bootstrap Next.js application based on no code MVP</li>
+					<li>Split application into monorepo for client and admin portals</li>
+					<li>Refactor legacy CRA to Next.js and bring into monorepo using same ui and api packages</li>
+					<li>Use quality checks and CI to enable many developers to release multiple times a day</li>
 				</ul>
-			</Card>
-			<Card
-				heading='Lorem Ipsum'
-				subheading='Sit amet consectetur'
-				date='Dec 2022 - Nov 2023'
-				imagePath='/src/assets/about-astro.png'
-				altText='Lorem, ipsum dolor sit'
-				imageClass='h-12 w-auto md:-left-16'
-			/>
-		</Section>
 
-		<Section title='Education'>
+				<div class="text-stone-500 text-sm">Skills: React, Next.js, Redux, C#, .Net Core, Docker, Kubernetes, AWS</div>
+			</Card>
+
 			<Card
-				heading='Lorem Ipsum'
-				subheading='Sit amet consectetur'
-				date='Dec 2022 - Nov 2023'
-				imagePath='/src/assets/about-astro.png'
-				altText='Lorem, ipsum dolor sit'
+				heading='AVB Marketing'
+				subheading='Software Engineer'
+				date='Mar 2019 - May 2022'
+				altText='AVB Marketing experience'
 				imageClass='h-12 w-auto md:-left-16'
 			>
 				<ul class='ml-4 list-disc text-muted-foreground'>
-					<li>
-						Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolore debitis recusandae, ut
-						molestiae laboriosam pariatur!
-
-						<li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, pariatur!</li>
-					</li>
+					<li>Refactor CRA to Next.js for app running 800+ e-commerce websites</li>
+					<li>Internationalize two React applications to handle English and French</li>
+					<li>Integrate third party credit checks and payment providers facilitating more than $9 million in revenue per month for checkout</li>
 				</ul>
+
+				<div class="text-stone-500 text-sm">Skills: React, Next.js, Redux, Docker, AWS</div>
 			</Card>
+
 			<Card
-				heading='Lorem Ipsum'
-				subheading='Sit amet consectetur'
-				date='Dec 2022 - Nov 2023'
-				imagePath='/src/assets/about-astro.png'
-				altText='Lorem, ipsum dolor sit'
+				heading='Intel'
+				subheading='Software Engineer'
+				date='Aug 2018 - Mar 2019'
+				altText='Intel experience'
 				imageClass='h-12 w-auto md:-left-16'
-			/>
+			>
+				<ul class='ml-4 list-disc text-muted-foreground'>
+					<li>Internal test automation suite for nand memory</li>
+					<li>Create onboarding docs for running our multiple services locally within a VM</li>
+				</ul>
+
+				<div class="text-stone-500 text-sm">Skills: AngularJS, Python, Django, SQLAlchemy</div>
+			</Card>
+
+			<Card
+				heading="Stanislaus County - Agricultural Commissioner's Office"
+				subheading='Software Developer II'
+				date='Dec 2016 - June 2018'
+				altText='Stanislaus County experience'
+				imageClass='h-12 w-auto md:-left-16'
+			>
+				<ul class='ml-4 list-disc text-muted-foreground'>
+					<li>Offline web app for in field phytosanitary inspections on iPads</li>
+					<li>Web app to record testing scales and output certification of inspections and invoice as pdf</li>
+					<li>Python script to read excel files by inspector and output by vehicle for each fiscal year</li>
+				</ul>
+
+				<div class="text-stone-500 text-sm">Skills: React, Docker, Python</div>
+			</Card>
+
+			<Card
+				heading='Mattersight'
+				subheading='Software Developer'
+				date='Feb 2016 - Dec 2016'
+				altText='Mattersight experience'
+				imageClass='h-12 w-auto md:-left-16'
+			>
+				<ul class='ml-4 list-disc text-muted-foreground'>
+					<li>Create Aspect telephony interface to ingest agent and call events</li>
+					<li>Pull third party audio from inContact and use factory pattern to enable multiple vendors</li>
+					<li>Interface generator to scaffold new projects unique to customer and telephony systems</li>
+				</ul>
+
+				<div class="text-stone-500 text-sm">Skills: C#, ZeroMQ</div>
+			</Card>
 		</Section>
 
+		
 		<Section title='Projects'>
 			<div class='flex flex-col gap-y-3 sm:flex-row sm:gap-x-3 sm:gap-y-0'>
 				<ProjectCard
-					href='https://www.google.com'
-					heading='Consectetur'
-					subheading='Lorem ipsum dolor sit amet consectetur adipisicing elit.'
+					href='https:/github.com/base'
+					heading='Base'
+					subheading='Simple bun monorepo.'
 					imagePath='/src/assets/coming-soon.png'
-					altText='Example'
+					altText='Base'
 					class='w-full sm:w-1/2'
 				/>
 				<ProjectCard
 					as='div'
-					heading='Coming soon...'
+					heading='Loading...'
 					subheading=''
 					imagePath='/src/assets/coming-soon.png'
-					altText='Lorem, ipsum dolor sit'
+					altText='coming soong'
 					class='w-full sm:w-1/2'
 				/>
 			</div>
 		</Section>
 
-		<Section title='Certifications'>
+		<Section title='Education'>
+			<Card
+				heading='California State University, Stanislaus'
+				subheading='BSBA - Accounting, Minor - Computer Science'
+				altText='College educations'
+				imageClass='h-12 w-auto md:-left-16'
+			/>
+		</Section>
+
+
+		<!-- <Section title='Certifications'>
 			<Card
 				as='a'
 				heading='Lorem ipsum, dolor sit amet consectetur adipisicing.'
 				subheading='Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam dicta magni consequuntur corrupti.'
 				date='Mar 2024 - Mar 2024'
-				imagePath='/src/assets/about-astro.png'
 				altText='Lorem, ipsum dolor sit'
 				imageClass='h-11 w-auto md:-left-16'
 				href='https://www.google.com'
 			/>
-			<Card
-				as='a'
-				heading='Lorem ipsum, dolor sit amet'
-				subheading='Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam dicta.'
-				date='Mar 2029 - Mar 2032'
-				imagePath='/src/assets/about-astro.png'
-				altText='Lorem, ipsum dolor sit'
-				imageClass='h-11 w-auto md:-left-16'
-				href='https://www.google.com'
-			/>
-		</Section>
+		</Section> -->
 
 		<Section title='Skills'>
 			<SkillLayout title='Languages' skills={languages} />

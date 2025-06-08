@@ -59,12 +59,26 @@
 	function getCurrentTheme() {
 		return localStorage.getItem('theme')
 	}
+
+	function setThemeMode(modeName: "light" | "dark" | "system") {
+		if (modeName !== "dark") {
+			document.documentElement.classList.remove("dark");
+		}
+
+		if (modeName === "dark") {
+			document.documentElement.classList.add("dark");
+		}
+	}
+
 	const toggleDarkModeButton = document.getElementById('toggleDarkMode')
 
 	toggleDarkModeButton?.addEventListener('click', () => {
+		const theme = getCurrentTheme() === 'light' ? 'dark' : 'light';
+
 		const toggleDarkModeEvent = new CustomEvent('theme-change', {
-			detail: { theme: getCurrentTheme() === 'light' ? 'dark' : 'light' }
-		})
-		document.dispatchEvent(toggleDarkModeEvent)
+			detail: { theme }
+		});
+		document.dispatchEvent(toggleDarkModeEvent);
+		setThemeMode(theme);
 	})
 </script>

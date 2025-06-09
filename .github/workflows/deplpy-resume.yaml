@@ -33,7 +33,10 @@ jobs:
         run: bun install
 
       - name: Build Docs
-        run: SITE_URL=https://funkstyr.me bun run build
+        env: # make sure these are set in repo > settings > secrets and variables (security) > actions > repository secrets (bottom)
+          SITE_URL: ${{ secrets.SITE_URL }}
+          VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
+        run: bun run build
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3

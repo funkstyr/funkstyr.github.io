@@ -1,0 +1,52 @@
+---
+title:  "Windows Communication Foundation"
+description: "First time working with an external api"
+publishDate: "13 May 2016"  
+tags: ["info", "c_sharp"]
+---
+
+## WCF
+
+<br/>
+
+This past week I was tasked with writing an interface for the Aspect telephony system. 
+The first thing I noticed when looking at the documentation is that I will be interacting with a .NET WCF service. 
+Looking around the web and talking to my teammates I found out it had replaced .NET Remoting.
+
+<br/>
+
+Lucky for me I was given sample code which it had sample code for connecting and receiving events from the service. 
+I was able to get the initial connection running where I Open the connection, getting a session id for future requests, subscribing to event types, and then enabling events to be directed at my interface by supplying a callback url.
+
+<br/>
+
+For the first day I was struggling with not getting any events back after a simple request. 
+The error showing up was that the connection was actively being denied which comes down to two options: the service isn't listening on the port you supplied or the firewall denied the connection; not including supplying the wrong url to your service.
+
+<br/>
+
+Luckily I had access to a computer in our lab that I new had connected to the Aspect server. 
+Deploy my code to the box in the lab and **BAM**, I get an event back immediately. 
+My team lead told my getting the connection was the hardest part about starting a new telephony interface. 
+So I was excited to be over the biggest hump of the project.
+
+<br/>
+
+The next things I worked on was creating a heartbeat monitoring. 
+The Aspect service sends out a heartbeat event and expects any integer value back. 
+If a certain number of heartbeat events are missed it closes the connection. 
+So I log the current time(UTC) of when I get the event.
+
+<br/>
+
+I then have a timer ticking every 2 minutes that checks if a heartbeat hasn't been received in over a minute and a half. 
+If that scenario is true is stops the interface and then starts again. 
+Now on my start cycle if I cannot connect I keep trying until I get connection again. 
+The delay before retrying again starts at 2 seconds and doubles until it is up to 5 minutes.
+
+<br/>
+
+We also maintain a agent white list in which basically supplies the agents that we are watching. 
+For every agent that is on the list, I add a filter to the connection to receive events for those agents only. 
+When there is a change in the file I create a list based on the new list and what the pervious list to know which agents need to be removed from the filter and which ones need to be added. 
+This is used by using the *EXCEPT* method of a List.

@@ -1,0 +1,133 @@
+---
+title:  "Why a monorepo?"
+description: "but that sounds complicated"
+publishDate: "25 Feb 2024"  
+tags: ["monorepo", "tubrorepo", "typescript"]
+---
+
+<hr />
+
+<a href="https://monorepo.tools/" target="_blank" rel="noopener noreferrer">
+  What is a monorepo?
+</a>
+
+<br/>
+
+## The Beginning
+
+<br/>
+
+I first became intrigued with monorepos in 2019 when I was working for <a href="https://www.avbmarketing.com/" target="\_blank" rel="noopener noreferrer">AVB Marketing</a>
+where we had a multi-tenant React application for over 800 appliance and furniture
+stores across the country. Why was I interested in monorepos at this time?
+
+<br/>
+
+Well, our application had some main areas: csm, catalog, product, the cart + checkout, and
+blog pages. But some of our members only used the cms and blog pages yet their users
+were downloading a lot of code for the other pages that they would never even know
+existed. I wanted to break each one of those areas into their own package and have
+a slim and ecommerce version.
+
+<br/>
+
+At that time, the main players were Nx and Lerna and I got about as far as a POC for our current app alongside
+documenation using <a href="https://docusaurus.io/" target="_blank" rel="noopener noreferrer">Docusaurus</a>.
+
+<br/>
+
+It wasn't until about 2 years ago where we implemented Turborepo at <a href="https://www.letshighlight.com/" target="_blank" rel="noopener noreferrer">Highlight</a>
+to split our application into two. We had two major users of the application: an account executive and a customer.
+We started with a single React application with a bunch of if statements based on role to two applications with
+some shared components. We had a single sprint to get this done, and with this being our first interactions with
+monoreps were under quite the duress.
+
+<br/>
+
+## The Revamp
+
+<br/>
+
+It wasn't until recently where we have started to revamp how we use Turborepo based on a recent talk at the last
+Next.js Conference 2023. We had been using the same setup as our original foray and had been feeling some pain points
+with CI time(mainly unit test time).
+
+<br/>
+
+We had 2 applications, and 2 shared packages; one for ui components and one for an
+api client. This talk sparked something in our team to double down on the monorepo and we quickly started to create
+small packages for new features and put shared configs into their own packages too.
+
+<br/>
+
+## Inspiration
+
+<a
+  href="https://www.chernicki.com/blog/infinitely-scalable-applications"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Infinitely Scalable Applications
+</a>
+
+<br/>
+
+<iframe
+  width="100%"
+  height="300"
+  src="https://www.youtube.com/embed/Bq3kOftoRqE?si=G2toHUXRVG6UiDpb"
+  title="YouTube video player"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  loading="lazy"
+>
+  {" "}
+</iframe>
+
+<br/>
+<br />
+
+<iframe
+  src="https://open.spotify.com/embed/episode/4QPEQESaCvlkPemT2C0X0T?utm_source=generator&theme=0"
+  width="100%"
+  height="152"
+  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+  loading="lazy"
+  title="spotify player"
+></iframe>
+
+<br />
+<br/>
+
+Between these amazing pieces of content, there had been something awakened inside of me. I immediately started breaking
+out every config into it's own package: eslint, next, postcss, prettier, stylelint, typescript. The patterns
+I was following were the ones set by <a href="https://github.com/t3-oss/create-t3-turbo" target="_blank" rel="noopener noreferrer">T3</a>;
+the turborepo flavor of the popular stack from <a href="https://twitter.com/t3dotgg" target="_blank" rel="noopener noreferrer">Theo</a> & team.
+I got my team to start doing new feature work in their own packages. This weird thing started to happen, it felt
+like we were gamifying writing new code.
+
+<br/>
+
+## How is it Helpful?
+
+<br/>
+
+I have very strong nuero-divergent tendencies which means I binge a new app idea for a couple days, weeks, months
+at best and then fizzle out to never return. Well, with a monorepo, when I get a new app idea and start to work
+on it, I am not starting from scratch. I have all of the ui components and utilities from my previous adventures.
+
+<br/>
+
+I also find it helpfull when working in a specific package, it helps keep the blinders on and trying to keep that
+package's public api as slim as possible. I have some packages where all they do is export the view component
+imported into a Next.js page. Everything else is defined within the package and is only used within the package.
+
+<br/>
+
+## What Now?
+
+<br/>
+
+I envision myself working in this repo for awhile, trying to get the first iteration of <a href="https://hub.omnibytes.io" target="_blank" rel="noopener noreferrer">Pi-Hub</a>
+out with a local temperature and wallpaper feature. This blog will hopefully serve as an outlet
+for my learnings and rants along the way. I also have yet another idea brewing, one that is not new, but one
+that I wish to return to for an online card game we played all the time for swimming and water polo.

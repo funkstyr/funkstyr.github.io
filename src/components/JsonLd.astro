@@ -1,0 +1,52 @@
+---
+import { siteConfig } from "../site.config";
+
+let schema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://funkstyr.me/",
+  additionalType: ["CreativeWork", "Person"],
+  name: "Michael Funk's personal website",
+  url: "https://funkstyr.me/",
+  author: {
+    "@type": "Person",
+    name: "Michael Funk",
+    alternateName: "funkstyr",
+    url: "https://bsky.app/profile/funkstyr.me/",
+    jobTitle: "Senior Software Engineer",
+    worksFor: "Highlight",
+    alumniOf: "California State University, Stanislaus",
+    sameAs: [
+      "https://github.com/funkstyr/",
+      "https://www.linkedin.com/in/michaelafunk/",
+      "https://bsky.app/profile/funkstyr.me/",
+      "https://x.com/funkstyr/",
+    ],
+    skills: [
+      "Software Development",
+      "Software Engineering",
+      "Typescript",
+      "React",
+      "Next",
+      "Redux",
+      "Turborepo",
+      "Monorepo",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+    ],
+  },
+
+  keywords: [
+    "Web",
+    "Technology",
+    "Software Development",
+    "Software Engineering",
+    "React",
+    "Next",
+    "Typescript",
+  ],
+});
+---
+
+<script type='application/ld+json' set:html={schema} />

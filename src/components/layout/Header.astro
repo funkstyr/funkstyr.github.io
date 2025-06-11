@@ -2,49 +2,61 @@
 
 ---
 
-<header class='mb-12 flex w-full flex-wrap pb-3 text-sm sm:flex-nowrap sm:justify-start'>
-	<nav
-		class='relative mx-auto flex w-full items-center justify-between sm:flex sm:items-center'
-		aria-label='global'
-	>
-		<a class='flex-none text-xl font-semibold' href='/' aria-label='Brand'>funk</a>
+<header
+  class='mb-12 flex w-full flex-wrap pb-3 text-sm sm:flex-nowrap sm:justify-start'
+>
+  <nav
+    class='relative mx-auto flex w-full items-center justify-between sm:flex sm:items-center'
+    aria-label='global'
+  >
+    <a class='flex-none text-xl font-semibold' href='/' aria-label='Brand'
+      >funk</a
+    >
 
-		<div class='flex flex-row items-center justify-center gap-x-5 sm:gap-x-7'>
-			<a
-				href='/blog'
-				class='flex-none text-[1.05rem] font-medium hover:text-foreground/75'
-				aria-label='Nav Menu Item'
-				>Blog
-			</a>
-			<a
-				href='/tools'
-				class='flex-none text-[1.05rem] font-medium hover:text-foreground/75'
-				aria-label='Nav Menu Item'
-				>Tools
-			</a>
+    <div class='flex flex-row items-center justify-center gap-x-5 sm:gap-x-7'>
+      <a
+        href='/blog'
+        class='flex-none text-[1.05rem] font-medium hover:text-foreground/75'
+        aria-label='Nav Menu Item'
+        >Blog
+      </a>
+      <a
+        href='/tools'
+        class='flex-none text-[1.05rem] font-medium hover:text-foreground/75'
+        aria-label='Nav Menu Item'
+        >Tools
+      </a>
 
-			<button id="toggleDarkMode" class="w-8 h-8 -mr-2 flex items-center justify-center cursor-pointer" aria-label="Change color scheme">
-				<svg class="w-4 h-4 fill-current dark:text-white text-black" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-					<circle cx="8" cy="8" r="8"></circle>
-				</svg>
-			</button>
-		</div>
-	</nav>
+      <button
+        id='toggleDarkMode'
+        class='w-8 h-8 -mr-2 flex items-center justify-center cursor-pointer'
+        aria-label='Change color scheme'
+      >
+        <svg
+          class='w-4 h-4 fill-current dark:text-white text-black'
+          viewBox='0 0 16 16'
+          xmlns='http://www.w3.org/2000/svg'
+        >
+          <circle cx='8' cy='8' r='8'></circle>
+        </svg>
+      </button>
+    </div>
+  </nav>
 </header>
 
 <script>
-	function getCurrentTheme() {
-		return localStorage.getItem('theme')
-	}
+  function getCurrentTheme() {
+    return localStorage.getItem("theme");
+  }
 
-	const toggleDarkModeButton = document.getElementById('toggleDarkMode')
+  const toggleDarkModeButton = document.getElementById("toggleDarkMode");
 
-	toggleDarkModeButton?.addEventListener('click', () => {
-		const theme = getCurrentTheme() === 'light' ? 'dark' : 'light';
+  toggleDarkModeButton?.addEventListener("click", () => {
+    const theme = getCurrentTheme() === "light" ? "dark" : "light";
 
-		const toggleDarkModeEvent = new CustomEvent('theme-change', {
-			detail: { theme }
-		});
-		document.dispatchEvent(toggleDarkModeEvent);
-	})
+    const toggleDarkModeEvent = new CustomEvent("theme-change", {
+      detail: { theme },
+    });
+    document.dispatchEvent(toggleDarkModeEvent);
+  });
 </script>

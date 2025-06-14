@@ -33,13 +33,13 @@ if (!images[imagePath])
 >
   <Image
     src={images[imagePath]()}
-    alt={altText}
+    alt={`${altText} project photo`}
     class='h-48 w-full rounded-2xl rounded-bl-none rounded-br-none object-cover'
     loading='eager'
   />
   <div class='flex flex-col gap-y-0.5 px-5 py-4'>
-    <h1 class='text-lg font-medium'>{heading}</h1>
-    <h2 class='text-muted-foreground'>{subheading}</h2>
+    <h3 class='text-lg font-medium'>{heading}</h3>
+    <p class='text-muted-foreground'>{subheading}</p>
   </div>
 
   <slot />

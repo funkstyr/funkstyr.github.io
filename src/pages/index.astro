@@ -37,7 +37,12 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
         <h1 class='text-3xl font-bold'>Michael Funk</h1>
 
         <div class='flex flex-wrap justify-center gap-x-7 gap-y-3'>
-          <Label title='Highlight'>
+          <Label
+            title='Highlight'
+            as='a'
+            href='https://www.letshighlight.com/'
+            target='_blank'
+          >
             <svg
               xmlns='http://www.w3.org/2000/svg'
               viewBox='0 0 24 24'

@@ -2,9 +2,9 @@ import "dotenv/config";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
-import { defineConfig } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
 // import remarkUnwrapImages from "remark-unwrap-images";
 

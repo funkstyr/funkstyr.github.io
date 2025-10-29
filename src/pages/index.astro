@@ -1,47 +1,13 @@
 ---
 import { Image } from "astro:assets";
-import { Icon } from "astro-icon/components";
 
 import PageLayout from "../layouts/BaseLayout.astro";
 import Section from "../components/Section.astro";
-import Card from "../components/Card.astro";
-import ProjectCard from "../components/ProjectCard.astro";
 import Label from "../components/Label.astro";
-import SkillLayout from "../components/SkillLayout.astro";
-// import PostPreview from '../components/blog/PostPreview.astro'
 import avatar from "../assets/avatar.png";
-
-import { getAllPosts, sortMDByDate } from "../utils";
-
-const languages = ["Typescript", "C#", "SQL"];
-const frontend = ["React", "Redux", "Next.js", "Playwright", "Testing Library"];
-const backend = [".Net Core", "Hono", "Trpc", "Postgres"];
-const others = ["Docker", "Kubernetes", "AWS", "Turborepo", "Nginx"];
-
-const MAX_POSTS = 10;
-const allPosts = await getAllPosts();
-const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
 ---
 
-<PageLayout meta={{ title: "Resume" }}>
-  <a
-    href='#experience'
-    class='sr-only focus:not-sr-only focus:block focus:static focus:z-50 focus:p-4 m-4'
-    >Skip to experience sections</a
-  >
-
-  <a
-    href='#projects'
-    class='sr-only focus:not-sr-only focus:block focus:static focus:z-50 focus:p-4 m-4'
-    >Skip to projects sections</a
-  >
-
-  <a
-    href='#skills'
-    class='sr-only focus:not-sr-only focus:block focus:static focus:z-50 focus:p-4 m-4'
-    >Skip to skills sections</a
-  >
-
+<PageLayout meta={{ title: "About Me" }}>
   <div class='flex w-full flex-col gap-y-10'>
     <section class='flex flex-col items-center gap-y-7'>
       <Image
@@ -113,226 +79,49 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
       </div>
     </section>
 
-    <Section title='About'>
-      <p class='text-muted-foreground'>
-        Fullstack developer that specializes in React
-        <br />
-        Sometimes dabble in .Net Core
-        <br />
-        Currently enjoy developing in a bun monorepo
-      </p>
-    </Section>
-    <!-- {
-			allPostsByDate.length > 0 && (
-				<Section title='Posts'>
-					<ul class='flex flex-col gap-y-2'>
-						{allPostsByDate.map((p) => (
-							<li class='flex flex-col gap-x-2 sm:flex-row'>
-								<PostPreview post={p} />
-							</li>
-						))}
-					</ul>
-				</Section>
-			)
-		} -->
-
-    <Section title='Experience' id='experience'>
-      <Card
-        heading='Highlight'
-        subheading='Senior Software Engineer II'
-        date='May 2022 - Current'
-        altText='Highlight website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.letshighlight.com/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>Create AI chat to query study results via natural language</li>
-          <li>
-            Use AI, like OCR, to intake a project scope PDF and generate
-            metadata to create a study in app
-          </li>
-          <li>Bootstrap Next.js application based on no code MVP</li>
-          <li>Split application into monorepo for client and admin portals</li>
-          <li>
-            Refactor legacy CRA to Next.js and bring into monorepo using same UI
-            and API packages
-          </li>
-          <li>
-            Use quality checks and CI to enable a team of developers to release
-            over 30 times a day
-          </li>
-        </ul>
-
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: React, Next.js, Monorepo, C#, .Net Core, Docker, Kubernetes,
-          AWS
-        </div>
-      </Card>
-
-      <Card
-        heading='AVB Marketing'
-        subheading='Software Engineer'
-        date='Mar 2019 - May 2022'
-        altText='AVB Marketing website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.avbmarketing.com/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>
-            Refactor CRA to Next.js for app running 800+ e-commerce websites
-          </li>
-          <li>
-            Internationalize two React applications to handle English and French
-          </li>
-          <li>
-            Integrate third party credit checks and payment providers
-            facilitating more than $9 million in revenue per month for checkout
-          </li>
-        </ul>
-
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: React, Next.js, Redux, Docker, AWS
-        </div>
-      </Card>
-
-      <Card
-        heading='Intel'
-        subheading='Software Engineer'
-        date='Aug 2018 - Mar 2019'
-        altText='Intel website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.intel.com/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>Internal test automation suite for nand memory</li>
-          <li>
-            Create onboarding docs for running our multiple services locally
-            within a VM
-          </li>
-        </ul>
-
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: AngularJS, Python, Django, SQLAlchemy
-        </div>
-      </Card>
-
-      <Card
-        heading="Stanislaus County - Agricultural Commissioner's Office"
-        subheading='Software Developer II'
-        date='Dec 2016 - June 2018'
-        altText='Stanislaus County website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.stanag.org/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>
-            Offline web app for in field phytosanitary inspections on iPads
-          </li>
-          <li>
-            Web app to record testing scales and output certification of
-            inspections and invoice as PDF
-          </li>
-          <li>
-            Python script to read Excel files by inspector and output by vehicle
-            for each fiscal year
-          </li>
-        </ul>
-
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: React, Docker, Python
-        </div>
-      </Card>
-
-      <Card
-        heading='Mattersight'
-        subheading='Software Developer'
-        date='Feb 2016 - Dec 2016'
-        altText='Mattersight website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.nice.com/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>
-            Create Aspect telephony interface to ingest agent and call events
-          </li>
-          <li>
-            Pull third party audio from inContact and use factory pattern to
-            enable multiple vendors
-          </li>
-          <li>
-            Interface generator to scaffold new projects unique to customer and
-            telephony systems
-          </li>
-        </ul>
-
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: C#, ZeroMQ
-        </div>
-      </Card>
-    </Section>
-
-    <Section title='Projects' id='projects'>
-      <div class='flex flex-col gap-y-3 sm:flex-row sm:gap-x-3 sm:gap-y-0'>
-        <ProjectCard
-          aria-label='Base project github repository (opens in new tab)'
-          href='https://github.com/funkstyr/base'
-          heading='Base'
-          subheading='Simple bun monorepo.'
-          imagePath='/src/assets/coming-soon.png'
-          altText='Base'
-          class='w-full sm:w-1/2'
-        />
-        <ProjectCard
-          as='div'
-          heading='Loading...'
-          subheading=''
-          imagePath='/src/assets/coming-soon.png'
-          altText='coming soon'
-          class='w-full sm:w-1/2'
-        />
+    <Section title='About Me'>
+      <div class='space-y-4'>
+        <p class='text-muted-foreground'>
+          Hi! I'm Michael, a fullstack developer with a passion for building
+          scalable, user-focused applications. I specialize in React and the
+          modern JavaScript ecosystem, with experience across the full stack.
+        </p>
+        <p class='text-muted-foreground'>
+          Currently, I work as a Software Engineer at Highlight, where I build
+          AI-powered features, architect monorepo solutions, and help teams ship
+          code with confidence. I love working in fast-paced environments where
+          quality and velocity go hand-in-hand.
+        </p>
       </div>
     </Section>
 
-    <Section title='Education'>
-      <Card
-        heading='California State University, Stanislaus'
-        subheading='BSBA - Accounting, Minor - Computer Science'
-        altText='College education'
-        imageClass='h-12 w-auto md:-left-16'
-        aria-label='California State University, Stanislaus website (opens in new tab)'
-        href='https://www.csustan.edu/'
-        as='a'
-        imagePath='/src/assets/stan_logo.png'
-      />
-    </Section>
-
-    <!-- <Section title='Certifications'>
-			<Card
-				as='a'
-				heading='Lorem ipsum, dolor sit amet consectetur adipisicing.'
-				subheading='Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam dicta magni consequuntur corrupti.'
-				date='Mar 2024 - Mar 2024'
-				altText='Lorem, ipsum dolor sit'
-				imageClass='h-11 w-auto md:-left-16'
-				href='https://www.google.com'
-			/>
-		</Section> -->
-
-    <Section title='Skills' id='skills'>
-      <SkillLayout title='Languages' skills={languages} />
-      <SkillLayout title='Frontend' skills={frontend} />
-      <SkillLayout title='Backend' skills={backend} />
-      <SkillLayout title='Others' skills={others} />
+    <Section title='What I Do'>
+      <div class='space-y-4'>
+        <div>
+          <h3 class='font-bold mb-2'>Frontend Development</h3>
+          <p class='text-muted-foreground'>
+            Building responsive, accessible user interfaces with React, Next.js,
+            and TypeScript. I focus on creating delightful user experiences
+            backed by solid testing practices.
+          </p>
+        </div>
+        <div>
+          <h3 class='font-bold mb-2'>Backend & Infrastructure</h3>
+          <p class='text-muted-foreground'>
+            Designing APIs and services with .NET Core, Node.js, and modern
+            cloud platforms. I enjoy working with Docker, Kubernetes, and AWS to
+            build scalable systems.
+          </p>
+        </div>
+        <div>
+          <h3 class='font-bold mb-2'>Developer Experience</h3>
+          <p class='text-muted-foreground'>
+            Improving workflows through monorepo architecture, CI/CD pipelines,
+            and tooling. I believe great developer experience leads to better
+            products.
+          </p>
+        </div>
+      </div>
     </Section>
   </div>
 </PageLayout>

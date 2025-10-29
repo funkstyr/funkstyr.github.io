@@ -3,7 +3,7 @@ import PageLayout from "../../layouts/BaseLayout.astro";
 import ToolSection from "../../components/ToolSection.astro";
 import Button from "../../components/Button.astro";
 
-const DESIGN = [
+const _DESIGN = [
   {
     name: "Figma",
     description: "Design Tool",
@@ -35,9 +35,23 @@ const DEVELOPMENT = [
     iconPath: "warp",
     iconBgColor: "#06A67F",
   },
+  {
+    name: "Claude",
+    description: "Assistant",
+    href: "https://www.claude.com/",
+    iconPath: "claude",
+    iconBgColor: "#06A67F",
+  },
 ];
 
 const HOSTING = [
+  {
+    name: "Cloudflare",
+    description: "Provider",
+    href: "https://cloudflare.com/",
+    iconPath: "cloudflare",
+    iconBgColor: "#2C2C32",
+  },
   {
     name: "Vercel",
     description: "Provider",
@@ -96,7 +110,7 @@ const HOSTING = [
 
       <ToolSection title='Development' tools={DEVELOPMENT} />
       <ToolSection title='Hosting' tools={HOSTING} />
-      <ToolSection title='Design' tools={DESIGN} />
+      <!-- <ToolSection title='Design' tools={DESIGN} /> -->
     </div>
   </div>
 </PageLayout>

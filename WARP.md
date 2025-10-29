@@ -57,7 +57,8 @@ bun run clean            # Clean node_modules
 
 ### Page Structure
 - **Pages**: File-based routing in `src/pages/`
-  - `/` - Resume/home page
+  - `/` - About Me page (home)
+  - `/resume/` - Full resume with experience, projects, education, skills
   - `/blog/` - Paginated blog listing
   - `/blog/[slug]` - Individual blog posts
   - `/tags/` - Tag listing and filtered views

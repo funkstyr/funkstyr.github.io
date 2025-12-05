@@ -1,21 +1,14 @@
 ---
-import { Image } from "astro:assets";
-
 import PageLayout from "../layouts/BaseLayout.astro";
 import Section from "../components/Section.astro";
 import Label from "../components/Label.astro";
-import avatar from "../assets/avatar.png";
+import Avatar from "../components/Avatar.astro";
 ---
 
 <PageLayout meta={{ title: "About Me" }}>
   <div class='flex w-full flex-col gap-y-10'>
     <section class='flex flex-col items-center gap-y-7'>
-      <Image
-        src={avatar}
-        alt='profile photo'
-        class='h-28 w-auto rounded-full bg-[#FFBE98] p-1'
-        loading='eager'
-      />
+      <Avatar />
 
       <div class='flex flex-col items-center gap-y-4'>
         <h1 class='text-3xl font-bold'>Michael Funk</h1>

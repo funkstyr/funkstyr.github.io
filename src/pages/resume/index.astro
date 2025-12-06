@@ -1,24 +1,14 @@
 ---
-import { Icon } from "astro-icon/components";
-
 import PageLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Card from "../../components/Card.astro";
 import ProjectCard from "../../components/ProjectCard.astro";
 import SkillLayout from "../../components/SkillLayout.astro";
-// import PostPreview from '../components/blog/PostPreview.astro'
 import ProfileHeader from "../../components/ProfileHeader.astro";
 
-import { getAllPosts, sortMDByDate } from "../../utils";
+import { resumeData, getSkillsByCategory } from "../../data/resume";
 
-const languages = ["TypeScript", "JavaScript", "C#", "SQL", "Python"];
-const frontend = ["React", "Next.js", "Redux", "Tailwind CSS", "Playwright", "Testing Library"];
-const backend = [".NET Core", "Node.js", "Hono", "tRPC", "PostgreSQL"];
-const devops = ["Docker", "Kubernetes", "AWS", "Turborepo", "CI/CD", "Nginx", "Git"];
-
-const MAX_POSTS = 10;
-const allPosts = await getAllPosts();
-const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
+const { summary, experience, education, projects, skills } = resumeData;
 ---
 
 <PageLayout meta={{ title: "Resume" }}>
@@ -45,241 +35,76 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
 
     <Section title='About'>
       <p class='text-muted-foreground'>
-        Fullstack developer that specializes in React
-        <br />
-        Sometimes dabble in .Net Core
-        <br />
-        Currently enjoy developing in a bun monorepo
+        {summary.short.map((line, i) => (
+          <>
+            {line}
+            {i < summary.short.length - 1 && <br />}
+          </>
+        ))}
       </p>
     </Section>
-    <!-- {
-			allPostsByDate.length > 0 && (
-				<Section title='Posts'>
-					<ul class='flex flex-col gap-y-2'>
-						{allPostsByDate.map((p) => (
-							<li class='flex flex-col gap-x-2 sm:flex-row'>
-								<PostPreview post={p} />
-							</li>
-						))}
-					</ul>
-				</Section>
-			)
-		} -->
 
     <Section title='Experience' id='experience'>
-      <Card
-        heading='Highlight'
-        subheading='Senior Software Engineer II'
-        date='June 2022 - Current'
-        altText='Highlight website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.letshighlight.com/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>
-            Architected monorepo strategy with Turborepo and pnpm workspaces,
-            enabling atomic cross-package changes across 3+ applications
-          </li>
-          <li>
-            Led full-stack development of consumer-facing app from POC to
-            production, including onboarding flows, SMS verification, and
-            mobile-optimized experiences
-          </li>
-          <li>
-            Built analytics dashboard with interactive visualizations,
-            cross-tabulation analysis, and export capabilities for market
-            research teams
-          </li>
-          <li>
-            Established API package architecture with RTK Query integrations,
-            caching strategies, and Zod schema generation for type safety across
-            the monorepo
-          </li>
-          <li>
-            Implemented testing and observability infrastructure with Playwright
-            E2E suites, Datadog RUM, and Amplitude analytics
-          </li>
-        </ul>
+      {experience.map((exp) => (
+        <Card
+          heading={exp.company}
+          subheading={exp.position}
+          date={`${exp.startDate} - ${exp.endDate}`}
+          altText={`${exp.company} website`}
+          imageClass='h-12 w-auto md:-left-16'
+          href={exp.website}
+          as='a'
+        >
+          <span class='sr-only'>(opens in new tab)</span>
+          <ul class='ml-4 list-disc text-muted-foreground'>
+            {exp.achievements.map((achievement) => (
+              <li>{achievement}</li>
+            ))}
+          </ul>
 
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: React, Next.js, Monorepo, C#, .Net Core, Docker, Kubernetes,
-          AWS
-        </div>
-      </Card>
-
-      <Card
-        heading='AVB Marketing'
-        subheading='Software Engineer'
-        date='Mar 2019 - May 2022'
-        altText='AVB Marketing website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.avbmarketing.com/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>
-            Migrated Create React App (CRA) to Next.js for platform serving 800+
-            e-commerce websites, improving SEO and initial page load performance
-          </li>
-          <li>
-            Internationalized two React applications for English and French
-            markets, expanding customer reach across North America
-          </li>
-          <li>
-            Integrated third-party credit verification and payment providers,
-            facilitating $9M+ monthly revenue through checkout systems
-          </li>
-        </ul>
-
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: React, Next.js, Redux, Docker, AWS
-        </div>
-      </Card>
-
-      <Card
-        heading='Intel'
-        subheading='Software Engineer'
-        date='Aug 2018 - Mar 2019'
-        altText='Intel website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.intel.com/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>
-            Developed internal test automation suite for NAND memory validation
-            using Python and Django, improving testing efficiency and coverage
-          </li>
-          <li>
-            Created comprehensive onboarding documentation for local development
-            environment setup, reducing new developer ramp-up time
-          </li>
-        </ul>
-
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: AngularJS, Python, Django, SQLAlchemy
-        </div>
-      </Card>
-
-      <Card
-        heading="Stanislaus County - Agricultural Commissioner's Office"
-        subheading='Software Developer II'
-        date='Dec 2016 - June 2018'
-        altText='Stanislaus County website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.stanag.org/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>
-            Built offline-capable Progressive Web Application (PWA) for field
-            phytosanitary inspections on iPads, enabling data collection without
-            network connectivity
-          </li>
-          <li>
-            Developed web application for scale testing records with automated
-            PDF generation for inspection certifications and invoices
-          </li>
-          <li>
-            Automated fiscal year reporting with Python scripts to process Excel
-            inspection data and generate vehicle-based reports
-          </li>
-        </ul>
-
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: React, Docker, Python
-        </div>
-      </Card>
-
-      <Card
-        heading='Mattersight'
-        subheading='Software Developer'
-        date='Feb 2016 - Dec 2016'
-        altText='Mattersight website'
-        imageClass='h-12 w-auto md:-left-16'
-        href='https://www.nice.com/'
-        as='a'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>
-            Developed Aspect telephony interface using C# and ZeroMQ to ingest
-            real-time agent and call events for analytics processing
-          </li>
-          <li>
-            Implemented factory pattern architecture to integrate multiple audio
-            vendors including inContact, enabling flexible third-party
-            integrations
-          </li>
-          <li>
-            Built code generation tool to scaffold customer-specific projects,
-            accelerating new client onboarding and reducing setup time
-          </li>
-        </ul>
-
-        <div class='text-stone-800 dark:text-stone-100 text-sm'>
-          Skills: C#, ZeroMQ
-        </div>
-      </Card>
+          <div class='text-stone-800 dark:text-stone-100 text-sm'>
+            Skills: {exp.skills.join(", ")}
+          </div>
+        </Card>
+      ))}
     </Section>
 
     <Section title='Projects' id='projects'>
       <div class='flex flex-col gap-y-3 sm:flex-row sm:gap-x-3 sm:gap-y-0'>
-        <ProjectCard
-          aria-label='Base project github repository (opens in new tab)'
-          href='https://github.com/funkstyr/base'
-          heading='Base'
-          subheading='Simple bun monorepo.'
-          imagePath='/src/assets/coming-soon.png'
-          altText='Base'
-          class='w-full sm:w-1/2'
-        />
-        <ProjectCard
-          as='div'
-          heading='Loading...'
-          subheading=''
-          imagePath='/src/assets/coming-soon.png'
-          altText='coming soon'
-          class='w-full sm:w-1/2'
-        />
+        {projects.map((project) => (
+          <ProjectCard
+            aria-label={project.url ? `${project.title} project (opens in new tab)` : undefined}
+            href={project.url}
+            heading={project.title}
+            subheading={project.description}
+            imagePath={project.imagePath}
+            altText={project.title}
+            class='w-full sm:w-1/2'
+            as={project.url ? 'a' : 'div'}
+          />
+        ))}
       </div>
     </Section>
 
     <Section title='Education'>
-      <Card
-        heading='California State University, Stanislaus'
-        subheading='BSBA - Accounting, Minor - Computer Science'
-        altText='College education'
-        imageClass='h-12 w-auto md:-left-16'
-        aria-label='California State University, Stanislaus website (opens in new tab)'
-        href='https://www.csustan.edu/'
-        as='a'
-        imagePath='/src/assets/stan_logo.png'
-      />
+      {education.map((edu) => (
+        <Card
+          heading={edu.institution}
+          subheading={edu.minor ? `${edu.degree}, Minor - ${edu.minor}` : edu.degree}
+          altText='College education'
+          imageClass='h-12 w-auto md:-left-16'
+          aria-label={`${edu.institution} website (opens in new tab)`}
+          href={edu.website}
+          as='a'
+          imagePath={edu.logoPath}
+        />
+      ))}
     </Section>
 
-    <!-- <Section title='Certifications'>
-			<Card
-				as='a'
-				heading='Lorem ipsum, dolor sit amet consectetur adipisicing.'
-				subheading='Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam dicta magni consequuntur corrupti.'
-				date='Mar 2024 - Mar 2024'
-				altText='Lorem, ipsum dolor sit'
-				imageClass='h-11 w-auto md:-left-16'
-				href='https://www.google.com'
-			/>
-		</Section> -->
-
     <Section title='Skills' id='skills'>
-      <SkillLayout title='Languages' skills={languages} />
-      <SkillLayout title='Frontend' skills={frontend} />
-      <SkillLayout title='Backend' skills={backend} />
-      <SkillLayout title='DevOps' skills={devops} />
+      {skills.map((category) => (
+        <SkillLayout title={category.title} skills={category.skills} />
+      ))}
     </Section>
   </div>
 </PageLayout>

@@ -73,6 +73,55 @@ bun run clean            # Clean node_modules
 - Blog posts: `/blog/[slug]` with pagination at `/blog/[...page]`
 - Tags: `/tags/` index and `/tags/[tag]/[...page]` for filtered views
 - RSS feed: `/rss.xml`
+- Resume: `/resume` (web version) and `/resume/print` (PDF-optimized version)
+
+### Resume System
+
+The resume uses a centralized data architecture with a single source of truth:
+
+**Data File:** `src/data/resume.ts`
+- Contains all resume content: contact info, experience, education, projects, skills, and summary
+- Both `/resume` and `/resume/print` pages import from this file
+- Update content once, changes reflect on both pages automatically
+
+**Data Types:**
+- `ContactInfo` - name, email, LinkedIn, location, current company
+- `Experience[]` - job positions with company, title, dates, achievements, skills
+- `Education[]` - degrees and institutions with optional logo
+- `Project[]` - personal projects with optional image
+- `SkillCategory[]` - skills grouped by category (Languages, Frontend, Backend, DevOps)
+- `ResumeSummary` - short version (web About section) and detailed version (print Professional Summary)
+
+**Helper Functions:**
+- `getPrintExperience()` - filters experiences, excluding those with `excludeFromPrint: true`
+- `getSkillsByCategory(title)` - retrieves skills for a specific category
+
+**Print/PDF Version (`/resume/print`):**
+- ATS-friendly format: single-column, no graphics, standard fonts (Arial)
+- Excludes: About section, Projects section, experiences marked `excludeFromPrint`
+- Uses `<style is:global>` to ensure styles apply to html/body elements
+- Optimized for single-page output with 36px padding
+
+**To exclude an experience from PDF:** Add `excludeFromPrint: true` to the experience object in `src/data/resume.ts`
+
+**To add a new experience:**
+```typescript
+// In src/data/resume.ts, add to the experience array:
+{
+  company: "Company Name",
+  position: "Job Title",
+  startDate: "Month Year",
+  endDate: "Current", // or "Month Year"
+  location: "City, State",
+  website: "https://company.com/",
+  achievements: [
+    "Achievement 1 with quantified impact",
+    "Achievement 2 with metrics",
+  ],
+  skills: ["Skill1", "Skill2", "Skill3"],
+  excludeFromPrint: false, // optional, defaults to showing in print
+}
+```
 
 ### Markdown Processing
 

@@ -1,0 +1,96 @@
+---
+import { resumeData } from "../data/resume";
+
+const { contact, experience, education, skills } = resumeData;
+
+// Create work experience entries
+const workExperience = experience.map((exp) => ({
+	"@type": "OrganizationRole" as const,
+	startDate: exp.startDate,
+	endDate: exp.endDate === "Current" ? undefined : exp.endDate,
+	roleName: exp.position,
+	namedPosition: exp.position,
+	"member": {
+		"@type": "Organization" as const,
+		name: exp.company,
+		...(exp.website && { url: exp.website }),
+	},
+}));
+
+// Flatten all skills
+const allSkills = skills.flatMap((category) => category.skills);
+
+const personSchema = {
+	"@context": "https://schema.org",
+	"@type": "Person",
+	"@id": "https://funkstyr.me/#resume-person",
+	name: contact.name,
+	jobTitle: contact.title,
+	email: `mailto:${contact.email}`,
+	url: "https://funkstyr.me/resume/",
+	image: "https://funkstyr.me/social_card.jpg",
+	address: {
+		"@type": "PostalAddress",
+		addressLocality: contact.location.split(",")[0]?.trim(),
+		addressRegion: contact.location.split(",")[1]?.trim(),
+		addressCountry: "US",
+	},
+	worksFor: {
+		"@type": "Organization",
+		name: contact.currentCompany,
+		url: contact.currentCompanyUrl,
+	},
+	alumniOf: education.map((edu) => ({
+		"@type": "CollegeOrUniversity",
+		name: edu.institution,
+		...(edu.website && { url: edu.website }),
+	})),
+	hasOccupation: {
+		"@type": "Occupation",
+		name: "Senior Software Engineer",
+		occupationalCategory: "15-1252.00",
+		skills: allSkills.join(", "),
+		qualifications: education.map((edu) => edu.degree).join(", "),
+	},
+	knowsAbout: allSkills,
+	sameAs: [
+		contact.linkedInUrl,
+		"https://github.com/funkstyr/",
+		"https://bsky.app/profile/funkstyr.me/",
+		"https://x.com/funkstyr/",
+	],
+};
+
+// Add a WebPage schema for the resume page
+const webPageSchema = {
+	"@context": "https://schema.org",
+	"@type": "WebPage",
+	"@id": "https://funkstyr.me/resume/",
+	name: `${contact.name} - Resume`,
+	description: `Professional resume of ${contact.name}, ${contact.title}. View work experience, skills, and education.`,
+	url: "https://funkstyr.me/resume/",
+	mainEntity: {
+		"@id": "https://funkstyr.me/#resume-person",
+	},
+	breadcrumb: {
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{
+				"@type": "ListItem",
+				position: 1,
+				name: "Home",
+				item: "https://funkstyr.me/",
+			},
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "Resume",
+				item: "https://funkstyr.me/resume/",
+			},
+		],
+	},
+};
+---
+
+<script type='application/ld+json' set:html={JSON.stringify(personSchema)} />
+<script type='application/ld+json' set:html={JSON.stringify(webPageSchema)} />

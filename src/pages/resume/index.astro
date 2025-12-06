@@ -5,6 +5,7 @@ import Card from "../../components/Card.astro";
 import ProjectCard from "../../components/ProjectCard.astro";
 import SkillLayout from "../../components/SkillLayout.astro";
 import ProfileHeader from "../../components/ProfileHeader.astro";
+import ResumeSchema from "../../components/ResumeSchema.astro";
 
 import { resumeData, getSkillsByCategory } from "../../data/resume";
 
@@ -12,6 +13,7 @@ const { summary, experience, education, projects, skills } = resumeData;
 ---
 
 <PageLayout meta={{ title: "Resume" }}>
+  <ResumeSchema />
   <a
     href='#experience'
     class='sr-only focus:not-sr-only focus:block focus:static focus:z-50 focus:p-4 m-4'

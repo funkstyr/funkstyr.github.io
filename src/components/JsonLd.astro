@@ -1,52 +1,72 @@
 ---
 import { siteConfig } from "../site.config";
 
-let schema = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "@id": "https://funkstyr.me/",
-  additionalType: ["CreativeWork", "Person"],
-  name: "Michael Funk's personal website",
-  url: "https://funkstyr.me/",
-  author: {
-    "@type": "Person",
-    name: "Michael Funk",
-    alternateName: "funkstyr",
-    url: "https://bsky.app/profile/funkstyr.me/",
-    jobTitle: "Senior Software Engineer",
-    worksFor: "Highlight",
-    alumniOf: "California State University, Stanislaus",
-    sameAs: [
-      "https://github.com/funkstyr/",
-      "https://www.linkedin.com/in/michaelafunk/",
-      "https://bsky.app/profile/funkstyr.me/",
-      "https://x.com/funkstyr/",
-    ],
-    skills: [
-      "Software Development",
-      "Software Engineering",
-      "Typescript",
-      "React",
-      "Next",
-      "Redux",
-      "Turborepo",
-      "Monorepo",
-      "AWS",
-      "Docker",
-      "Kubernetes",
-    ],
-  },
+const websiteSchema = {
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	"@id": "https://funkstyr.me/#website",
+	name: "Michael Funk's personal website",
+	url: "https://funkstyr.me/",
+	description: siteConfig.description,
+	inLanguage: siteConfig.lang,
+	publisher: {
+		"@id": "https://funkstyr.me/#person",
+	},
+	keywords: [
+		"Web",
+		"Technology",
+		"Software Development",
+		"Software Engineering",
+		"React",
+		"Next",
+		"Typescript",
+	],
+};
 
-  keywords: [
-    "Web",
-    "Technology",
-    "Software Development",
-    "Software Engineering",
-    "React",
-    "Next",
-    "Typescript",
-  ],
-});
+const personSchema = {
+	"@context": "https://schema.org",
+	"@type": "Person",
+	"@id": "https://funkstyr.me/#person",
+	name: "Michael Funk",
+	alternateName: "funkstyr",
+	url: "https://funkstyr.me/",
+	image: "https://funkstyr.me/social_card.jpg",
+	jobTitle: "Senior Software Engineer",
+	worksFor: {
+		"@type": "Organization",
+		name: "Highlight",
+		url: "https://highlight.io/",
+	},
+	alumniOf: {
+		"@type": "CollegeOrUniversity",
+		name: "California State University, Stanislaus",
+	},
+	sameAs: [
+		"https://github.com/funkstyr/",
+		"https://www.linkedin.com/in/michaelafunk/",
+		"https://bsky.app/profile/funkstyr.me/",
+		"https://x.com/funkstyr/",
+	],
+	knowsAbout: [
+		"Software Development",
+		"Software Engineering",
+		"TypeScript",
+		"JavaScript",
+		"React",
+		"Next.js",
+		"Redux",
+		"Node.js",
+		"Turborepo",
+		"Monorepo Architecture",
+		"AWS",
+		"Docker",
+		"Kubernetes",
+		"PostgreSQL",
+		"GraphQL",
+		"REST APIs",
+	],
+};
 ---
 
-<script type='application/ld+json' set:html={schema} />
+<script type='application/ld+json' set:html={JSON.stringify(websiteSchema)} />
+<script type='application/ld+json' set:html={JSON.stringify(personSchema)} />

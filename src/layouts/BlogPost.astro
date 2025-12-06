@@ -2,6 +2,8 @@
 import type { CollectionEntry } from "astro:content";
 
 import BlogHero from "../components/blog/Hero.astro";
+import BlogPostSchema from "../components/BlogPostSchema.astro";
+import BreadcrumbSchema from "../components/BreadcrumbSchema.astro";
 import TOC from "../components/blog/TOC.astro";
 import Button from "../components/Button.astro";
 import Comments from "../components/Comments.astro";
@@ -15,7 +17,7 @@ interface Props {
 
 const { post, prev, next } = Astro.props;
 const {
-  data: { description, ogImage, publishDate, title, updatedDate },
+  data: { description, ogImage, publishDate, tags, title, updatedDate },
   slug,
 } = post;
 
@@ -24,7 +26,15 @@ const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString();
 const { headings } = await post.render();
 ---
 
-<PageLayout meta={{ articleDate, description, ogImage: socialImage, title }}>
+<PageLayout meta={{ articleDate, articleTags: tags, description, ogImage: socialImage, title }}>
+  <BlogPostSchema post={post} url={Astro.url.href} />
+  <BreadcrumbSchema
+    items={[
+      { name: "Home", url: "https://funkstyr.me/" },
+      { name: "Blog", url: "https://funkstyr.me/blog/" },
+      { name: title, url: Astro.url.href },
+    ]}
+  />
   <div class='w-full'>
     <div class='flex items-center justify-between'>
       <Button title='Back' href='/blog' style='button'>

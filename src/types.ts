@@ -20,5 +20,7 @@ export type SiteMeta = {
   title: string;
   description?: string;
   ogImage?: string | undefined;
+  ogImageAlt?: string | undefined;
   articleDate?: string | undefined;
+  articleTags?: string[] | undefined;
 };

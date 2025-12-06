@@ -1,0 +1,47 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import { siteConfig } from "../site.config";
+
+interface Props {
+	post: CollectionEntry<"post">;
+	url: string;
+}
+
+const { post, url } = Astro.props;
+const { title, description, publishDate, updatedDate, coverImage, tags } =
+	post.data;
+
+const schema = {
+	"@context": "https://schema.org",
+	"@type": "BlogPosting",
+	headline: title,
+	description: description,
+	author: {
+		"@type": "Person",
+		name: "Michael Funk",
+		url: "https://funkstyr.me/",
+	},
+	publisher: {
+		"@type": "Person",
+		name: "Michael Funk",
+		url: "https://funkstyr.me/",
+	},
+	datePublished: publishDate.toISOString(),
+	...(updatedDate && { dateModified: updatedDate.toISOString() }),
+	mainEntityOfPage: {
+		"@type": "WebPage",
+		"@id": url,
+	},
+	...(coverImage && {
+		image: {
+			"@type": "ImageObject",
+			url: coverImage.src,
+		},
+	}),
+	...(tags?.length && { keywords: tags.join(", ") }),
+	inLanguage: siteConfig.lang,
+};
+---
+
+<script type='application/ld+json' set:html={JSON.stringify(schema)} />

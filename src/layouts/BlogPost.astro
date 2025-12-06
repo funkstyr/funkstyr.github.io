@@ -140,6 +140,14 @@ const { headings } = await post.render();
 </PageLayout>
 
 <script>
+  import {
+    trackBlogScrollDepth,
+    trackBlogPostCompleted,
+    trackEvent,
+    getScrollPercent,
+    detectPlatformFromUrl,
+  } from "../utils/analytics";
+
   const scrollBtn = document.getElementById("to-top-btn") as HTMLButtonElement;
   const targetHeader = document.getElementById("blog-hero") as HTMLDivElement;
 
@@ -156,4 +164,98 @@ const { headings } = await post.render();
 
   const observer = new IntersectionObserver(callback);
   observer.observe(targetHeader);
+
+  // ============================================
+  // Blog Post Analytics Tracking
+  // ============================================
+
+  const pageLoadTime = Date.now();
+  const postSlug = window.location.pathname
+    .split("/blog/")[1]
+    ?.replace(/\/$/, "");
+  const postTitle = document.title.split(" • ")[0];
+
+  // Track scroll depth milestones
+  const scrollDepths = [25, 50, 75, 100] as const;
+  const trackedDepths: number[] = [];
+
+  function handleScroll() {
+    const scrollPercent = getScrollPercent();
+
+    scrollDepths.forEach((depth) => {
+      if (scrollPercent >= depth && !trackedDepths.includes(depth)) {
+        trackedDepths.push(depth);
+        if (postSlug) {
+          trackBlogScrollDepth(
+            depth,
+            postSlug,
+            Math.round((Date.now() - pageLoadTime) / 1000)
+          );
+        }
+      }
+    });
+  }
+
+  // Throttle scroll events for performance
+  let scrollTimeout: number | null = null;
+  window.addEventListener("scroll", () => {
+    if (scrollTimeout) return;
+    scrollTimeout = window.setTimeout(() => {
+      handleScroll();
+      scrollTimeout = null;
+    }, 100);
+  });
+
+  // Track post completion when user reaches the comments section
+  const commentsSection = document.querySelector(".giscus");
+  if (commentsSection) {
+    const completionObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && postSlug) {
+          trackBlogPostCompleted(
+            postTitle,
+            postSlug,
+            Math.round((Date.now() - pageLoadTime) / 1000)
+          );
+          completionObserver.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    completionObserver.observe(commentsSection);
+  }
+
+  // Track print intent for blog posts
+  window.addEventListener("beforeprint", () => {
+    if (postSlug) {
+      trackEvent("blog_post_printed", { post_slug: postSlug });
+    }
+  });
+
+  // Track external link clicks within blog content
+  document.querySelectorAll("article a[href^='http']").forEach((link) => {
+    const href = (link as HTMLAnchorElement).href;
+    // Skip internal links
+    if (href.includes("funkstyr.me")) return;
+
+    link.addEventListener("click", () => {
+      const platform = detectPlatformFromUrl(href);
+      trackEvent("blog_external_link_clicked", {
+        platform,
+        url: href,
+        post_slug: postSlug,
+      });
+    });
+  });
+
+  // Track TOC link clicks
+  document.querySelectorAll('nav[aria-label="Table of Contents"] a').forEach((link) => {
+    link.addEventListener("click", () => {
+      const heading = (link as HTMLAnchorElement).textContent;
+      trackEvent("toc_link_clicked", {
+        heading,
+        post_slug: postSlug,
+      });
+    });
+  });
 </script>

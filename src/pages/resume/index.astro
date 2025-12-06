@@ -110,3 +110,71 @@ const { summary, experience, education, projects, skills } = resumeData;
     </Section>
   </div>
 </PageLayout>
+
+<script>
+  import {
+    trackExternalProfileClick,
+    trackResumeSectionView,
+    detectPlatformFromUrl,
+    trackEvent,
+  } from "../../utils/analytics";
+
+  // Track page load time for section visibility calculations
+  const pageLoadTime = Date.now();
+
+  // Track external profile clicks (LinkedIn, GitHub)
+  document
+    .querySelectorAll('a[href*="linkedin.com"], a[href*="github.com"]')
+    .forEach((link) => {
+      link.addEventListener("click", () => {
+        const href = (link as HTMLAnchorElement).href;
+        const platform = href.includes("linkedin") ? "linkedin" : "github";
+        trackExternalProfileClick(platform, href);
+      });
+    });
+
+  // Track section visibility using IntersectionObserver
+  const sections = document.querySelectorAll("section[id]");
+  const observedSections = new Set<string>();
+
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const sectionId = entry.target.id;
+        if (entry.isIntersecting && !observedSections.has(sectionId)) {
+          observedSections.add(sectionId);
+          trackResumeSectionView(
+            sectionId,
+            Math.round((Date.now() - pageLoadTime) / 1000)
+          );
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+
+  sections.forEach((section) => sectionObserver.observe(section));
+
+  // Track print intent
+  window.addEventListener("beforeprint", () => {
+    trackEvent("resume_print_initiated", {
+      time_on_page: Math.round((Date.now() - pageLoadTime) / 1000),
+    });
+  });
+
+  // Track all external link clicks with platform detection
+  document.querySelectorAll('a[href^="http"]').forEach((link) => {
+    const href = (link as HTMLAnchorElement).href;
+    // Skip internal links
+    if (href.includes("funkstyr.me")) return;
+
+    link.addEventListener("click", () => {
+      const platform = detectPlatformFromUrl(href);
+      trackEvent("external_link_clicked", {
+        platform,
+        url: href,
+        page: window.location.pathname,
+      });
+    });
+  });
+</script>

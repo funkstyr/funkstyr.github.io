@@ -1,0 +1,376 @@
+---
+/**
+ * Print-optimized resume page for PDF generation
+ * ATS-friendly: single-column, no graphics, standard headings
+ * Excludes: About section, Projects section, oldest experience
+ */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Michael Funk - Resume</title>
+    <style>
+      /* Reset and base styles */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 11pt;
+        line-height: 1.4;
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000;
+        background: #fff;
+        max-width: 8.5in;
+        margin: 0 auto;
+        padding: 0.4in 0.5in;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 0.3in;
+        border-bottom: 1px solid #000;
+        padding-bottom: 0.15in;
+      }
+
+      .name {
+        font-size: 20pt;
+        font-weight: bold;
+        margin-bottom: 0.08in;
+        letter-spacing: 0.5px;
+      }
+
+      .title {
+        font-size: 11pt;
+        color: #333;
+        margin-bottom: 0.08in;
+      }
+
+      .contact {
+        font-size: 10pt;
+        color: #333;
+      }
+
+      .contact a {
+        color: #333;
+        text-decoration: none;
+      }
+
+      .contact span {
+        margin: 0 0.1in;
+      }
+
+      /* Section styles */
+      .section {
+        margin-bottom: 0.2in;
+      }
+
+      .section-title {
+        font-size: 11pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-bottom: 1px solid #000;
+        padding-bottom: 0.03in;
+        margin-bottom: 0.1in;
+        letter-spacing: 0.5px;
+      }
+
+      /* Summary */
+      .summary {
+        font-size: 10pt;
+        line-height: 1.5;
+      }
+
+      /* Experience */
+      .job {
+        margin-bottom: 0.15in;
+      }
+
+      .job:last-child {
+        margin-bottom: 0;
+      }
+
+      .job-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.03in;
+      }
+
+      .job-title {
+        font-weight: bold;
+        font-size: 10.5pt;
+      }
+
+      .job-date {
+        font-size: 10pt;
+        color: #333;
+      }
+
+      .job-company {
+        font-size: 10pt;
+        font-style: italic;
+        margin-bottom: 0.05in;
+      }
+
+      .job-achievements {
+        list-style-type: disc;
+        margin-left: 0.2in;
+        font-size: 10pt;
+      }
+
+      .job-achievements li {
+        margin-bottom: 0.03in;
+      }
+
+      /* Skills */
+      .skills-grid {
+        font-size: 10pt;
+      }
+
+      .skill-row {
+        margin-bottom: 0.05in;
+      }
+
+      .skill-category {
+        font-weight: bold;
+        display: inline;
+      }
+
+      /* Education */
+      .education-item {
+        font-size: 10pt;
+      }
+
+      .education-school {
+        font-weight: bold;
+      }
+
+      .education-degree {
+        font-style: italic;
+      }
+
+      /* Print styles */
+      @media print {
+        html {
+          font-size: 10.5pt;
+        }
+
+        body {
+          padding: 0.35in 0.5in;
+        }
+
+        @page {
+          size: letter;
+          margin: 0;
+        }
+      }
+
+      /* Screen-only styles */
+      @media screen {
+        body {
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          margin-top: 0.5in;
+          margin-bottom: 0.5in;
+        }
+
+        .print-notice {
+          position: fixed;
+          top: 10px;
+          right: 10px;
+          background: #333;
+          color: #fff;
+          padding: 10px 15px;
+          border-radius: 5px;
+          font-size: 12px;
+          cursor: pointer;
+          z-index: 1000;
+        }
+
+        .print-notice:hover {
+          background: #555;
+        }
+      }
+
+      @media print {
+        .print-notice {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-notice" onclick="window.print()">
+      Press Ctrl+P or click to print/save as PDF
+    </button>
+
+    <header class="header">
+      <h1 class="name">MICHAEL FUNK</h1>
+      <p class="title">Senior Software Engineer | Full Stack Developer</p>
+      <p class="contact">
+        <a href="mailto:michael@funk.dev">michael@funk.dev</a>
+        <span>|</span>
+        <a href="https://linkedin.com/in/michaelafunk">linkedin.com/in/michaelafunk</a>
+        <span>|</span>
+        <span>Sacramento, CA</span>
+      </p>
+    </header>
+
+    <section class="section">
+      <h2 class="section-title">Professional Summary</h2>
+      <p class="summary">
+        Senior Software Engineer with 8+ years of experience building scalable web applications
+        and leading technical initiatives. Expert in React, TypeScript, and modern JavaScript
+        ecosystems with strong full-stack capabilities in .NET Core and cloud infrastructure.
+        Proven track record of architecting monorepo strategies, establishing testing frameworks,
+        and delivering high-impact features from concept to production.
+      </p>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Experience</h2>
+
+      <div class="job">
+        <div class="job-header">
+          <span class="job-title">Senior Software Engineer II</span>
+          <span class="job-date">June 2022 - Present</span>
+        </div>
+        <p class="job-company">Highlight, Remote</p>
+        <ul class="job-achievements">
+          <li>
+            Architected monorepo strategy with Turborepo and pnpm workspaces, enabling atomic
+            cross-package changes across 3+ applications and improving developer velocity
+          </li>
+          <li>
+            Led full-stack development of consumer-facing application from POC to production,
+            including onboarding flows, SMS verification, and mobile-optimized experiences
+          </li>
+          <li>
+            Built analytics dashboard with interactive visualizations, cross-tabulation analysis,
+            and export capabilities for market research teams
+          </li>
+          <li>
+            Established API package architecture with RTK Query integrations, caching strategies,
+            and Zod schema generation for type safety across the monorepo
+          </li>
+          <li>
+            Implemented testing and observability infrastructure with Playwright end-to-end (E2E)
+            test suites, Datadog Real User Monitoring (RUM), and Amplitude analytics
+          </li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-header">
+          <span class="job-title">Software Engineer</span>
+          <span class="job-date">March 2019 - May 2022</span>
+        </div>
+        <p class="job-company">AVB Marketing, Remote</p>
+        <ul class="job-achievements">
+          <li>
+            Migrated Create React App (CRA) to Next.js for platform serving 800+ e-commerce
+            websites, improving SEO and initial page load performance
+          </li>
+          <li>
+            Internationalized two React applications for English and French markets, expanding
+            customer reach across North America
+          </li>
+          <li>
+            Integrated third-party credit verification and payment providers, facilitating $9M+
+            monthly revenue through checkout systems
+          </li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-header">
+          <span class="job-title">Software Engineer</span>
+          <span class="job-date">August 2018 - March 2019</span>
+        </div>
+        <p class="job-company">Intel Corporation, Folsom, CA</p>
+        <ul class="job-achievements">
+          <li>
+            Developed internal test automation suite for NAND memory validation using Python and
+            Django, improving testing efficiency and coverage
+          </li>
+          <li>
+            Created comprehensive onboarding documentation for local development environment setup,
+            reducing new developer ramp-up time
+          </li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-header">
+          <span class="job-title">Software Developer II</span>
+          <span class="job-date">December 2016 - June 2018</span>
+        </div>
+        <p class="job-company">Stanislaus County Agricultural Commissioner's Office, Modesto, CA</p>
+        <ul class="job-achievements">
+          <li>
+            Built offline-capable Progressive Web Application (PWA) for field phytosanitary
+            inspections on iPads, enabling data collection without network connectivity
+          </li>
+          <li>
+            Developed web application for scale testing records with automated PDF generation for
+            inspection certifications and invoices
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Skills</h2>
+      <div class="skills-grid">
+        <div class="skill-row">
+          <span class="skill-category">Languages:</span>
+          TypeScript, JavaScript, C#, SQL, Python, HTML5, CSS3
+        </div>
+        <div class="skill-row">
+          <span class="skill-category">Frontend:</span>
+          React, Next.js, Redux, RTK Query, Tailwind CSS, Playwright, Testing Library, Responsive
+          Design
+        </div>
+        <div class="skill-row">
+          <span class="skill-category">Backend:</span>
+          .NET Core, Node.js, RESTful APIs, Hono, tRPC, PostgreSQL, GraphQL
+        </div>
+        <div class="skill-row">
+          <span class="skill-category">DevOps & Tools:</span>
+          Docker, Kubernetes, Amazon Web Services (AWS), Turborepo, CI/CD, Nginx, Git, Datadog
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Education</h2>
+      <div class="education-item">
+        <span class="education-school">California State University, Stanislaus</span>
+        <br />
+        <span class="education-degree"
+          >Bachelor of Science in Business Administration - Accounting | Minor: Computer Science</span
+        >
+      </div>
+    </section>
+
+    <script>
+      // Auto-trigger print dialog when page loads (optional - user can dismiss)
+      if (window.location.search.includes("print=true")) {
+        window.addEventListener("load", () => {
+          setTimeout(() => window.print(), 500);
+        });
+      }
+    </script>
+  </body>
+</html>

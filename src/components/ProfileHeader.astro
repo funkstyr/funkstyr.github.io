@@ -64,6 +64,27 @@ import Avatar from "./Avatar.astro";
           ></path></svg
         >
       </Label>
+
+      <Label
+        title='Resume'
+        as='a'
+        aria-label='View resume as PDF (opens in new tab)'
+        href='/resume/print'
+        target='_blank'
+      >
+        <span class='sr-only'>(opens in new tab)</span>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          viewBox='0 0 24 24'
+          slot='icon'
+          class='h-5 w-5 text-foreground/75'
+          aria-hidden='true'
+          ><path
+            fill='currentColor'
+            d='M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 2h7v5h5v11H6zm2 8v2h8v-2zm0 4v2h5v-2z'
+          ></path></svg
+        >
+      </Label>
     </div>
   </div>
 </section>

@@ -11,10 +11,10 @@ import ProfileHeader from "../../components/ProfileHeader.astro";
 
 import { getAllPosts, sortMDByDate } from "../../utils";
 
-const languages = ["Typescript", "C#", "SQL"];
-const frontend = ["React", "Redux", "Next.js", "Playwright", "Testing Library"];
-const backend = [".Net Core", "Hono", "Trpc", "Postgres"];
-const others = ["Docker", "Kubernetes", "AWS", "Turborepo", "Nginx"];
+const languages = ["TypeScript", "JavaScript", "C#", "SQL", "Python"];
+const frontend = ["React", "Next.js", "Redux", "Tailwind CSS", "Playwright", "Testing Library"];
+const backend = [".NET Core", "Node.js", "Hono", "tRPC", "PostgreSQL"];
+const devops = ["Docker", "Kubernetes", "AWS", "Turborepo", "CI/CD", "Nginx", "Git"];
 
 const MAX_POSTS = 10;
 const allPosts = await getAllPosts();
@@ -121,14 +121,16 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
         <span class='sr-only'>(opens in new tab)</span>
         <ul class='ml-4 list-disc text-muted-foreground'>
           <li>
-            Refactor CRA to Next.js for app running 800+ e-commerce websites
+            Migrated Create React App (CRA) to Next.js for platform serving 800+
+            e-commerce websites, improving SEO and initial page load performance
           </li>
           <li>
-            Internationalize two React applications to handle English and French
+            Internationalized two React applications for English and French
+            markets, expanding customer reach across North America
           </li>
           <li>
-            Integrate third party credit checks and payment providers
-            facilitating more than $9 million in revenue per month for checkout
+            Integrated third-party credit verification and payment providers,
+            facilitating $9M+ monthly revenue through checkout systems
           </li>
         </ul>
 
@@ -148,10 +150,13 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
       >
         <span class='sr-only'>(opens in new tab)</span>
         <ul class='ml-4 list-disc text-muted-foreground'>
-          <li>Internal test automation suite for nand memory</li>
           <li>
-            Create onboarding docs for running our multiple services locally
-            within a VM
+            Developed internal test automation suite for NAND memory validation
+            using Python and Django, improving testing efficiency and coverage
+          </li>
+          <li>
+            Created comprehensive onboarding documentation for local development
+            environment setup, reducing new developer ramp-up time
           </li>
         </ul>
 
@@ -172,15 +177,17 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
         <span class='sr-only'>(opens in new tab)</span>
         <ul class='ml-4 list-disc text-muted-foreground'>
           <li>
-            Offline web app for in field phytosanitary inspections on iPads
+            Built offline-capable Progressive Web Application (PWA) for field
+            phytosanitary inspections on iPads, enabling data collection without
+            network connectivity
           </li>
           <li>
-            Web app to record testing scales and output certification of
-            inspections and invoice as PDF
+            Developed web application for scale testing records with automated
+            PDF generation for inspection certifications and invoices
           </li>
           <li>
-            Python script to read Excel files by inspector and output by vehicle
-            for each fiscal year
+            Automated fiscal year reporting with Python scripts to process Excel
+            inspection data and generate vehicle-based reports
           </li>
         </ul>
 
@@ -201,15 +208,17 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
         <span class='sr-only'>(opens in new tab)</span>
         <ul class='ml-4 list-disc text-muted-foreground'>
           <li>
-            Create Aspect telephony interface to ingest agent and call events
+            Developed Aspect telephony interface using C# and ZeroMQ to ingest
+            real-time agent and call events for analytics processing
           </li>
           <li>
-            Pull third party audio from inContact and use factory pattern to
-            enable multiple vendors
+            Implemented factory pattern architecture to integrate multiple audio
+            vendors including inContact, enabling flexible third-party
+            integrations
           </li>
           <li>
-            Interface generator to scaffold new projects unique to customer and
-            telephony systems
+            Built code generation tool to scaffold customer-specific projects,
+            accelerating new client onboarding and reducing setup time
           </li>
         </ul>
 
@@ -270,7 +279,7 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
       <SkillLayout title='Languages' skills={languages} />
       <SkillLayout title='Frontend' skills={frontend} />
       <SkillLayout title='Backend' skills={backend} />
-      <SkillLayout title='Others' skills={others} />
+      <SkillLayout title='DevOps' skills={devops} />
     </Section>
   </div>
 </PageLayout>

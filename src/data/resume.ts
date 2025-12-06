@@ -90,6 +90,7 @@ export const resumeData: ResumeData = {
 			location: "Remote",
 			website: "https://www.letshighlight.com/",
 			achievements: [
+				"Integrated Anthropic Claude API to build conversational AI assistant for analyzing study results and generating actionable insights",
 				"Architected monorepo strategy with Turborepo and pnpm workspaces, enabling atomic cross-package changes across 3+ applications",
 				"Led full-stack development of consumer-facing app from POC to production, including onboarding flows, SMS verification, and mobile-optimized experiences",
 				"Built analytics dashboard with interactive visualizations, cross-tabulation analysis, and export capabilities for market research teams",

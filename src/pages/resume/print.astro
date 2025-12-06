@@ -12,7 +12,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Michael Funk - Resume</title>
-    <style>
+    <style is:global>
       /* Reset and base styles */
       *,
       *::before,
@@ -31,9 +31,10 @@
         font-family: Arial, Helvetica, sans-serif;
         color: #000;
         background: #fff;
-        max-width: 8.5in;
+        max-width: 816px;
         margin: 0 auto;
-        padding: 0.4in 0.5in;
+        padding: 36px;
+        box-sizing: border-box;
       }
 
       /* Header */
@@ -163,12 +164,18 @@
 
       /* Print styles */
       @media print {
-        html {
+        html, body {
+          width: 216mm; /* Letter width */
+          height: 279mm; /* Letter height */
           font-size: 10.5pt;
+          background: #fff;
+          overflow: visible;
         }
 
         body {
-          padding: 0.35in 0.5in;
+          padding: 12.7mm; /* 0.5 inch margin */
+          margin: 0;
+          max-width: none;
         }
 
         @page {
@@ -219,7 +226,7 @@
       <h1 class="name">MICHAEL FUNK</h1>
       <p class="title">Senior Software Engineer | Full Stack Developer</p>
       <p class="contact">
-        <a href="mailto:michael@funk.dev">michael@funk.dev</a>
+        <a href="mailto:funk-michael@outlook.com">funk-michael@outlook.com</a>
         <span>|</span>
         <a href="https://linkedin.com/in/michaelafunk">linkedin.com/in/michaelafunk</a>
         <span>|</span>

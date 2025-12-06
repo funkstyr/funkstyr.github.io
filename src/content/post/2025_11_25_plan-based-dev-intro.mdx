@@ -1,0 +1,119 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 1"
+description: "How plan-based development transformed our 60+ package monorepo workflow"
+publishDate: "25 Nov 2025"
+tags: ["claude-code", "monorepo", "typescript", "turborepo", "ai"]
+---
+
+<hr />
+
+*This is Part 1 of a series on plan-based development with Claude Code. We'll explore how combining planning documents, TypeScript, Turborepo, and AI assistance creates a development workflow that's faster and more reliable.*
+
+<br />
+
+## The Challenge of Modern Monorepo Development
+
+<br />
+
+Picture this: You're managing a TypeScript monorepo with over 60 packages. There are multiple apps (web, server, mobile), dozens of shared packages (UI components, API clients, AI integrations, database layers), and a team that needs to move fast without breaking things.
+
+<br />
+
+This is our reality today. But it didn't start this way.
+
+<br />
+
+### From Single App to Sprawling Monorepo
+
+<br />
+
+Six months ago, we had a single Next.js application with everything in one place. Authentication logic lived next to UI components. Database queries shared files with API routes. It worked—until it didn't.
+
+<br />
+
+The inflection points came quickly:
+
+<br />
+
+1. **Adding a mobile app**: We needed the same authentication and API logic for React Native. Copy-paste wasn't going to cut it.
+2. **Growing the team**: Multiple developers working in the same directories meant constant merge conflicts.
+3. **Performance requirements**: Build times stretched to 10+ minutes as the app grew.
+4. **AI integration explosion**: What started as one LLM call became a dozen specialized AI tools, each with their own prompts, schemas, and test data.
+
+<br />
+
+So we started extracting. First `@bts/auth` for shared authentication. Then `@bts/db` for database logic. Then UI components, then API routes, then AI tools. Before we knew it, we had 60+ packages.
+
+<br />
+
+### When to Extract: Our Decision Framework
+
+<br />
+
+Not everything belongs in a package. Here's the framework we use:
+
+<br />
+
+**Extract when:**
+- **Shared across apps**: If both web and mobile need it, it's a package
+- **Independent testing valuable**: Complex logic that benefits from isolated unit tests
+- **Clear API boundary**: You can define what goes in and what comes out
+- **Stable interface**: The contract between this code and its consumers is well-understood
+- **Build optimization**: Isolating code allows Turborepo to cache it separately
+
+<br />
+
+**Keep inline when:**
+- **App-specific**: Only one app uses it and always will
+- **Rapidly evolving**: The interface changes with every PR
+- **Tightly coupled**: It can't be understood without its surrounding context
+- **Trivial**: A few utility functions don't need their own package
+
+<br />
+
+**The rule of three**: When you copy code to a third location, it's time to extract. Two copies might be coincidence. Three copies is a pattern.
+
+<br />
+
+### The Package Naming Convention
+
+<br />
+
+We adopted a naming pattern that makes packages discoverable:
+
+<br />
+
+```
+@bts/[domain]-[type]
+
+Examples:
+@bts/project-router   # Project domain, router type
+@bts/project-ui       # Project domain, UI components
+@bts/project-ai       # Project domain, AI tools
+@bts/core-ui          # Shared/core UI components
+@bts/core-ai          # Shared AI utilities
+```
+
+<br />
+
+This convention means you can predict where code lives. Need the survey API routes? Check `@bts/survey-router`. Need survey-related AI tools? Check `@bts/survey-ai`.
+
+<br />
+
+### The Challenge of Scale
+
+<br />
+
+The traditional approach of "write code, test manually, fix bugs, repeat" simply doesn't scale at this complexity level. A change to `@bts/db` can affect 30 downstream packages. A type change in `@bts/schemas` ripples through the entire system.
+
+<br />
+
+We needed tooling and practices that could handle this complexity without slowing us down.
+
+<br />
+
+What we discovered was that combining **plan-based development**, **aggressive type checking**, **intelligent build orchestration**, and **AI-assisted coding** creates a feedback loop so tight that we can confidently make sweeping changes across the entire codebase in hours instead of days.
+
+<br />
+
+*Next up in Part 2: We'll dive deep into plan-based development and how writing the plan before the code changes everything.*

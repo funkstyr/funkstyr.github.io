@@ -1,0 +1,177 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 2"
+description: "Write the plan first, then the code - how planning documents accelerate development"
+publishDate: "27 Nov 2025"
+tags: ["claude-code", "monorepo", "planning", "documentation"]
+---
+
+<hr />
+
+*This is Part 2 of a series on plan-based development with Claude Code. Today we explore why writing the plan before the code changes everything.*
+
+<br />
+
+## The Problem with "Just Start Coding"
+
+<br />
+
+When faced with a complex feature request, the instinct is to dive straight into code. Create a branch, start typing, and figure it out as you go. This approach has serious downsides:
+
+<br />
+
+- **Hidden complexity surfaces late**: You discover architectural issues after you've already built the scaffolding
+- **Context switching**: You constantly pause coding to research, losing flow state
+- **Incomplete mental models**: Without a written plan, you hold everything in your head—and drop things
+- **Poor communication**: Teammates can't review your approach until they see the code
+
+<br />
+
+## The Solution: Plans as First-Class Artifacts
+
+<br />
+
+We adopted a practice where every significant feature starts with a markdown planning document. Before writing a single line of implementation code, we write the plan.
+
+<br />
+
+Here's an example from our `plans/` directory structure:
+
+<br />
+
+```
+plans/
+├── feature-effect-refactor.md      # Effect TS integration plan
+├── feature-turbo.md                # Turborepo optimization plan
+├── feature-test-coverage.md        # Test infrastructure improvements
+├── feature-claude.md               # Claude Code commands setup
+├── feature-auth-cleanup.md         # Authentication system refactor
+├── feature-ai-tools.md             # AI tooling additions
+└── ... (65+ planning documents)
+```
+
+<br />
+
+## What Makes a Good Plan Document
+
+<br />
+
+Our planning documents follow a consistent structure:
+
+<br />
+
+```markdown
+# Feature: [Name]
+
+## Problem
+Clear description of what we're solving and why.
+
+## Solution
+High-level approach with rationale for key decisions.
+
+## Implementation Steps
+1. [ ] Step one with specific file paths
+2. [ ] Step two with dependencies noted
+3. [ ] Step three with testing criteria
+
+## Files to Modify
+- `packages/auth/src/index.ts` - Add conditional provider logic
+- `apps/server/src/routes/health.ts` - Add new endpoint
+
+## Technical Decisions
+Key architectural choices and trade-offs.
+
+## Status
+Tracking completion of each phase.
+```
+
+<br />
+
+## The Plan as a Living Document
+
+<br />
+
+The magic happens when plans become living documents. As we implement:
+
+<br />
+
+1. **Check off completed steps** - Creates visible progress
+2. **Add discoveries** - Document unexpected issues as they arise
+3. **Update decisions** - When you pivot, record why
+4. **Link to commits** - Connect plans to actual code changes
+
+<br />
+
+Here's a real example from our Effect TS integration plan:
+
+<br />
+
+```markdown
+## Migration Strategy
+
+### Phase 1: Foundation
+1. [x] Create `@bts/effect` package
+2. [x] Implement error types
+3. [x] Create configuration service
+4. [x] Add logger and telemetry services
+
+### Phase 2: Database Layer
+1. [x] Add Effect to `@bts/db`
+2. [x] Implement Database service
+3. [ ] Create repository pattern for entities
+
+### Phase 3: API Layer
+1. [ ] Add Effect integration to `@bts/api`
+2. [ ] Implement error mapping
+3. [ ] Add runtime middleware
+```
+
+<br />
+
+## Benefits We've Observed
+
+<br />
+
+After six months of plan-based development:
+
+<br />
+
+**For individuals:**
+- Reduced "what was I doing?" moments after interruptions
+- Easier to resume work after context switches
+- Better at estimating complexity (plans expose hidden work)
+
+<br />
+
+**For teams:**
+- Code reviews are faster—reviewers understand intent
+- Onboarding is easier—new devs read plans to understand features
+- Post-mortems are richer—we have documented decision trails
+
+<br />
+
+**For the codebase:**
+- More consistent architectural patterns
+- Better documentation (plans often become README content)
+- Fewer "I don't know why this works this way" mysteries
+
+<br />
+
+## When to Skip the Plan
+
+<br />
+
+Not everything needs a formal plan. Quick guidelines:
+
+<br />
+
+- **Plan needed**: Multiple packages affected, new patterns introduced, significant architectural decisions
+- **Plan optional**: Single file changes, bug fixes with obvious solutions, dependency updates
+- **Skip the plan**: Typo fixes, formatting changes, configuration tweaks
+
+<br />
+
+The key insight: The time spent planning is almost always recovered through faster implementation and fewer revision cycles.
+
+<br />
+
+*Next up in Part 3: How Turborepo orchestrates complexity and makes our 60+ package monorepo manageable.*

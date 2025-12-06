@@ -4,22 +4,25 @@ export const prerender = true;
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 
 import PostLayout from "../../layouts/BlogPost.astro";
-import { getAllPosts } from "../../utils";
+import { getAllPosts, getPostNavigation } from "../../utils";
 
 export const getStaticPaths = (async () => {
   const blogEntries = await getAllPosts();
-  return blogEntries.map((entry) => ({
-    params: { slug: entry.slug },
-    props: { entry },
-  }));
+  return blogEntries.map((entry) => {
+    const { prev, next } = getPostNavigation(blogEntries, entry.slug);
+    return {
+      params: { slug: entry.slug },
+      props: { entry, prev, next },
+    };
+  });
 }) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { entry } = Astro.props;
+const { entry, prev, next } = Astro.props;
 const { Content } = await entry.render();
 ---
 
-<PostLayout post={entry}>
+<PostLayout post={entry} prev={prev} next={next}>
   <Content />
 </PostLayout>

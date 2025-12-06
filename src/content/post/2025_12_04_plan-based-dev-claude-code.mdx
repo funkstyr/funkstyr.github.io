@@ -1,0 +1,197 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 6"
+description: "Claude Code as AI pair programmer - custom commands and skills for your workflow"
+publishDate: "04 Dec 2025"
+tags: ["claude-code", "ai", "developer-tools", "productivity"]
+---
+
+<hr />
+
+*This is Part 6 of a series on plan-based development with Claude Code. Today we explore how Claude Code becomes an integrated development partner.*
+
+<br />
+
+## From Chatbot to Development Partner
+
+<br />
+
+Claude Code isn't a chatbot you occasionally ask questions. It's an integrated development partner that understands your codebase, follows your patterns, and executes multi-step tasks.
+
+<br />
+
+The difference is profound:
+- **Chat**: "How do I add a new route in Express?"
+- **Claude Code**: "Add a new protected route for user preferences following our existing patterns in `@bts/api`"
+
+<br />
+
+## Custom Commands: Codified Workflows
+
+<br />
+
+We created custom commands that encode our team's workflows:
+
+<br />
+
+```
+.claude/
+├── commands/
+│   ├── research.md   # /research - Research & planning
+│   ├── understand.md # /understand - Code comprehension
+│   ├── find.md       # /find - Code discovery
+│   ├── test.md       # /test - Testing workflow
+│   ├── review.md     # /review - PR-style code review
+│   └── write.md      # /write - Code generation
+```
+
+<br />
+
+### The `/research` Command
+
+<br />
+
+When planning a new feature:
+
+<br />
+
+```
+/research add real-time notifications to the dashboard
+```
+
+<br />
+
+This triggers a structured research process:
+1. Searches for existing notification patterns
+2. Reviews the current architecture
+3. Identifies affected packages
+4. Produces a structured implementation plan
+
+<br />
+
+### The `/review` Command
+
+<br />
+
+Before committing:
+
+<br />
+
+```
+/review staged
+```
+
+<br />
+
+This performs a comprehensive code review:
+- Checks for bugs and security issues
+- Validates TypeScript patterns
+- Ensures consistency with repo conventions
+- Suggests improvements
+
+<br />
+
+## Skills: Context-Aware Assistance
+
+<br />
+
+Unlike commands that you invoke explicitly, skills activate automatically based on context:
+
+<br />
+
+```markdown
+# .claude/skills/type-safety/SKILL.md
+
+## When to Activate
+- Questions about TypeScript errors
+- Code with type assertions or `any`
+- Discussions of validation or schemas
+
+## Guidance
+- Prefer Zod schemas over manual type guards
+- Use branded types for IDs
+- Validate at system boundaries
+```
+
+<br />
+
+When Claude sees code with `as any`, it automatically applies the type-safety skill's guidance.
+
+<br />
+
+## The Plan Mode Workflow
+
+<br />
+
+For complex features, we use Claude Code's plan mode:
+
+<br />
+
+1. **Enter plan mode**: Triggered for multi-step implementations
+2. **Explore codebase**: Claude reads relevant files, understands patterns
+3. **Write plan**: Creates detailed implementation steps
+4. **Review**: Human reviews and approves the plan
+5. **Execute**: Claude implements following the approved plan
+
+<br />
+
+This mirrors our manual plan-based development but with AI assistance at every step.
+
+<br />
+
+## Real Examples from Our Workflow
+
+<br />
+
+**Example 1: Fixing a Build Issue**
+
+<br />
+
+```
+> bun run dev shows "Cannot find module '@bts/effect/services'"
+
+Claude analyzes:
+- Checks turbo.json for task dependencies
+- Identifies race condition: dev starts before build completes
+- Proposes fix: Add "^build" to dev task dependencies
+- Implements the fix
+- Verifies with test run
+```
+
+<br />
+
+**Example 2: Adding a New Package**
+
+<br />
+
+```
+> Create a new @bts/highlighter-router package following existing patterns
+
+Claude:
+- Uses `turbo gen package` generator
+- Creates turbo.json with correct tags
+- Sets up tsconfig.json extending base
+- Adds to workspace catalog
+- Creates initial exports
+- Updates @bts/router to include new router
+```
+
+<br />
+
+## The Amplification Effect
+
+<br />
+
+Claude Code doesn't replace developer judgment—it amplifies it.
+
+<br />
+
+- **Without Claude**: Manually search 60 packages, copy patterns, adapt to context
+- **With Claude**: Describe intent, review proposed solution, approve and refine
+
+<br />
+
+The cognitive load shifts from "how do I do this?" to "is this the right approach?"
+
+<br />
+
+*Next up in Part 7: Putting it all together - the virtuous cycle and lessons learned from six months of this workflow.*

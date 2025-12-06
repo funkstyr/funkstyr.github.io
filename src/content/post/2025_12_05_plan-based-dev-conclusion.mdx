@@ -1,0 +1,296 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 7"
+description: "The virtuous cycle - putting it all together and lessons learned"
+publishDate: "05 Dec 2025"
+tags: ["claude-code", "monorepo", "typescript", "turborepo", "ai"]
+---
+
+<hr />
+
+*This is Part 7, the final installment of our series on plan-based development with Claude Code. Today we put it all together and share lessons from six months of this workflow.*
+
+<br />
+
+## The Complete Workflow
+
+<br />
+
+Here's how all these pieces combine for a typical feature:
+
+<br />
+
+### Step 1: Planning
+
+<br />
+
+1. **Create plan document**: Write `plans/feature-user-preferences.md`
+2. **Use `/research`**: Let Claude explore the codebase and validate approach
+3. **Define scope**: List affected packages and implementation steps
+
+<br />
+
+### Step 2: Implementation
+
+<br />
+
+1. **Start with types**: Define the data shapes
+2. **Write failing tests**: TDD where appropriate
+3. **Implement incrementally**: Check each step with `bun run check-types`
+4. **Use `/write`**: Let Claude generate boilerplate following patterns
+5. **Verify continuously**: Fast Turborepo caches make this painless
+
+<br />
+
+### Step 3: Polish & Ship
+
+<br />
+
+1. **Run full test suite**: `bun run test`
+2. **Use `/review`**: Get AI code review before human review
+3. **Update plan**: Mark completed steps, document decisions
+4. **Create PR**: Include link to plan document
+5. **CI validates**: Turborepo ensures only affected tests run
+6. **Review is fast**: Reviewer reads plan, understands intent
+7. **Merge confidently**: Type system caught edge cases
+
+<br />
+
+## Why This Works
+
+<br />
+
+The workflow creates positive reinforcement loops:
+
+<br />
+
+```
+Fast Type Checking → More Frequent Checking → Earlier Bug Detection
+       ↓
+Strict Types → Better IDE Support → Faster Coding
+       ↓
+Good Tests → Confident Refactoring → Cleaner Code
+       ↓
+Clean Code → Easier AI Understanding → Better AI Assistance
+       ↓
+AI Assistance → Faster Feature Delivery → More Time for Quality
+       ↓
+Back to start...
+```
+
+<br />
+
+Each investment pays dividends that make the next investment easier.
+
+<br />
+
+## The Compound Returns
+
+<br />
+
+Over six months, we've observed:
+
+<br />
+
+- **50% reduction** in time from idea to PR
+- **70% reduction** in PR revision cycles
+- **80% reduction** in production bugs from type errors
+- **90% reduction** in "it works on my machine" issues
+
+<br />
+
+These aren't from any single practice—they're from the compound effect of all practices reinforcing each other.
+
+<br />
+
+## What We Got Right
+
+<br />
+
+**1. Invest in tooling early**
+
+Setting up Turborepo properly, creating shared configs, and establishing patterns paid dividends for months.
+
+<br />
+
+**2. Make the right thing the easy thing**
+
+Generators for new packages, shared TypeScript configs, and custom Claude commands mean developers naturally follow patterns.
+
+<br />
+
+**3. Document decisions, not just code**
+
+Our `plans/` directory is as valuable as our `src/` directories for understanding the codebase.
+
+<br />
+
+**4. Embrace AI as a collaborator**
+
+Claude Code is most effective when treated as a knowledgeable team member, not a magic code generator.
+
+<br />
+
+## What We'd Do Differently
+
+<br />
+
+**1. Start stricter, loosen if needed**
+
+We initially had loose TypeScript settings and tightened over time. This created migration debt. Start strict.
+
+<br />
+
+**2. Establish package boundaries from day one**
+
+Turborepo boundaries work best when introduced before bad patterns exist, not after.
+
+<br />
+
+**3. Write plans for everything initially**
+
+Even when it felt like overkill, plans for "simple" features prevented scope creep and provided documentation.
+
+<br />
+
+## Best Practices Checklist
+
+<br />
+
+For teams adopting this workflow:
+
+<br />
+
+- [ ] Enable TypeScript strict mode across all packages
+- [ ] Configure Turborepo with explicit task dependencies
+- [ ] Create a `plans/` directory and use it
+- [ ] Set up shared test configurations that prioritize speed
+- [ ] Install Claude Code and create custom commands for your workflows
+- [ ] Add `bun run check && bun run check-types` to your post-change ritual
+- [ ] Make CI fast enough that developers don't skip it
+- [ ] Document your patterns in a `CLAUDE.md` or similar file
+
+<br />
+
+## The Shift in Development Mindset
+
+<br />
+
+This workflow represents a shift from reactive to proactive development:
+
+<br />
+
+**Old mindset**: Code first, fix problems as they arise, document if time permits.
+
+<br />
+
+**New mindset**: Plan first, let tooling catch problems early, documentation is part of the process.
+
+<br />
+
+The result isn't just faster feature delivery—it's sustainable velocity. We ship faster today without borrowing against tomorrow's productivity.
+
+<br />
+
+## Getting Started
+
+<br />
+
+If you're inspired to try this approach:
+
+<br />
+
+1. **Start with TypeScript strict mode**: The foundation for everything else
+2. **Add Turborepo**: Even for small monorepos, the structure helps
+3. **Create your first plan document**: For your next feature
+4. **Try Claude Code**: With access to your codebase
+5. **Iterate**: Adjust the workflow to fit your team
+
+<br />
+
+The specific tools matter less than the principles:
+- Write before you code
+- Verify continuously
+- Trust your type system
+- Leverage AI assistance
+
+<br />
+
+These principles compound over time, making each week of development more productive than the last.
+
+<br />
+
+---
+
+<br />
+
+## Quick Reference
+
+<br />
+
+### Essential Commands
+
+<br />
+
+```bash
+# Daily development
+bun run dev              # Start all apps
+bun run check            # Fast lint
+bun run check-types      # TypeScript validation
+
+# Before committing
+bun run test             # Run affected tests
+bun run build            # Full build
+
+# New packages
+turbo gen package        # Create new package
+turbo gen component      # Create UI component
+```
+
+<br />
+
+### Claude Code Commands
+
+<br />
+
+```
+/research <topic>     # Research and plan a feature
+/understand <code>    # Deep dive into code
+/find <pattern>       # Search codebase
+/test <file>          # Create or improve tests
+/review <code>        # PR-style code review
+/write <description>  # Generate code
+```
+
+<br />
+
+### Plan Document Template
+
+<br />
+
+```markdown
+# Feature: [Name]
+
+## Problem
+What are we solving and why?
+
+## Solution
+High-level approach.
+
+## Implementation Steps
+1. [ ] Step one
+2. [ ] Step two
+
+## Files to Modify
+- path/to/file.ts - What changes
+
+## Status
+In progress / Complete
+```
+
+<br />
+
+---
+
+<br />
+
+*Thanks for following along with this series. These practices are always evolving, and the best workflow is the one your team will actually use.*

@@ -4,6 +4,7 @@ export type { TocItem } from "./generateToc";
 export { generateToc } from "./generateToc";
 export {
   getAllPosts,
+  getPostNavigation,
   getUniqueTags,
   getUniqueTagsWithCount,
   sortMDByDate,

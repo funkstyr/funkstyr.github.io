@@ -1,0 +1,240 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 5"
+description: "Testing as a feedback loop - prioritizing fast tests over comprehensive coverage"
+publishDate: "03 Dec 2025"
+tags: ["testing", "vitest", "monorepo", "tdd"]
+---
+
+<hr />
+
+*This is Part 5 of a series on plan-based development with Claude Code. Today we explore our testing philosophy: fast feedback over comprehensive coverage.*
+
+<br />
+
+## The Testing Philosophy
+
+<br />
+
+Our testing strategy prioritizes fast feedback over comprehensive coverage. This might sound backwards, but here's the reasoning:
+
+<br />
+
+- A test suite that takes 30 seconds to run gets executed constantly
+- A test suite that takes 10 minutes gets executed only in CI
+- Fast, frequent testing catches issues earlier in the development cycle
+
+<br />
+
+## Test Infrastructure Setup
+
+<br />
+
+We use Vitest with shared configurations that optimize for speed:
+
+<br />
+
+```typescript
+// tools/vitest/src/server.ts
+export function createServerConfig(options: {
+  name: string;
+  testInclude?: string[];
+}) {
+  return defineConfig({
+    test: {
+      name: options.name,
+      include: options.testInclude ?? ["src/**/*.test.ts"],
+      passWithNoTests: true, // Don't fail empty packages
+      testTimeout: 10000,
+      hookTimeout: 10000,
+    },
+  });
+}
+```
+
+<br />
+
+The `passWithNoTests: true` is crucial. It allows packages to exist without tests initially, enabling us to add tests incrementally rather than as a gate.
+
+<br />
+
+## The Testing Pyramid in Practice
+
+<br />
+
+Our test distribution:
+
+<br />
+
+```
+                    /\
+                   /  \  E2E Tests (Playwright)
+                  /----\  5% - Critical user journeys
+                 /      \
+                /--------\  Integration Tests
+               /          \  15% - API endpoints, DB operations
+              /------------\
+             /              \  Unit Tests
+            /----------------\  80% - Functions, utilities, components
+```
+
+<br />
+
+### Unit Tests: The Foundation
+
+<br />
+
+Fast, isolated, focused on pure logic:
+
+<br />
+
+```typescript
+// packages/results-ai/src/__tests__/alienation.test.ts
+describe("calculateAlienation", () => {
+  it("identifies clear risk when alienation exceeds threshold", () => {
+    const result = calculateAlienation({
+      controlResponses: mockControlData,
+      testResponses: mockTestData,
+      segments: [{ id: "gen-z", name: "Gen Z" }],
+      threshold: 4,
+    });
+
+    expect(result[0].verdict).toBe("clear_risk");
+    expect(result[0].alienatedProportion).toBeGreaterThan(0.15);
+  });
+});
+```
+
+<br />
+
+### Integration Tests: The Safety Net
+
+<br />
+
+Test real interactions between systems:
+
+<br />
+
+```typescript
+// packages/auth/src/__tests__/auth.integration.test.ts
+describe("Authentication Flow", () => {
+  it("creates session on successful login", async () => {
+    const response = await authClient.signIn.email({
+      email: "test@example.com",
+      password: "password123",
+    });
+
+    expect(response.data?.session).toBeDefined();
+    expect(response.data?.user.email).toBe("test@example.com");
+  });
+});
+```
+
+<br />
+
+### E2E Tests: The User Journey
+
+<br />
+
+Full browser tests for critical paths:
+
+<br />
+
+```typescript
+// apps/web-pw/tests/auth/login.spec.ts
+test("user can log in and view dashboard", async ({ page }) => {
+  await page.goto("/login");
+  await page.fill('[name="email"]', TEST_CLIENT_EMAIL);
+  await page.fill('[name="password"]', TEST_CLIENT_PASSWORD);
+  await page.click('button[type="submit"]');
+
+  await expect(page).toHaveURL("/dashboard");
+  await expect(page.locator("h1")).toContainText("Welcome");
+});
+```
+
+<br />
+
+## Coverage as a Guide, Not a Goal
+
+<br />
+
+We track coverage but don't chase arbitrary percentages. Coverage tells us where we lack tests, not whether we have enough. 100% coverage doesn't mean 100% correct.
+
+<br />
+
+## Practical Testing Patterns
+
+<br />
+
+**Pattern 1: Test the Public API**
+
+<br />
+
+```typescript
+// Don't test internal implementation
+// DO test exported functions
+describe("@bts/results-ai", () => {
+  it("exports expected tool names", async () => {
+    const { RESULTS_TOOL_NAMES } = await import("../index");
+    expect(RESULTS_TOOL_NAMES).toBeDefined();
+    expect(RESULTS_TOOL_NAMES.analyze).toBe("analyze_results");
+  });
+});
+```
+
+<br />
+
+**Pattern 2: Handle Async Timeouts**
+
+<br />
+
+```typescript
+it("handles slow operations", async () => {
+  // Dynamic imports can be slow in parallel test execution
+  const { slowFunction } = await import("./slow-module");
+  expect(slowFunction()).toBeDefined();
+}, { timeout: 15000 }); // Explicit timeout
+```
+
+<br />
+
+**Pattern 3: Case-Insensitive Assertions**
+
+<br />
+
+```typescript
+it("renders email correctly", async () => {
+  const text = await render(<Email {...props} />, { plainText: true });
+  // Email renderers may transform case
+  expect(text.toLowerCase()).toContain(props.subject.toLowerCase());
+});
+```
+
+<br />
+
+## The CI Integration
+
+<br />
+
+Our GitHub Actions workflow runs tests in parallel:
+
+<br />
+
+```yaml
+- name: Run tests with coverage
+  run: bun run test:coverage
+
+- name: Merge coverage reports
+  run: bun run coverage:merge
+
+- name: Add coverage to job summary
+  run: cat coverage/coverage-report.md >> $GITHUB_STEP_SUMMARY
+```
+
+<br />
+
+Coverage reports appear directly in PR comments, making review easier.
+
+<br />
+
+*Next up in Part 6: Claude Code as your AI pair programmer - custom commands and skills that encode your team's workflows.*

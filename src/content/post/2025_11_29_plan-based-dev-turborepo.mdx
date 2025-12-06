@@ -1,0 +1,212 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 3"
+description: "How Turborepo orchestrates complexity and makes 60+ packages manageable"
+publishDate: "29 Nov 2025"
+tags: ["turborepo", "monorepo", "typescript", "build-tools"]
+---
+
+<hr />
+
+*This is Part 3 of a series on plan-based development with Claude Code. Today we explore how Turborepo makes our massive monorepo manageable.*
+
+<br />
+
+## Why Build Orchestration Matters
+
+<br />
+
+In a monorepo with 60+ packages, the naive approach to building and testing is brutally slow. Run every test? That's 20 minutes. Build every package? Another 15. Type-check everything? Add another 10.
+
+<br />
+
+Multiply these numbers by the frequency of commits, and you have a recipe for slow iteration cycles and frustrated developers.
+
+<br />
+
+Turborepo solves this with intelligent caching and parallel execution. But the real power comes from how you configure it.
+
+<br />
+
+## Our Turborepo Configuration Philosophy
+
+<br />
+
+Our `turbo.json` evolved through many iterations. Here's the philosophy behind our current setup:
+
+<br />
+
+### 1. Declare Dependencies Explicitly
+
+<br />
+
+```json
+{
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "check-types": {
+      "dependsOn": ["build", "^build"],
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "interruptible": true
+    }
+  }
+}
+```
+
+<br />
+
+The `^build` syntax means "build my dependencies first." This ensures packages are built in the correct order without manual coordination.
+
+<br />
+
+### 2. Precise Input Definitions
+
+<br />
+
+```json
+{
+  "build": {
+    "inputs": [
+      "$TURBO_DEFAULT$",
+      ".env*",
+      "!**/*.test.{ts,tsx}",
+      "!**/*.spec.{ts,tsx}",
+      "!coverage/**",
+      "!storybook-static/**"
+    ]
+  }
+}
+```
+
+<br />
+
+By excluding test files and coverage reports from build inputs, we avoid rebuilding packages when only tests change. This seemingly small optimization saves significant time across the full repository.
+
+<br />
+
+### 3. Package Boundaries
+
+<br />
+
+One of Turborepo's powerful features is boundary enforcement:
+
+<br />
+
+```json
+{
+  "boundaries": {
+    "tags": {
+      "db": {
+        "dependencies": {
+          "deny": ["app", "ui", "ai"]
+        }
+      },
+      "api": {
+        "dependencies": {
+          "deny": ["app", "ui", "ai"]
+        }
+      },
+      "ui": {
+        "dependencies": {
+          "deny": ["app"]
+        }
+      }
+    }
+  }
+}
+```
+
+<br />
+
+This configuration enforces architectural rules:
+- Database packages can't depend on UI or AI packages
+- API packages are pure logic, no UI dependencies
+- UI packages don't directly depend on apps
+
+<br />
+
+When someone accidentally imports a UI component into a database package, `turbo boundaries` catches it immediately.
+
+<br />
+
+## Real Performance Numbers
+
+<br />
+
+Before and after Turborepo optimization:
+
+<br />
+
+| Operation | Before | After | Improvement |
+|-----------|--------|-------|-------------|
+| Full build (cold) | 4m 30s | 4m 30s | 0% (same) |
+| Full build (cached) | 4m 30s | 8s | 97% |
+| Type check (cached) | 3m 15s | 12s | 94% |
+| Test (affected) | 8m | 45s | 91% |
+| Dev startup | 90s | 15s | 83% |
+
+<br />
+
+The key insight: Turborepo's value isn't in the first run—it's in every subsequent run. Most of your development time is incremental, not from-scratch.
+
+<br />
+
+## Package-Level Configuration
+
+<br />
+
+Each package has its own `turbo.json` that extends the root:
+
+<br />
+
+```json
+// packages/db/turbo.json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tags": ["db"],
+  "tasks": {
+    "build": {
+      "env": ["DATABASE_URL", "DB_*", "DATABASE_MODE"],
+      "outputs": ["dist/**"]
+    }
+  }
+}
+```
+
+<br />
+
+This allows packages to declare their specific environment variable dependencies. When `DATABASE_URL` changes, only packages that depend on it rebuild.
+
+<br />
+
+## The Feedback Loop Impact
+
+<br />
+
+Fast builds enable a different kind of development:
+
+<br />
+
+1. **Experiment freely**: Quick validation means you try more ideas
+2. **Catch errors early**: Run `bun run check-types` after every significant change
+3. **Stay in flow**: No 10-minute builds breaking your concentration
+4. **Review faster**: CI completes in minutes, not hours
+
+<br />
+
+The mantra we've adopted: **If verification takes less than 30 seconds, you'll do it constantly. If it takes more than 5 minutes, you'll skip it.**
+
+<br />
+
+Turborepo puts most verifications in that under-30-second category.
+
+<br />
+
+*Next up in Part 4: TypeScript strict mode as your first line of defense.*

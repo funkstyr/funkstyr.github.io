@@ -37,3 +37,20 @@ export function getUniqueTagsWithCount(
     ),
   ].sort((a, b) => b[1] - a[1]);
 }
+
+/** Get the previous and next posts for navigation */
+export function getPostNavigation(
+  posts: Array<CollectionEntry<"post">>,
+  currentSlug: string,
+) {
+  const sortedPosts = sortMDByDate([...posts]);
+  const currentIndex = sortedPosts.findIndex((p) => p.slug === currentSlug);
+
+  return {
+    prev:
+      currentIndex < sortedPosts.length - 1
+        ? sortedPosts[currentIndex + 1]
+        : null,
+    next: currentIndex > 0 ? sortedPosts[currentIndex - 1] : null,
+  };
+}

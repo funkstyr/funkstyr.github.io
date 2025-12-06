@@ -1,0 +1,192 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 4"
+description: "TypeScript strict mode as your first line of defense in a monorepo"
+publishDate: "01 Dec 2025"
+tags: ["typescript", "monorepo", "type-safety"]
+---
+
+<hr />
+
+*This is Part 4 of a series on plan-based development with Claude Code. Today we explore why TypeScript strict mode accelerates rather than slows development.*
+
+<br />
+
+## Beyond "Any" - Strict Mode as a Feature
+
+<br />
+
+Many teams adopt TypeScript but undermine its value with loose configurations. They use `any` liberally, disable strict checks, and treat types as documentation rather than guarantees.
+
+<br />
+
+We took the opposite approach: TypeScript strict mode everywhere, with additional constraints.
+
+<br />
+
+Our base `tsconfig.json`:
+
+<br />
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
+```
+
+<br />
+
+## Why Strict Mode Accelerates Development
+
+<br />
+
+Counter-intuitively, stricter types make you faster:
+
+<br />
+
+### 1. Errors Surface at Write Time, Not Run Time
+
+<br />
+
+```typescript
+// Without strict mode, this compiles fine and crashes at runtime
+function getUser(id: string) {
+  const users = { alice: { name: "Alice" } };
+  return users[id].name; // Runtime error if id !== "alice"
+}
+
+// With noUncheckedIndexedAccess, TypeScript catches this
+function getUser(id: string) {
+  const users = { alice: { name: "Alice" } };
+  const user = users[id]; // Type: { name: string } | undefined
+  return user?.name ?? "Unknown"; // Must handle undefined
+}
+```
+
+<br />
+
+### 2. Refactoring Becomes Fearless
+
+<br />
+
+When you rename a property or change a function signature, TypeScript shows you every call site that needs updating. In a 60+ package monorepo, this is invaluable.
+
+<br />
+
+### 3. Self-Documenting Code
+
+<br />
+
+With precise types, you often don't need comments:
+
+<br />
+
+```typescript
+// Types tell the story
+type ProjectStatus = "draft" | "active" | "completed" | "archived";
+
+interface CreateProjectInput {
+  name: string;
+  clientId: string;
+  startDate: Date;
+  status?: ProjectStatus; // Defaults to "draft"
+}
+
+function createProject(input: CreateProjectInput): Promise<Project> {
+  // Implementation
+}
+```
+
+<br />
+
+## Our Type Safety Rules
+
+<br />
+
+We've codified our type safety practices:
+
+<br />
+
+```markdown
+## Type Safety
+
+- Never use `as unknown as X` without justification
+- Use type guards or Zod validation instead of casts
+- Validate JSONB at boundaries with Zod schemas
+- Use shared types for `Result`, `StrictOmit`, `DeepPartial`
+```
+
+<br />
+
+## The Post-Change Verification Ritual
+
+<br />
+
+After any significant change, we run:
+
+<br />
+
+```bash
+bun run check && bun run check-types
+```
+
+<br />
+
+This becomes muscle memory. The commands:
+- `check`: Runs oxlint for fast linting
+- `check-types`: Runs TypeScript compiler across all packages
+
+<br />
+
+## Types as Architecture Documentation
+
+<br />
+
+Our package structure uses types to enforce boundaries:
+
+<br />
+
+```typescript
+// packages/api-base/src/procedures.ts
+export const protectedProcedure = baseProcedure.use(async ({ context, next }) => {
+  if (!context.session) {
+    throw new ORPCError("UNAUTHORIZED");
+  }
+  return next({
+    context: {
+      ...context,
+      session: context.session, // Now typed as non-null
+    },
+  });
+});
+```
+
+<br />
+
+Anyone using `protectedProcedure` gets `session` guaranteed in context. The type system enforces what comments could only suggest.
+
+<br />
+
+## The Compound Effect
+
+<br />
+
+Strict typing pays dividends that compound over time:
+
+<br />
+
+- **Day 1**: Extra time adding types feels slow
+- **Week 1**: Autocomplete and error detection speed you up
+- **Month 1**: Refactoring confidence lets you improve code fearlessly
+- **Month 6**: New team members onboard faster, understanding code through types
+- **Year 1**: Technical debt is lower because types prevented shortcuts
+
+<br />
+
+*Next up in Part 5: Testing as a feedback loop - how we prioritize fast tests over comprehensive coverage.*

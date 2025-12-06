@@ -129,8 +129,116 @@ The resume uses a centralized data architecture with a single source of truth:
 - Code blocks styled with Expressive Code using dracula (dark) and github-light (light) themes
 - Theme switching controlled via `[data-theme]` attribute
 
+### Component Patterns
+
+**Polymorphic Components:** Several components use Astro's `Polymorphic` type to allow dynamic HTML tag selection:
+```astro
+// Card.astro, Button.astro, ProjectCard.astro
+const { as: Tag = "div", ...props } = Astro.props;
+<Tag {...props}>...</Tag>
+```
+Usage: `<Card as='a' href={...} />` renders as anchor, `<Card />` renders as div.
+
+**Spread Props Pattern:** Components extract known props and spread the rest for HTML attributes:
+```astro
+const { class: className, title, ...rest } = Astro.props;
+<Tag class={className} {...rest}>
+```
+
+**Named Slots:** Components support optional icon slots (`icon`, `icon-before`, `icon-after`) for flexible composition.
+
+### Image Handling
+
+**Dynamic Image Imports:** Card and ProjectCard components use `import.meta.glob` for runtime image validation:
+```typescript
+const images = import.meta.glob<{ default: ImageMetadata }>("/src/assets/*.{jpeg,jpg,png,gif}");
+```
+- Throws build-time error if image path doesn't exist
+- Used for company logos, project images, education logos
+
+**Image Loading Priority:**
+- `loading='eager'` + `fetchpriority='high'` for above-fold images (avatar, blog hero)
+- Default lazy loading for below-fold content
+
+### Icon Usage
+
+**Astro Icon Component:** Uses `@iconify-json/tabler` icons:
+```astro
+import { Icon } from "astro-icon/components";
+<Icon size='24' name='tabler:brand-linkedin' aria-hidden='true' />
+```
+- Always pair decorative icons with `aria-hidden='true'`
+- Use `sr-only` span for screen reader text on icon-only buttons
+
+**Inline SVGs:** Used for custom icons, support `currentColor` for theme-aware coloring.
+
+### Theme / Dark Mode
+
+**Implementation:** `ThemeProvider.astro` handles theme with inline script (no hydration):
+- Reads from `localStorage` key `theme` and system `prefers-color-scheme`
+- Sets `dark` class on document root
+- Custom event `theme-change` for cross-component communication
+
+**CSS Variables:** Defined in `global.css` using HSL format:
+- Light mode in `:root`, dark mode overrides in `.dark`
+- Variables: `--background`, `--foreground`, `--primary`, `--muted`, `--border`, etc.
+
+**Expressive Code:** Uses `[data-theme='dark']` selector (not class) for code block theming.
+
+### SEO Patterns
+
+**BaseHead.astro** handles all meta tags:
+- Canonical URL from `Astro.url.pathname` + `Astro.site`
+- OpenGraph image fallback: `/social_card.jpg`
+- Conditional article metadata when `articleDate` prop exists
+- Title format: `Page Title • Site Title`
+
+**JSON-LD:** `JsonLd.astro` provides Person schema with skills, job title, social profiles.
+
+**Pagefind Search:** Blog content uses `data-pagefind-body` and `data-pagefind-filter='tag'` attributes.
+
+### Utility Functions
+
+**`src/utils/tailwind.ts`** - Class merging:
+```typescript
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+**`src/utils/date.ts`** - Date formatting using `Intl.DateTimeFormat` with config from `site.config.ts`.
+
+**`src/utils/domElement.ts`** - DOM helpers:
+- `toggleClass()`, `elementHasClass()`
+- `rootInDarkMode()` - checks `data-theme` attribute (not class)
+
+**`src/utils/generateToc.ts`** - Generates hierarchical table of contents from markdown headings.
+
+### Accessibility Patterns
+
+**Skip Links:** Present in Header and Resume pages:
+```astro
+<a href='#content' class='sr-only focus:not-sr-only focus:block focus:static focus:z-50 focus:p-4'>
+  Skip to content
+</a>
+```
+
+**Screen Reader Text:** Use `<span class='sr-only'>(opens in new tab)</span>` for external links.
+
+**ARIA:** `aria-label` on interactive elements, `aria-hidden='true'` on decorative elements.
+
+### Analytics
+
+**PostHog:** Configured in `PostHog.astro` with `VITE_POSTHOG_KEY` environment variable.
+
+**Giscus Comments:** GitHub Discussions-based comments in `Comments.astro`, repo: `funkstyr/funkstyr.github.io`.
+
 ## Important Notes
 
 - When adding new blog posts, create them in `src/content/post/` with proper frontmatter
 - Tags are automatically lowercased and deduplicated via the schema transform
 - The `getAllPosts()` function must be used to properly filter drafts in production
+- Use `data-astro-prefetch` attribute on navigation links for prefetching
+- Print/PDF pages must use `<style is:global>` to style html/body elements

@@ -1,0 +1,579 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 8"
+description: "Evalite and the new age of AI 'unit' tests - testing LLM outputs systematically"
+publishDate: "06 Dec 2025"
+tags: ["testing", "ai", "evalite", "llm", "typescript"]
+---
+
+<hr />
+
+*This is Part 8 of our series on plan-based development with Claude Code. Today we explore a paradigm shift: testing AI outputs with Evalite and why traditional unit tests don't cut it for LLM-powered features.*
+
+<br />
+
+## The Problem with Testing AI
+
+<br />
+
+Traditional unit tests have a fundamental assumption: given the same input, you get the same output. But LLMs are inherently non-deterministic. The same prompt can produce different (but equally valid) responses.
+
+<br />
+
+```typescript
+// Traditional test - this doesn't work for AI
+describe("generateSummary", () => {
+  it("returns expected summary", async () => {
+    const result = await generateSummary("Long article text...");
+    expect(result).toBe("Expected exact summary"); // ❌ Will fail randomly
+  });
+});
+```
+
+<br />
+
+This creates a testing gap. We can't use traditional assertions, but we also can't ship AI features without confidence they work correctly.
+
+<br />
+
+## Enter Evalite: LLM Evaluation Framework
+
+<br />
+
+[Evalite](https://www.evalite.dev/) is a testing framework designed specifically for LLM outputs. Built on Vitest, it feels familiar but uses **scoring functions** instead of assertions. Think of it as `.eval.ts` being the new `.test.ts` for AI code.
+
+<br />
+
+```typescript
+import { evalite } from "evalite";
+import { Levenshtein } from "autoevals";
+
+evalite("Summary Generator", {
+  // Test data with input and expected
+  data: [
+    {
+      input: "Long article about climate change...",
+      expected: "Article discusses rising temperatures and policy responses",
+    },
+  ],
+  // The AI function under test
+  task: async (input) => {
+    return await generateSummary(input);
+  },
+  // Scorers evaluate output quality (0-1)
+  scorers: [Levenshtein],
+});
+```
+
+<br />
+
+The key insight: we're not testing for **exact** output, we're testing for **quality** output.
+
+<br />
+
+## Why This Matters for Plan-Based Development
+
+<br />
+
+In our monorepo, we have over a dozen AI-powered features:
+
+<br />
+
+- Survey analysis tools (`@bts/survey-ai`)
+- Results interpretation (`@bts/results-ai`)
+- Content generation (`@bts/content-ai`)
+- Code assistance features (`@bts/highlighter-ai`)
+
+<br />
+
+Before Evalite, testing these was a nightmare:
+
+<br />
+
+1. **Manual testing**: Run the feature, read the output, decide if it's "good enough"
+2. **Snapshot testing**: Capture outputs, but any regeneration breaks tests
+3. **Regex assertions**: Fragile and doesn't capture semantic correctness
+
+<br />
+
+With Evalite, we have systematic, reproducible quality metrics.
+
+<br />
+
+## Anatomy of an Evalite Test
+
+<br />
+
+### The Data: Input-Expected Pairs
+
+<br />
+
+```typescript
+data: [
+  {
+    input: {
+      surveyResponses: mockResponses,
+      segments: ["gen-z", "millennials"],
+    },
+    expected: "Analysis should cover both segments with actionable insights",
+  },
+],
+```
+
+<br />
+
+The `data` array contains test cases. Each has an `input` (passed to your task) and `expected` (the ground truth scorers compare against). Unlike unit tests where `expected` is the exact output, here it's reference material for semantic comparison.
+
+<br />
+
+### The Task: Your AI Function
+
+<br />
+
+```typescript
+task: async (input) => {
+  const analysis = await analyzeSurveyWithAI({
+    responses: input.surveyResponses,
+    segments: input.segments,
+  });
+  return analysis.summary;
+},
+```
+
+<br />
+
+This is the actual AI-powered function you're testing. Evalite runs it and captures the output for scoring.
+
+<br />
+
+### The Scorers: Quality Metrics
+
+<br />
+
+Scorers receive `input`, `output`, and `expected`, returning a score from 0 to 1. You can use built-in scorers from [autoevals](https://github.com/braintrustdata/autoevals) or create custom ones:
+
+<br />
+
+```typescript
+import { Factuality } from "autoevals";
+import { createScorer } from "evalite";
+
+// Built-in scorers from autoevals
+scorers: [
+  Factuality,  // LLM-as-judge for factual consistency
+],
+
+// Inline custom scorer
+scorers: [
+  {
+    name: "Contains Action Items",
+    description: "Checks if output includes actionable recommendations",
+    scorer: ({ output }) => {
+      const actionWords = ["should", "recommend", "consider", "implement"];
+      const hasActions = actionWords.some(word =>
+        output.toLowerCase().includes(word)
+      );
+      return hasActions ? 1 : 0;
+    },
+  },
+],
+
+// Reusable scorer with createScorer
+const hasActionableInsights = createScorer<string, string>({
+  name: "Actionable Insights",
+  description: "Checks for actionable recommendations in the output",
+  scorer: ({ output }) => {
+    const actionWords = ["should", "recommend", "consider", "implement"];
+    return actionWords.some(w => output.toLowerCase().includes(w)) ? 1 : 0;
+  },
+});
+```
+
+<br />
+
+## Real Example: Testing Survey Analysis
+
+<br />
+
+Here's how we test our survey analysis AI:
+
+<br />
+
+```typescript
+// packages/survey-ai/src/__evals__/analysis.eval.ts
+import { evalite } from "evalite";
+import { Factuality } from "autoevals";
+import { analyzeSurvey } from "../analyze";
+import { mockSurveyData } from "../__fixtures__/surveys";
+
+evalite("Survey Analysis Quality", {
+  data: [
+    {
+      input: mockSurveyData.customerSatisfaction,
+      expected: "Analysis of customer satisfaction metrics with improvement suggestions",
+    },
+    {
+      input: mockSurveyData.employeeEngagement,
+      expected: "Analysis of employee engagement with segment breakdowns",
+    },
+  ],
+
+  task: async (input) => {
+    const result = await analyzeSurvey(input);
+    return result.analysis;
+  },
+
+  scorers: [
+    Factuality,
+
+    // Custom: Check for quantitative insights
+    {
+      name: "Contains Metrics",
+      description: "Output should include percentages or numeric data",
+      scorer: ({ output }) => {
+        const hasNumbers = /\d+%|\d+\.\d+|\d+ (respondents|participants)/.test(output);
+        return hasNumbers ? 1 : 0;
+      },
+    },
+
+    // Custom: Check for segment-specific analysis
+    {
+      name: "Segment Analysis",
+      description: "Output should mention all input segments",
+      scorer: ({ output, input }) => {
+        const segments = input.segments || [];
+        const mentionsAllSegments = segments.every(seg =>
+          output.toLowerCase().includes(seg.toLowerCase())
+        );
+        return mentionsAllSegments ? 1 : 0;
+      },
+    },
+  ],
+});
+```
+
+<br />
+
+## The Evalite Workflow
+
+<br />
+
+First, add the dev script to your `package.json`:
+
+<br />
+
+```json
+{
+  "scripts": {
+    "eval": "evalite",
+    "eval:dev": "evalite watch"
+  }
+}
+```
+
+<br />
+
+Then run your evals:
+
+<br />
+
+```bash
+# Run evals in watch mode with UI
+pnpm eval:dev
+
+# Run once (for CI)
+pnpm eval
+```
+
+<br />
+
+The Evalite UI at `http://localhost:3006` shows:
+
+<br />
+
+- **Score distribution** across test cases
+- **Individual output inspection** with scorer breakdowns
+- **Traces and logs** from your AI calls
+- **Historical trends** stored in SQLite (`node_modules/.evalite`)
+
+<br />
+
+## Integrating with Turborepo
+
+<br />
+
+We added evals as a separate task in our monorepo:
+
+<br />
+
+```json
+// turbo.json
+{
+  "tasks": {
+    "eval": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.eval.ts", "src/__fixtures__/**"],
+      "outputs": [".evalite/**"],
+      "cache": false  // AI outputs shouldn't be cached
+    }
+  }
+}
+```
+
+<br />
+
+Note `cache: false`. Unlike deterministic tests, we want evals to run fresh each time to catch prompt regressions.
+
+<br />
+
+## The Scoring Philosophy
+
+<br />
+
+We adopted a tiered scoring approach:
+
+<br />
+
+### Tier 1: Hard Requirements (Score = 0 or 1)
+
+<br />
+
+```typescript
+// Must pass these or the feature is broken
+{
+  name: "No Hallucinated Data",
+  description: "Output must only reference data from input",
+  scorer: ({ output, input }) => {
+    // Check that output only references data actually in input
+    const referencedIds = extractIds(output);
+    const validIds = new Set(input.data.map(d => d.id));
+    const allValid = referencedIds.every(id => validIds.has(id));
+    return allValid ? 1 : 0;
+  },
+}
+```
+
+<br />
+
+### Tier 2: Quality Metrics (Score = 0 to 1)
+
+<br />
+
+```typescript
+// Graduated scoring for quality aspects
+{
+  name: "Insight Depth",
+  description: "Measures explanation quality and detail",
+  scorer: ({ output }) => {
+    let score = 0;
+    if (output.includes("because")) score += 0.25;  // Explains reasoning
+    if (output.includes("compared to")) score += 0.25;  // Makes comparisons
+    if (output.includes("recommend")) score += 0.25;  // Provides actions
+    if (output.length > 500) score += 0.25;  // Sufficient detail
+    return score;
+  },
+}
+```
+
+<br />
+
+### Tier 3: LLM-as-Judge (Semantic evaluation)
+
+<br />
+
+```typescript
+// Use another LLM to evaluate quality - returns score with metadata
+import { generateObject } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
+
+{
+  name: "Tone Consistency",
+  description: "LLM judges if output maintains professional tone",
+  scorer: async ({ output }) => {
+    const { object } = await generateObject({
+      model: openai("gpt-4o-mini"),
+      schema: z.object({
+        score: z.number().min(0).max(1),
+        rationale: z.string(),
+      }),
+      prompt: `Rate the professional tone of this text (0-1): ${output}`,
+    });
+    // Return score with metadata for UI debugging
+    return {
+      score: object.score,
+      metadata: { rationale: object.rationale },
+    };
+  },
+}
+```
+
+<br />
+
+## CI Integration: Quality Gates
+
+<br />
+
+Evalite can export results as static HTML and set score thresholds. Configure in `evalite.config.ts`:
+
+<br />
+
+```typescript
+// evalite.config.ts
+import { defineConfig } from "evalite";
+
+export default defineConfig({
+  // Maximum time per test case (default: 30000ms)
+  testTimeout: 60000,
+  // Parallel test execution (default: 5)
+  maxConcurrency: 3,
+});
+```
+
+<br />
+
+In CI, export results and fail on low scores:
+
+<br />
+
+```yaml
+# .github/workflows/eval.yml
+- name: Run AI Evals
+  run: pnpm eval
+
+- name: Export Eval Results
+  run: pnpm evalite export --output ./eval-report
+
+- name: Upload Eval Results
+  uses: actions/upload-artifact@v4
+  with:
+    name: evalite-results
+    path: ./eval-report/
+```
+
+<br />
+
+## Lessons Learned
+
+<br />
+
+### 1. Start with Failure Cases
+
+<br />
+
+Before writing scorers, collect examples of bad outputs. What makes them bad? Turn those observations into scorers.
+
+<br />
+
+### 2. Version Your Prompts
+
+<br />
+
+When evals start failing, you need to know what changed. We version prompts alongside code:
+
+<br />
+
+```typescript
+// packages/survey-ai/src/prompts/analyze.ts
+export const ANALYZE_PROMPT_V3 = `...`;
+export const ANALYZE_PROMPT_VERSION = "3.1.0";
+```
+
+<br />
+
+### 3. Seed Your Randomness (When Possible)
+
+<br />
+
+Some LLM APIs support temperature and seed parameters. Use them for more consistent eval runs:
+
+<br />
+
+```typescript
+const result = await llm.complete({
+  prompt: ANALYZE_PROMPT,
+  temperature: 0.1,  // Lower = more deterministic
+  seed: 42,          // Same seed = more reproducible
+});
+```
+
+<br />
+
+### 4. Eval Early, Eval Often
+
+<br />
+
+Don't wait until a feature is "done" to add evals. Write evals as you develop, just like TDD:
+
+<br />
+
+```
+1. Write eval with expected behavior
+2. Run eval (it fails or scores low)
+3. Improve prompt/logic
+4. Run eval (scores improve)
+5. Repeat until quality threshold met
+```
+
+<br />
+
+## The Bigger Picture
+
+<br />
+
+Evalite represents a fundamental shift in how we think about testing:
+
+<br />
+
+| Traditional Tests | AI Evals |
+|------------------|----------|
+| Binary pass/fail | Continuous scores |
+| Exact matching | Semantic evaluation |
+| Deterministic | Probabilistic |
+| Fast (&lt;1ms) | Slower (API calls) |
+| Cache aggressively | Run fresh |
+
+<br />
+
+This isn't replacing unit tests—it's a new category alongside them. Our test pyramid now looks like:
+
+<br />
+
+```
+                    /\
+                   /  \  E2E Tests
+                  /----\
+                 /      \  Integration Tests
+                /--------\
+               /          \  Unit Tests
+              /------------\
+             /              \  AI Evals (new layer!)
+            /----------------\
+```
+
+<br />
+
+## Getting Started with Evalite
+
+<br />
+
+If you're shipping AI features without systematic evaluation, start here:
+
+<br />
+
+1. **Install dependencies**: `pnpm add -D evalite vitest autoevals`
+2. **Create your first eval**: Name it `*.eval.ts`
+3. **Add basic scorers**: Start with `Levenshtein` or `Factuality` from autoevals
+4. **Run `pnpm evalite watch`**: Explore results in the UI at localhost:3006
+5. **Iterate**: Add custom scorers for your domain-specific quality criteria
+
+<br />
+
+The goal isn't 100% scores—it's visibility into quality and confidence that prompt changes don't regress.
+
+<br />
+
+---
+
+<br />
+
+*This post extends our series to cover the unique challenges of testing AI-powered features. As LLMs become more integrated into our applications, frameworks like [Evalite](https://www.evalite.dev/) become essential tools in our quality assurance toolkit.*

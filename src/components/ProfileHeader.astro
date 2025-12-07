@@ -71,6 +71,7 @@ import Avatar from "./Avatar.astro";
         aria-label='View resume as PDF (opens in new tab)'
         href='/resume/print'
         target='_blank'
+        data-track-print-resume
       >
         <span class='sr-only'>(opens in new tab)</span>
         <svg
@@ -88,3 +89,12 @@ import Avatar from "./Avatar.astro";
     </div>
   </div>
 </section>
+
+<script>
+  import { trackResumePrintLinkClick } from "../utils/analytics";
+
+  const printResumeLink = document.querySelector("[data-track-print-resume]");
+  printResumeLink?.addEventListener("click", () => {
+    trackResumePrintLinkClick();
+  });
+</script>

@@ -47,18 +47,21 @@
         href='/resume'
         class='flex-none text-[1.05rem] font-medium hover:text-foreground/75'
         aria-label='Resume page'
+        data-track-nav='resume'
         >Resume
       </a>
       <a
         href='/tools'
         class='flex-none text-[1.05rem] font-medium hover:text-foreground/75'
         aria-label='Tools page'
+        data-track-nav='tools'
         >Tools
       </a>
       <a
         href='/blog'
         class='flex-none text-[1.05rem] font-medium hover:text-foreground/75'
         aria-label='Blog page'
+        data-track-nav='blog'
         >Blog
       </a>
     </div>
@@ -66,6 +69,8 @@
 </header>
 
 <script>
+  import { trackResumeNavClick, trackHeaderNavClick } from "../../utils/analytics";
+
   function getCurrentTheme() {
     return localStorage.getItem("theme");
   }
@@ -79,5 +84,17 @@
       detail: { theme },
     });
     document.dispatchEvent(toggleDarkModeEvent);
+  });
+
+  // Track navigation link clicks
+  document.querySelectorAll("[data-track-nav]").forEach((link) => {
+    link.addEventListener("click", () => {
+      const destination = (link as HTMLElement).dataset.trackNav;
+      if (destination === "resume") {
+        trackResumeNavClick(window.location.pathname);
+      } else if (destination) {
+        trackHeaderNavClick(destination);
+      }
+    });
   });
 </script>

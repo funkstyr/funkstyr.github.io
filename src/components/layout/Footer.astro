@@ -27,14 +27,14 @@ const today = new Date();
       <div class='flex items-center justify-between'>
         <!-- Social Brands -->
         <div class='flex items-center gap-x-4'>
-          <a href='https://www.linkedin.com/in/michaelafunk' target='_blank'>
+          <a href='https://www.linkedin.com/in/michaelafunk' target='_blank' data-track-social='linkedin'>
             <span class='sr-only'
               >Go to my linkedin profile (opens in new tab)</span
             >
             <Icon size='24' name='tabler:brand-linkedin' aria-hidden='true' />
           </a>
 
-          <a href='https://github.com/funkstyr' target='_blank'>
+          <a href='https://github.com/funkstyr' target='_blank' data-track-social='github'>
             <span class='sr-only'>Go to my GitHub repo (opens in new tab)</span>
             <Icon size='24' name='tabler:brand-github' aria-hidden='true' />
           </a>
@@ -54,3 +54,16 @@ const today = new Date();
     </div>
   </div>
 </footer>
+
+<script>
+  import { trackFooterSocialClick } from "../../utils/analytics";
+
+  document.querySelectorAll("[data-track-social]").forEach((link) => {
+    link.addEventListener("click", () => {
+      const platform = (link as HTMLElement).dataset.trackSocial as "linkedin" | "github";
+      if (platform) {
+        trackFooterSocialClick(platform);
+      }
+    });
+  });
+</script>

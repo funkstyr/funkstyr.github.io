@@ -188,6 +188,73 @@ export function trackContactAttempt(
 // ============================================
 
 /**
+ * Track clicks on the resume link in the header
+ */
+export function trackResumeNavClick(fromPage: string): void {
+  trackEvent("resume_link_clicked", {
+    source: "header",
+    page: fromPage,
+    referrer: typeof document !== "undefined" ? document.referrer : "",
+  });
+}
+
+/**
+ * Track clicks on the print resume link
+ */
+export function trackResumePrintLinkClick(): void {
+  trackEvent("resume_print_link_clicked", {
+    source: "profile_header",
+    page: typeof window !== "undefined" ? window.location.pathname : "",
+    referrer: typeof document !== "undefined" ? document.referrer : "",
+  });
+}
+
+/**
+ * Track clicks on header navigation links
+ */
+export function trackHeaderNavClick(destination: string): void {
+  trackEvent("nav_link_clicked", {
+    destination,
+    page: typeof window !== "undefined" ? window.location.pathname : "",
+  });
+}
+
+/**
+ * Track clicks on footer social links
+ */
+export function trackFooterSocialClick(platform: "linkedin" | "github"): void {
+  trackEvent("footer_social_clicked", {
+    platform,
+    page: typeof window !== "undefined" ? window.location.pathname : "",
+  });
+}
+
+/**
+ * Track clicks on blog post navigation (prev/next)
+ */
+export function trackBlogNavClick(
+  direction: "previous" | "next",
+  fromSlug: string,
+  toSlug: string,
+): void {
+  trackEvent("blog_nav_clicked", {
+    direction,
+    from_slug: fromSlug,
+    to_slug: toSlug,
+  });
+}
+
+/**
+ * Track clicks on tools page
+ */
+export function trackToolClick(toolName: string, category: string): void {
+  trackEvent("tool_clicked", {
+    tool_name: toolName,
+    category,
+  });
+}
+
+/**
  * Track navigation between pages
  */
 export function trackNavigation(from: string, to: string): void {

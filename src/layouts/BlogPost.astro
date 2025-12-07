@@ -57,6 +57,8 @@ const { headings } = await post.render();
         <a
           href={`/blog/${prev.slug}`}
           class='text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1'
+          data-track-blog-nav='previous'
+          data-to-slug={prev.slug}
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -113,6 +115,8 @@ const { headings } = await post.render();
         <a
           href={`/blog/${next.slug}`}
           class='text-muted-foreground hover:text-foreground transition-colors flex items-center justify-end gap-1'
+          data-track-blog-nav='next'
+          data-to-slug={next.slug}
         >
           <span>Next: {next.data.title}</span>
           <svg
@@ -143,6 +147,7 @@ const { headings } = await post.render();
   import {
     trackBlogScrollDepth,
     trackBlogPostCompleted,
+    trackBlogNavClick,
     trackEvent,
     getScrollPercent,
     detectPlatformFromUrl,
@@ -256,6 +261,17 @@ const { headings } = await post.render();
         heading,
         post_slug: postSlug,
       });
+    });
+  });
+
+  // Track blog post navigation (prev/next) clicks
+  document.querySelectorAll("[data-track-blog-nav]").forEach((link) => {
+    link.addEventListener("click", () => {
+      const direction = (link as HTMLElement).dataset.trackBlogNav as "previous" | "next";
+      const toSlug = (link as HTMLElement).dataset.toSlug;
+      if (direction && toSlug && postSlug) {
+        trackBlogNavClick(direction, postSlug, toSlug);
+      }
     });
   });
 </script>

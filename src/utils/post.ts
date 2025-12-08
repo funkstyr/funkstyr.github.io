@@ -12,6 +12,11 @@ export function sortMDByDate(posts: Array<CollectionEntry<"post">>) {
   return posts.sort((a, b) => {
     const aDate = new Date(a.data.updatedDate ?? a.data.publishDate).valueOf();
     const bDate = new Date(b.data.updatedDate ?? b.data.publishDate).valueOf();
+    // If same date, use order field descending (higher order = appears first in the list)
+    // This way Part 13 (order:13) appears before Part 12 (order:12) on same day
+    if (bDate === aDate) {
+      return (b.data.order ?? 0) - (a.data.order ?? 0);
+    }
     return bDate - aDate;
   });
 }

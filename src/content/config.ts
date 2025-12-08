@@ -30,6 +30,8 @@ const post = defineCollection({
       draft: z.boolean().default(false),
       tags: z.array(z.string()).default([]).transform(removeDupesAndLowerCase),
       ogImage: z.string().optional(),
+      // Optional sort order for posts on the same day (higher = appears first)
+      order: z.number().default(0),
     }),
 });
 

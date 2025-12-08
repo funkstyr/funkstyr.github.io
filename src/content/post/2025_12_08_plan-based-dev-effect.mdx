@@ -1,0 +1,489 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 12"
+description: "Effect TS patterns for structured errors and dependency injection"
+publishDate: "08 Dec 2025"
+tags: ["effect-ts", "typescript", "monorepo", "error-handling", "dependency-injection"]
+---
+
+<hr />
+
+*This is Part 12 of our series on plan-based development with Claude Code. Today we explore Effect TS - how structured errors and dependency injection make services maintainable at scale.*
+
+<br />
+
+## Why Effect TS?
+
+<br />
+
+When your monorepo grows to 60+ packages with complex service interactions, traditional error handling breaks down:
+
+<br />
+
+- `try/catch` everywhere, catching `unknown` errors with no type information
+- Promise chains that lose error context
+- Mock-heavy tests because services are tightly coupled
+- Runtime errors that could have been caught at compile time
+
+<br />
+
+Effect TS addresses these by making errors first-class citizens and providing compile-time dependency injection.
+
+<br />
+
+## Type-Safe Errors with TaggedError
+
+<br />
+
+Effect uses `Data.TaggedError` to create discriminated union types:
+
+<br />
+
+```typescript
+import { Data } from "effect";
+
+// Define typed errors
+export class NotFoundError extends Data.TaggedError("NotFoundError")<{
+  readonly resource: string;
+  readonly id?: string;
+  readonly message?: string;
+}> {}
+
+export class ValidationError extends Data.TaggedError("ValidationError")<{
+  readonly message: string;
+  readonly field?: string;
+  readonly value?: unknown;
+}> {}
+
+export class UnauthorizedError extends Data.TaggedError("UnauthorizedError")<{
+  readonly resource?: string;
+  readonly action?: string;
+  readonly message?: string;
+}> {}
+```
+
+<br />
+
+The magic is the `_tag` property. When a function returns `Effect<A, NotFoundError | ValidationError>`, TypeScript knows exactly which errors are possible. Pattern matching is exhaustive:
+
+<br />
+
+```typescript
+Effect.catchTag("NotFoundError", (error) =>
+  // error is typed as NotFoundError
+  console.log(`${error.resource} with id ${error.id} not found`)
+)
+```
+
+<br />
+
+No more `catch (e: unknown)` guessing games.
+
+<br />
+
+## Services with Dependency Injection
+
+<br />
+
+Services are defined as interfaces, then tagged for injection:
+
+<br />
+
+```typescript
+import { Context, Effect, Layer } from "effect";
+
+// Define service interface
+export interface DatabaseService {
+  readonly query: <T>(
+    fn: (db: Client) => Promise<T>
+  ) => Effect.Effect<T, DatabaseQueryError>;
+  readonly transaction: <T, E>(
+    fn: (tx: Client) => Effect.Effect<T, E>
+  ) => Effect.Effect<T, E | DatabaseTransactionError>;
+}
+
+// Tag for dependency injection
+export class Database extends Context.Tag("@bts/db/Database")<
+  Database,
+  DatabaseService
+>() {}
+```
+
+<br />
+
+Now any effect can request the Database service:
+
+<br />
+
+```typescript
+const getTodos = Effect.gen(function* () {
+  const db = yield* Database;  // Inject Database service
+  const todos = yield* db.query((client) =>
+    client.select().from(todoTable)
+  );
+  return todos;
+});
+```
+
+<br />
+
+The type signature is explicit: `Effect<Todo[], DatabaseQueryError, Database>`. The third type parameter tells you this effect requires a `Database` service to run.
+
+<br />
+
+## Layer Composition
+
+<br />
+
+Layers wire services together:
+
+<br />
+
+```typescript
+// Create database layer from connection string
+export const DatabaseLive = (connectionString: string) =>
+  Layer.scoped(
+    Database,
+    Effect.gen(function* () {
+      const pool = yield* makePool(connectionString);
+      const client = drizzle(pool);
+
+      return {
+        query: (fn) => Effect.tryPromise({
+          try: () => fn(client),
+          catch: (error) =>
+            new DatabaseQueryError({
+              message: "Query failed",
+              cause: error,
+            }),
+        }),
+        transaction: (fn) => Effect.gen(function* () {
+          // Transaction implementation
+        }),
+      };
+    })
+  );
+```
+
+<br />
+
+Layers compose with `Layer.mergeAll`:
+
+<br />
+
+```typescript
+export const CoreLayer = Layer.mergeAll(
+  ConfigServiceLive,
+  LogServiceLive.pipe(Layer.provide(ConfigServiceLive)),
+  TelemetryServiceLive.pipe(Layer.provide(ConfigServiceLive)),
+);
+```
+
+<br />
+
+The dependency graph is explicit. LogService depends on ConfigService - that's encoded in the types, not hidden in runtime behavior.
+
+<br />
+
+## Repository Pattern
+
+<br />
+
+We use Effect for database repositories:
+
+<br />
+
+```typescript
+export const TodoRepo = {
+  findAll: () =>
+    Effect.gen(function* () {
+      const db = yield* Database;
+      return yield* db.query((client) =>
+        client.select().from(todo)
+      );
+    }),
+
+  findById: (id: number) =>
+    Effect.gen(function* () {
+      const db = yield* Database;
+      const results = yield* db.query((client) =>
+        client.select().from(todo).where(eq(todo.id, id)).limit(1)
+      );
+      const [first] = results;
+      return first ? Option.some(first) : Option.none();
+    }),
+
+  update: (id: number, data: Partial<TodoInsert>) =>
+    Effect.gen(function* () {
+      const db = yield* Database;
+      const results = yield* db.query((client) =>
+        client.update(todo).set(data).where(eq(todo.id, id)).returning()
+      );
+      const [updated] = results;
+      if (!updated) {
+        return yield* Effect.fail(
+          new RecordNotFoundError({
+            table: "todo",
+            id: String(id),
+          })
+        );
+      }
+      return updated;
+    }),
+};
+```
+
+<br />
+
+Every method has an explicit type: `Effect<Todo[], DatabaseQueryError, Database>` for `findAll`, or `Effect<Todo, DatabaseQueryError | RecordNotFoundError, Database>` for `update`.
+
+<br />
+
+## Error Mapping to HTTP
+
+<br />
+
+Effect errors need to become HTTP responses. The `runEffect` function bridges this gap:
+
+<br />
+
+```typescript
+export const mapErrorToORPC = (error: unknown): ORPCError => {
+  // Auth errors -> 401/403
+  if (error instanceof UnauthenticatedError) {
+    return new ORPCError("UNAUTHORIZED", {
+      message: error.message ?? "Not authenticated",
+    });
+  }
+  if (error instanceof UnauthorizedError) {
+    return new ORPCError("FORBIDDEN", {
+      message: error.message ?? "Access denied",
+    });
+  }
+
+  // Not found errors -> 404
+  if (error instanceof NotFoundError) {
+    return new ORPCError("NOT_FOUND", {
+      message: error.message ?? `${error.resource} not found`,
+    });
+  }
+  if (error instanceof RecordNotFoundError) {
+    return new ORPCError("NOT_FOUND", {
+      message: error.message ?? `${error.table} record not found`,
+    });
+  }
+
+  // Validation -> 400
+  if (error instanceof ValidationError) {
+    return new ORPCError("BAD_REQUEST", { message: error.message });
+  }
+
+  // Default -> 500
+  return new ORPCError("INTERNAL_SERVER_ERROR", {
+    message: error instanceof Error ? error.message : "Unexpected error",
+  });
+};
+
+export const runEffect = async <A, E>(
+  effect: Effect.Effect<A, E, never>
+): Promise<A> => {
+  const exit = await Effect.runPromiseExit(effect);
+
+  if (Exit.isSuccess(exit)) {
+    return exit.value;
+  }
+
+  const cause = exit.cause;
+  if (Cause.isFailType(cause)) {
+    throw mapErrorToORPC(cause.error);
+  }
+
+  throw new ORPCError("INTERNAL_SERVER_ERROR", {
+    message: "Unexpected failure",
+  });
+};
+```
+
+<br />
+
+Usage in route handlers:
+
+<br />
+
+```typescript
+import { runEffect } from "@bts/api-base/effect";
+
+handler: async ({ input }) => {
+  return runEffect(
+    TodoRepo.update(input.id, input.data)
+      .pipe(Effect.provide(DatabaseLive(process.env.DATABASE_URL)))
+  );
+}
+```
+
+<br />
+
+`RecordNotFoundError` automatically becomes a 404. `ValidationError` becomes a 400. The mapping is centralized and consistent.
+
+<br />
+
+## Testing with Mock Layers
+
+<br />
+
+Testing is where Effect shines. No need for dependency injection frameworks or complex mocking:
+
+<br />
+
+```typescript
+describe("EmailService", () => {
+  // Create mock provider
+  const createMockProvider = (result = { messageId: "mock-id" }) => ({
+    sendEmail: vi.fn().mockReturnValue(Effect.succeed(result)),
+  });
+
+  // Compose test layer
+  const createTestLayer = (mockProvider) =>
+    Layer.mergeAll(
+      Layer.succeed(EmailProviderTag, mockProvider),
+      Layer.effect(TemplateServiceTag, makeTemplateService),
+    );
+
+  it("sends email successfully", async () => {
+    const mockProvider = createMockProvider({ messageId: "test-123" });
+
+    const program = Effect.gen(function* () {
+      const service = yield* EmailServiceTag;
+      return yield* service.send({
+        template: "welcome",
+        recipients: [{ email: "test@example.com" }],
+        templateData: { name: "Test" },
+      });
+    }).pipe(Effect.provide(createTestLayer(mockProvider)));
+
+    const exit = await Effect.runPromiseExit(program);
+
+    expect(Exit.isSuccess(exit)).toBe(true);
+    if (Exit.isSuccess(exit)) {
+      expect(exit.value.messageId).toBe("test-123");
+    }
+    expect(mockProvider.sendEmail).toHaveBeenCalled();
+  });
+});
+```
+
+<br />
+
+Key patterns:
+- `Layer.succeed()` creates a layer with a mock implementation
+- `Layer.mergeAll()` composes mocks with real implementations
+- `Effect.runPromiseExit()` gives you the full Exit for inspection
+- No global state, no cleanup needed
+
+<br />
+
+## Concurrency Control
+
+<br />
+
+Effect has built-in concurrency primitives:
+
+<br />
+
+```typescript
+const sendBulkEmails = (recipients: Recipient[]) =>
+  Effect.forEach(
+    recipients,
+    (recipient) => sendEmail(recipient),
+    { concurrency: 5 }  // Max 5 concurrent sends
+  );
+```
+
+<br />
+
+## Retry Logic
+
+<br />
+
+Automatic retries with configurable schedules:
+
+<br />
+
+```typescript
+const generateWithRetry = (prompt: string) =>
+  generateText(prompt).pipe(
+    Effect.retry(
+      Schedule.exponential(Duration.millis(100)).pipe(
+        Schedule.union(Schedule.recurs(3))  // Max 3 retries
+      )
+    )
+  );
+```
+
+<br />
+
+## When to Use Effect
+
+<br />
+
+Effect adds complexity. Use it when:
+
+<br />
+
+**Good fit:**
+- Database operations with multiple potential errors
+- External API calls that need retry logic
+- Services with complex dependencies
+- Operations requiring concurrency control
+
+<br />
+
+**Overkill:**
+- Simple CRUD with straightforward error handling
+- Pure utility functions
+- UI components
+
+<br />
+
+## Gradual Adoption
+
+<br />
+
+You don't need to Effect-ify everything at once:
+
+<br />
+
+1. **Start with new services**: Write new database services with Effect
+2. **Add error types**: Define TaggedErrors for your domain
+3. **Use `runEffect` at boundaries**: Bridge to existing Promise-based code
+4. **Expand as needed**: Convert existing services when you touch them
+
+<br />
+
+## The Payoff
+
+<br />
+
+After six months with Effect:
+
+<br />
+
+- **Fewer runtime errors**: Type-checked error handling catches issues at compile time
+- **Better testing**: Mock layers are trivial to compose
+- **Clearer contracts**: Service interfaces are explicit about errors
+- **Centralized error mapping**: One place to handle HTTP error codes
+
+<br />
+
+The learning curve is real, but the maintenance benefits compound over time.
+
+<br />
+
+---
+
+<br />
+
+*Effect TS makes errors and dependencies explicit. In a monorepo with complex service interactions, this explicitness prevents entire categories of bugs.*
+
+<br />
+
+*Next up in Part 13: AI tool development - building 70+ tools across 14 domain packages with consistent patterns.*

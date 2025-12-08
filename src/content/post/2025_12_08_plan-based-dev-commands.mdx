@@ -1,0 +1,648 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 10"
+description: "Building custom slash commands that codify your team's workflows"
+publishDate: "08 Dec 2025"
+tags: ["claude-code", "developer-tools", "productivity", "automation"]
+---
+
+<hr />
+
+*This is Part 10 of our series on plan-based development with Claude Code. Today we explore custom slash commands - how to transform recurring workflows into reusable, optimized operations.*
+
+<br />
+
+## Beyond Chat: Commands as Codified Workflows
+
+<br />
+
+Part 6 introduced Claude Code as an AI pair programmer. But conversations are ephemeral. Every time you need to research a feature or review code, you're starting from scratch - re-explaining context, re-specifying expectations.
+
+<br />
+
+Custom slash commands solve this. They're markdown files that define:
+- What Claude should do
+- What tools Claude can use
+- What output format to follow
+- What context to consider
+
+<br />
+
+When you type `/review staged`, Claude doesn't need your guidance - it already knows your review process, your code standards, and your checklist.
+
+<br />
+
+## Anatomy of a Slash Command
+
+<br />
+
+Commands live in `.claude/commands/` and have two parts:
+
+<br />
+
+### YAML Frontmatter
+
+<br />
+
+```yaml
+---
+description: Review code with PR-quality feedback
+argument-hint: <file path or "staged" for git changes>
+allowed-tools: Glob, Grep, Read, Bash
+---
+```
+
+<br />
+
+**description**: Shows in command palette and help
+**argument-hint**: Guides what to pass (shown as `/review <file path or "staged"...>`)
+**allowed-tools**: Restricts which tools Claude can use (critical for focused operations)
+
+<br />
+
+### Markdown Body
+
+<br />
+
+The rest is a detailed prompt that tells Claude how to execute the command. It uses `$ARGUMENTS` for user input:
+
+<br />
+
+```markdown
+# Code Review Command
+
+You are reviewing: **$ARGUMENTS**
+
+## Context
+This is a TypeScript monorepo with strict conventions...
+
+## Review Process
+1. Gather changes
+2. Analyze code quality
+3. Check conventions
+...
+```
+
+<br />
+
+## Tool Restrictions: The Key to Focused Commands
+
+<br />
+
+The `allowed-tools` field is crucial. Without it, Claude might:
+- Start writing code during a review (you wanted analysis, not changes)
+- Create files during a search (you wanted to find, not create)
+- Make network requests during a local operation
+
+<br />
+
+By restricting tools, commands become predictable:
+
+<br />
+
+```yaml
+# /find - Read-only exploration
+allowed-tools: Glob, Grep, Read, Task
+
+# /review - Can check git status, but not write files
+allowed-tools: Glob, Grep, Read, Bash
+
+# /write - Full access for code generation
+allowed-tools: Glob, Grep, Read, Write, Edit, Bash
+
+# /test - Can create test files and run them
+allowed-tools: Glob, Grep, Read, Write, Edit, Bash
+```
+
+<br />
+
+## Our Six Core Commands
+
+<br />
+
+We built six commands that cover our daily workflow:
+
+<br />
+
+### `/research` - Planning New Features
+
+<br />
+
+```markdown
+---
+description: Research and plan a feature or solution
+argument-hint: <feature or problem to research>
+allowed-tools: Glob, Grep, Read, Task, WebSearch, WebFetch
+---
+
+# Research & Planning Command
+
+You are researching and planning: **$ARGUMENTS**
+
+## Research Process
+
+1. **Understand the Request**
+   - Parse the feature/problem description
+   - Identify key requirements
+   - Note any ambiguities
+
+2. **Explore Existing Patterns**
+   - Search for similar implementations
+   - Review relevant package structures
+   - Check existing service patterns
+
+3. **Architecture Analysis**
+   - Determine affected apps/packages
+   - Identify dependencies
+   - Consider data flow
+
+4. **Create Implementation Plan**
+   - Break down into discrete tasks
+   - Order by dependencies
+   - Identify potential risks
+
+## Output Format
+
+### Summary
+Brief description of the solution approach
+
+### Affected Packages
+- List packages that need changes
+
+### Implementation Steps
+1. Numbered, actionable steps
+2. Include file paths
+3. Note dependencies between steps
+
+### Technical Decisions
+- Key architectural choices
+- Trade-offs considered
+
+### Questions/Blockers
+- Items needing clarification
+```
+
+<br />
+
+Usage: `/research add real-time notifications to the dashboard`
+
+<br />
+
+### `/understand` - Deep Code Analysis
+
+<br />
+
+```markdown
+---
+description: Deeply understand code, patterns, or architecture
+argument-hint: <file path, component, or concept>
+allowed-tools: Glob, Grep, Read, Task
+---
+
+# Code Understanding Command
+
+You are analyzing: **$ARGUMENTS**
+
+## Analysis Process
+
+1. **Locate the Code**
+   - Find relevant files
+   - Map directory structure
+
+2. **Trace Dependencies**
+   - What does this code depend on?
+   - What depends on this code?
+
+3. **Understand Patterns**
+   - Identify design patterns
+   - Note Effect TS patterns
+   - Document React patterns
+
+4. **Document Behavior**
+   - What does it do?
+   - Inputs/outputs?
+   - Side effects?
+
+## Output Format
+
+### Overview
+High-level description
+
+### Architecture
+Visual representation of structure
+
+### Key Components
+- **Name**: What it does
+
+### Patterns Used
+- Design patterns
+- Framework-specific patterns
+
+### Dependencies
+- Upstream: What this needs
+- Downstream: What uses this
+```
+
+<br />
+
+Usage: `/understand packages/auth/src/index.ts`
+
+<br />
+
+### `/find` - Code Discovery
+
+<br />
+
+```markdown
+---
+description: Find code, patterns, or implementations
+argument-hint: <what to find>
+allowed-tools: Glob, Grep, Read, Task
+---
+
+# Code Discovery Command
+
+You are searching for: **$ARGUMENTS**
+
+## Search Strategy
+
+1. **Interpret the Query**
+   - Consider synonyms
+   - Think about file naming conventions
+
+2. **Multi-Pronged Search**
+   - File patterns (glob)
+   - Content search (grep)
+   - Type definitions
+   - Usage examples
+
+3. **Rank Results**
+   - Primary matches (direct hits)
+   - Secondary matches (related)
+   - Examples and usage
+
+## Search Patterns
+
+**Components**: `packages/*/src/**/*.tsx`
+**Services**: `packages/*/src/**/*.ts`
+**Database**: `packages/db/src/schema/*.ts`
+**Tests**: `**/*.test.ts`, `**/*.spec.ts`
+
+## Output Format
+
+### Search Results
+
+**File**: `path/to/file.ts:line`
+```typescript
+// Relevant code snippet
+```
+**Context**: Why this is relevant
+
+### Summary
+- Total matches
+- Most relevant locations
+- Suggested next steps
+```
+
+<br />
+
+Usage: `/find authentication middleware`
+
+<br />
+
+### `/review` - Code Review
+
+<br />
+
+```markdown
+---
+description: Review code with PR-quality feedback
+argument-hint: <file path or "staged" for git changes>
+allowed-tools: Glob, Grep, Read, Bash
+---
+
+# Code Review Command
+
+You are reviewing: **$ARGUMENTS**
+
+## Review Process
+
+1. **Gather Changes**
+   - If "staged": run `git diff --staged`
+   - If file path: read file and check history
+
+2. **Analyze Code Quality**
+   - Type safety and correctness
+   - Error handling
+   - Performance considerations
+
+3. **Check Conventions**
+   - Naming conventions
+   - File organization
+   - Import ordering
+
+4. **Security Review**
+   - Input validation
+   - Authentication/authorization
+   - Secrets handling
+
+## Review Categories
+
+### Critical (Must Fix)
+- Security vulnerabilities
+- Type errors
+- Breaking changes
+
+### Important (Should Fix)
+- Logic errors
+- Missing error handling
+- Performance issues
+
+### Suggestions (Nice to Have)
+- Code style
+- Better naming
+- Refactoring opportunities
+
+## Checklist
+- [ ] Types are correct
+- [ ] Error handling is complete
+- [ ] No security issues
+- [ ] Follows repo conventions
+```
+
+<br />
+
+Usage: `/review staged` or `/review packages/auth/src/session.ts`
+
+<br />
+
+### `/test` - Testing Workflow
+
+<br />
+
+```markdown
+---
+description: Create, run, or improve tests
+argument-hint: <file, function, or component to test>
+allowed-tools: Glob, Grep, Read, Write, Edit, Bash
+---
+
+# Testing Workflow Command
+
+You are testing: **$ARGUMENTS**
+
+## Testing Process
+
+1. **Analyze Target**
+   - Read code to be tested
+   - Identify functions and behaviors
+   - Understand dependencies
+
+2. **Check Existing Tests**
+   - Look for test files
+   - Review current coverage
+   - Identify gaps
+
+3. **Plan Tests**
+   - Unit tests for isolated logic
+   - Integration tests for workflows
+   - Edge cases and error handling
+
+4. **Write/Update Tests**
+   - Follow existing patterns
+   - Use descriptive test names
+   - Arrange-act-assert structure
+
+5. **Run Tests**
+   - Execute with vitest
+   - Check coverage
+   - Fix failures
+
+## Commands
+
+```bash
+bun run test                              # All tests
+bun run test --filter=@bts/package-name   # Specific package
+bun run test:coverage                     # With coverage
+```
+
+## Output
+
+1. Show test code
+2. Run tests
+3. Report results
+4. Suggest additional cases
+```
+
+<br />
+
+Usage: `/test packages/auth/src/session.ts`
+
+<br />
+
+### `/write` - Code Generation
+
+<br />
+
+```markdown
+---
+description: Generate code following repo patterns
+argument-hint: <description of what to create>
+allowed-tools: Glob, Grep, Read, Write, Edit, Bash
+---
+
+# Code Generation Command
+
+You are creating: **$ARGUMENTS**
+
+## Generation Process
+
+1. **Understand Requirements**
+   - Parse what needs to be created
+   - Identify code type (service, component, API)
+   - Determine involved packages
+
+2. **Find Patterns**
+   - Search for similar code
+   - Extract patterns to follow
+   - Note naming conventions
+
+3. **Plan Structure**
+   - File locations
+   - Exports and imports
+   - Dependencies
+
+4. **Generate Code**
+   - Follow existing patterns exactly
+   - Include TypeScript types
+   - Add necessary imports
+   - Include exports in index files
+
+5. **Verify**
+   - `bun run check-types`
+   - `bun run build`
+
+## Code Patterns
+
+### Effect TS Service
+```typescript
+export class MyService extends Context.Tag('MyService')<...>() {}
+export const MyServiceLive = Layer.succeed(MyService, {...})
+```
+
+### oRPC Procedure
+```typescript
+export const myRouter = {
+  myAction: publicProcedure
+    .input(z.object({...}))
+    .handler(async ({ input, context }) => {...})
+}
+```
+
+### React Component
+```typescript
+export function MyComponent({ className }: Props) {
+  return <div className={cn('base', className)}>...</div>
+}
+```
+
+## Output
+
+1. Generated code
+2. Key decisions explained
+3. Files created/modified
+4. Next steps
+```
+
+<br />
+
+Usage: `/write a new authentication guard hook for admin routes`
+
+<br />
+
+## The Workflow in Practice
+
+<br />
+
+A typical feature development session:
+
+<br />
+
+```bash
+# 1. Research the approach
+/research add project archiving feature
+
+# 2. Understand existing patterns
+/understand packages/project-ai/src/tools
+
+# 3. Find similar implementations
+/find soft delete implementation
+
+# 4. Write the code
+/write an archiveProject tool following the recent-projects pattern
+
+# 5. Test it
+/test packages/project-ai/src/tools/archive-project
+
+# 6. Review before committing
+/review staged
+```
+
+<br />
+
+Each command is optimized for its purpose. `/research` has web access for looking up APIs. `/find` is read-only. `/write` can create files. `/review` can run git commands but not modify files.
+
+<br />
+
+## Creating Your Own Commands
+
+<br />
+
+Start with the workflows you repeat:
+
+<br />
+
+1. **Identify the pattern**: What do you ask Claude to do repeatedly?
+2. **Document the process**: What steps should it follow?
+3. **Restrict the tools**: What should it be allowed to do?
+4. **Define the output**: What format should results take?
+
+<br />
+
+Create `.claude/commands/my-command.md`:
+
+<br />
+
+```markdown
+---
+description: What this command does
+argument-hint: <what to pass>
+allowed-tools: [appropriate tools]
+---
+
+# My Command
+
+You are doing X with: **$ARGUMENTS**
+
+## Process
+1. Step one
+2. Step two
+
+## Output Format
+- How results should look
+```
+
+<br />
+
+## Command Design Tips
+
+<br />
+
+**Be specific about context**: Include your monorepo structure, naming conventions, and patterns. Generic commands produce generic results.
+
+<br />
+
+**Restrict tools appropriately**: `/find` shouldn't write files. `/review` shouldn't modify code. Tool restrictions prevent unintended side effects.
+
+<br />
+
+**Define output format**: When Claude knows what format to use, results are consistent and useful.
+
+<br />
+
+**Include examples**: Show Claude what good output looks like for your codebase.
+
+<br />
+
+**Keep commands focused**: One command, one purpose. Better to have six focused commands than one Swiss Army knife.
+
+<br />
+
+## The Compound Effect
+
+<br />
+
+Commands improve over time. When a `/review` misses something, you add it to the checklist. When `/find` searches the wrong locations, you update the patterns. Each refinement makes the command more valuable.
+
+<br />
+
+After months of iteration, our commands encode the accumulated wisdom of the team:
+- What to check in reviews
+- Where to find patterns
+- How to structure tests
+- What conventions to follow
+
+<br />
+
+New team members get this wisdom instantly through the commands they use.
+
+<br />
+
+---
+
+<br />
+
+*Custom slash commands transform Claude from a general-purpose assistant into a specialized tool that understands your codebase and follows your processes.*
+
+<br />
+
+*Next up in Part 11: Code generators with Turborepo - scaffolding new packages and components with consistency.*

@@ -1,0 +1,427 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 9"
+description: "Writing CLAUDE.md files that actually help AI understand your codebase"
+publishDate: "08 Dec 2025"
+tags: ["claude-code", "documentation", "ai", "developer-experience"]
+---
+
+<hr />
+
+*This is Part 9 of our series on plan-based development with Claude Code. Today we dive into CLAUDE.md - the documentation format that bridges human knowledge and AI understanding.*
+
+<br />
+
+## Documentation for AI, Not Just Humans
+
+<br />
+
+Traditional documentation serves humans. README files explain how to get started. API docs describe endpoints. Architecture docs explain design decisions.
+
+<br />
+
+CLAUDE.md serves a different purpose: it teaches an AI assistant how to work effectively in your specific codebase. The audience isn't a new developer - it's an AI that needs to understand your patterns, conventions, and anti-patterns.
+
+<br />
+
+This shift in audience changes everything about how you write documentation.
+
+<br />
+
+## Why CLAUDE.md Matters
+
+<br />
+
+Claude Code reads your CLAUDE.md file at the start of every conversation. It becomes the AI's mental model of your codebase. Without it, Claude makes reasonable guesses based on general programming knowledge. With a good CLAUDE.md, Claude makes decisions aligned with your specific patterns.
+
+<br />
+
+The difference is stark:
+
+<br />
+
+**Without CLAUDE.md:**
+- Claude might use `ctx` as a variable name (common convention)
+- Suggests creating new files when editing existing ones would be better
+- Uses standard patterns that don't match your architecture
+- Recommends tools and libraries you've intentionally avoided
+
+<br />
+
+**With CLAUDE.md:**
+- Claude uses `context` because that's your convention
+- Knows to use `turbo gen` instead of manually creating files
+- Follows your Effect TS patterns and error handling conventions
+- Understands your package naming scheme (`@bts/[domain]-[type]`)
+
+<br />
+
+## Anatomy of an Effective CLAUDE.md
+
+<br />
+
+Our CLAUDE.md is ~350 lines and covers six key sections. Here's the structure:
+
+<br />
+
+### 1. Commands Quick Reference
+
+<br />
+
+Start with the commands developers (and AI) use constantly:
+
+<br />
+
+```markdown
+## Commands
+
+```bash
+# Development
+bun run dev              # All apps (web :3001, server :3000, native)
+bun run dev:web          # Web only
+bun run dev:server       # Server only
+
+# Build & Check
+bun run build            # Build all
+bun run check-types      # TypeScript
+bun run check            # oxlint
+
+# Generators (always use for new packages)
+turbo gen package        # New package (interactive)
+turbo gen tool           # New AI tool (interactive)
+turbo gen component      # New UI component (interactive)
+```
+```
+
+<br />
+
+The comment "always use for new packages" is crucial - it tells Claude to use generators rather than manually creating files.
+
+<br />
+
+### 2. Post-Change Verification
+
+<br />
+
+Document what to run after making changes:
+
+<br />
+
+```markdown
+## Post-Change Verification
+
+After changes, run: `bun run check && bun run check-types`
+
+| Lint Issue | Fix |
+|------------|-----|
+| Unused imports | Remove |
+| Unused vars | Prefix with `_` or remove |
+| Non-null assertion | Use `?.` or fallback |
+```
+
+<br />
+
+This creates a shared ritual. When Claude finishes implementing something, it knows to verify.
+
+<br />
+
+### 3. Architecture Overview
+
+<br />
+
+Map the territory with tables and clear relationships:
+
+<br />
+
+```markdown
+## Architecture
+
+Turborepo monorepo with bun workspaces. Packages use `@bts/*` prefix.
+
+### Apps
+
+| App | Description | Port |
+|-----|-------------|------|
+| `apps/server` | Hono + oRPC + Better Auth | 3000 |
+| `apps/web` | TanStack Start (SSR) | 3001 |
+
+### Key Packages
+
+| Package | Purpose |
+|---------|---------|
+| `@bts/router` | **Use this** for app router |
+| `@bts/api-base` | Procedures: `publicProcedure`, `protectedProcedure` |
+| `@bts/db` | Drizzle ORM, schema in `src/schema/` |
+```
+
+<br />
+
+Note the "**Use this**" emphasis - it guides Claude toward the right package when there are multiple options.
+
+<br />
+
+### 4. Code Patterns
+
+<br />
+
+Show the patterns you want Claude to follow:
+
+<br />
+
+```markdown
+### Router Pattern
+
+```typescript
+// Always use @bts/router, not @bts/api/routers
+import { appRouter } from "@bts/router";
+
+// Handler patterns
+({ input, context }) => // use `context` not `ctx`
+```
+```
+
+<br />
+
+The `context` not `ctx` comment is a micro-decision that prevents inconsistency across the codebase. Without it, Claude might use either.
+
+<br />
+
+### 5. Troubleshooting
+
+<br />
+
+Document the issues Claude will encounter:
+
+<br />
+
+```markdown
+## Troubleshooting
+
+### Database Password Auth Failed
+
+URL-encode special chars in `DATABASE_URL` (`=` → `%3D`, etc.)
+
+### SSR URL Parsing Errors
+
+Use `process.env.*` server-side, relative paths client-side:
+```typescript
+if (typeof window !== "undefined") return "/api/project";
+return process.env.PROJECT_API_URL ?? "http://project-api";
+```
+```
+
+<br />
+
+When Claude hits one of these issues, it can self-diagnose instead of suggesting unhelpful solutions.
+
+<br />
+
+### 6. Type Safety Rules
+
+<br />
+
+Codify your standards:
+
+<br />
+
+```markdown
+## Type Safety
+
+- Never use `as unknown as X` without justification
+- Use type guards or Zod validation instead of casts
+- Validate JSONB at boundaries with Zod schemas
+- Use `@bts/schemas/common` for `Result`, `StrictOmit`, `DeepPartial`
+```
+
+<br />
+
+This prevents Claude from taking shortcuts that would fail code review.
+
+<br />
+
+## The Specificity Principle
+
+<br />
+
+The most valuable parts of CLAUDE.md are the specific, seemingly minor details:
+
+<br />
+
+- "use `context` not `ctx`"
+- "always use generators for new packages"
+- "`vi.mocked()` does NOT work with bun"
+- "Shiki doesn't support `env` - use `bash` instead"
+
+<br />
+
+These details come from hard-won experience. You discovered them through debugging sessions, failed PRs, and team discussions. Without documentation, Claude would rediscover the same issues.
+
+<br />
+
+General advice ("use TypeScript") doesn't help - Claude already knows that. Specific guidance ("validate JSONB at boundaries with Zod") prevents real bugs.
+
+<br />
+
+## Testing Pattern Documentation
+
+<br />
+
+Our CLAUDE.md includes a detailed testing section because we discovered a compatibility issue:
+
+<br />
+
+```markdown
+## Unit Testing with Vitest
+
+### Mocking Modules
+
+**IMPORTANT**: `vi.mocked()` does NOT work with bun's test runner.
+Define mock functions OUTSIDE `vi.mock()` to reference them in tests.
+
+```typescript
+// CORRECT: Define mock function outside vi.mock
+const mockApiMethod = vi.fn();
+
+vi.mock("@bts/core-api", () => ({
+  createAPIClient: vi.fn().mockReturnValue({
+    sdk: { apiMethod: mockApiMethod },
+  }),
+}));
+
+describe("myFunction", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should handle success", async () => {
+    mockApiMethod.mockResolvedValue({ data: { id: 1 } });
+    // ... test code
+  });
+});
+```
+```
+
+<br />
+
+Without this, Claude would suggest the standard Vitest pattern that fails with Bun. With it, Claude generates working test code on the first try.
+
+<br />
+
+## Keeping CLAUDE.md Updated
+
+<br />
+
+A stale CLAUDE.md is worse than none - it teaches Claude wrong patterns. Here's our update strategy:
+
+<br />
+
+**Update triggers:**
+- New package added to the monorepo
+- Pattern changed in code review feedback
+- Bug caused by Claude following outdated guidance
+- New troubleshooting solution discovered
+
+<br />
+
+**Update workflow:**
+1. Fix the issue in code
+2. Immediately update CLAUDE.md
+3. Commit both together
+
+<br />
+
+The key is immediacy. If you wait, you'll forget.
+
+<br />
+
+## What NOT to Include
+
+<br />
+
+CLAUDE.md isn't a replacement for all documentation:
+
+<br />
+
+- **Don't include**: Tutorial-style explanations, historical context, team processes
+- **Do include**: Commands, patterns, constraints, troubleshooting
+
+<br />
+
+The test: "Would Claude need this to write correct code?" If no, it doesn't belong in CLAUDE.md.
+
+<br />
+
+## Real Impact
+
+<br />
+
+Since adding our detailed CLAUDE.md:
+
+<br />
+
+- **Fewer revision cycles**: Claude's first attempts match our patterns
+- **Faster onboarding**: New developers read CLAUDE.md to understand conventions
+- **Consistent codebase**: AI and humans follow the same rules
+- **Self-service troubleshooting**: Claude solves common issues without human intervention
+
+<br />
+
+## Getting Started
+
+<br />
+
+If you don't have a CLAUDE.md:
+
+<br />
+
+1. **Start with commands**: What does a developer run daily?
+2. **Add architecture**: What packages exist and how do they relate?
+3. **Document one pattern**: Pick your most important convention
+4. **Add one troubleshooting tip**: What issue did you solve recently?
+
+<br />
+
+Then iterate. Every time Claude suggests something wrong, add the correction to CLAUDE.md. The file grows organically from real usage.
+
+<br />
+
+## Template Structure
+
+<br />
+
+```markdown
+# CLAUDE.md
+
+## Commands
+[Quick reference for common tasks]
+
+## Post-Change Verification
+[What to run after making changes]
+
+## Architecture
+[Package structure, key relationships]
+
+## [Domain] Patterns
+[Code patterns for specific areas]
+
+## Troubleshooting
+[Common issues and solutions]
+
+## Type Safety / Code Standards
+[Rules for code quality]
+```
+
+<br />
+
+Start simple. Let it grow based on what Claude actually needs to know.
+
+<br />
+
+---
+
+<br />
+
+*CLAUDE.md is the bridge between your team's accumulated knowledge and AI-assisted development. The investment in maintaining it pays dividends in every conversation with Claude.*
+
+<br />
+
+*Next up in Part 10: Custom slash commands - codifying your workflows into reusable Claude Code operations.*

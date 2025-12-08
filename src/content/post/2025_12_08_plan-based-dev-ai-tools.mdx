@@ -1,0 +1,526 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 13"
+description: "Building AI tools at scale - patterns for 70+ tools across 14 domain packages"
+publishDate: "08 Dec 2025"
+tags: ["ai", "typescript", "monorepo", "vercel-ai-sdk", "tooling"]
+---
+
+<hr />
+
+*This is Part 13 of our series on plan-based development with Claude Code. Today we explore how to build AI tools systematically when you have dozens of them across multiple domain packages.*
+
+<br />
+
+## The Challenge: AI Tools at Scale
+
+<br />
+
+When you have one or two AI tools, you can get away with ad-hoc patterns. Copy some code, tweak the schema, ship it. But what happens when you have 70+ tools across 14 domain packages?
+
+<br />
+
+In our monorepo, we have:
+- `@bts/project-ai` - 18 tools for project management
+- `@bts/results-ai` - 26+ tools for data analysis
+- `@bts/survey-ai` - Survey generation and analysis
+- `@bts/audience-ai` - Audience targeting tools
+- Plus 10 more domain-specific AI packages
+
+<br />
+
+Without systematic patterns, this becomes unmaintainable. Every tool would have slightly different result structures, error handling, and testing approaches.
+
+<br />
+
+## The Solution: Standardized Tool Architecture
+
+<br />
+
+We developed a layered architecture:
+
+<br />
+
+```
+@bts/core-ai           # Shared utilities for all tools
+├── tools/
+│   ├── tool-result.ts      # Generic result types
+│   ├── tool-context.ts     # Context type hierarchy
+│   └── tool-error-handler.ts  # Standardized errors
+
+@bts/{domain}-ai       # Domain-specific packages
+├── tools/
+│   ├── index.ts            # Exports & TOOL_NAMES
+│   └── {tool-name}/
+│       ├── {tool-name}-tool.ts
+│       ├── {tool-name}-tool.test.ts
+│       └── index.ts
+├── agents/                 # Agents composing tools
+└── handlers/               # Chat streaming handlers
+```
+
+<br />
+
+## The Tool Result Contract
+
+<br />
+
+Every tool returns the same structure:
+
+<br />
+
+```typescript
+// @bts/core-ai/tools/tool-result.ts
+
+export type ToolStatus = "success" | "error";
+
+export interface ToolResult<T = unknown> {
+  status: ToolStatus;
+  reason?: string;    // Error explanation
+  summary?: string;   // Success description (1-2 sentences)
+  data?: T;           // Typed result data
+}
+
+// Helper functions
+export function toolSuccess<T>(data: T, summary?: string): ToolResult<T> {
+  return { status: "success", data, summary };
+}
+
+export function toolError(reason: string): ToolResult<never> {
+  return { status: "error", reason };
+}
+```
+
+<br />
+
+Why this matters:
+- LLMs always know what to expect from tool calls
+- UI components render any tool result consistently
+- Error handling is predictable across 70+ tools
+
+<br />
+
+## Anatomy of a Tool
+
+<br />
+
+Here's a real tool from our codebase:
+
+<br />
+
+```typescript
+// packages/project-ai/src/tools/recent-projects/recent-projects-tool.ts
+
+import { z } from "zod";
+import { createProjectAPIClient } from "@bts/core-api";
+
+// 1. Export a constant for the tool name
+export const TOOL_NAME = "recentProjects";
+
+// 2. Define a typed result interface
+export interface RecentProjectsToolResult {
+  status: "success" | "error";
+  reason?: string;
+  summary?: string;
+  projects?: Array<{
+    id: number;
+    publicId: string;
+    name: string;
+    status: string;
+  }>;
+  totalCount?: number;
+}
+
+// 3. Define the input schema with Zod
+const inputSchema = z.object({
+  filter: z
+    .enum(["in_flight", "recent", "needs_attention", "completed"])
+    .default("in_flight")
+    .describe("Filter for project selection"),
+  limit: z.number().default(10).describe("Maximum projects to return"),
+});
+
+// 4. Tool factory - receives context, returns tool definition
+export const recentProjectsTool = (params: { sessionToken: string }) => ({
+  description: `Get a list of recent or in-flight projects.`,
+  inputSchema,
+
+  execute: async (input): Promise<RecentProjectsToolResult> => {
+    if (!params.sessionToken) {
+      return { status: "error", reason: "Session token is required" };
+    }
+
+    try {
+      const api = createProjectAPIClient(params.sessionToken);
+      const response = await api.sdk.getProjects_$adminProjects({});
+
+      // ... filtering logic ...
+
+      return {
+        status: "success",
+        summary: `Found ${projects.length} projects`,
+        projects,
+        totalCount: filtered.length,
+      };
+    } catch (error) {
+      return {
+        status: "error",
+        reason: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  },
+});
+```
+
+<br />
+
+Key patterns:
+
+<br />
+
+1. **Tool factory pattern**: Tools are functions that accept context and return the definition. This enables per-request context injection.
+
+2. **Zod schemas with `.describe()`**: Parameter descriptions are visible to the LLM, helping it use tools correctly.
+
+3. **Consistent result structure**: Status, reason/summary, and typed data.
+
+<br />
+
+## The Export Pattern
+
+<br />
+
+Every domain package has an `index.ts` that exports tools consistently:
+
+<br />
+
+```typescript
+// packages/project-ai/src/tools/index.ts
+
+export {
+  recentProjectsTool,
+  TOOL_NAME as RECENT_PROJECTS_TOOL_NAME,
+  type RecentProjectsToolResult,
+} from "./recent-projects";
+
+export {
+  createProjectTool,
+  TOOL_NAME as CREATE_PROJECT_TOOL_NAME,
+  type CreateProjectToolResult,
+} from "./create-project";
+
+// Centralized tool names for type-safe configuration
+export const PROJECT_TOOL_NAMES = {
+  RECENT_PROJECTS: "recentProjects",
+  CREATE_PROJECT: "createProject",
+  GET_PROJECT_INFO: "getProjectInfo",
+  // ... more tools
+} as const;
+
+export type ProjectToolName =
+  (typeof PROJECT_TOOL_NAMES)[keyof typeof PROJECT_TOOL_NAMES];
+```
+
+<br />
+
+The `PROJECT_TOOL_NAMES` object enables type-safe tool configuration:
+
+<br />
+
+```typescript
+const allowedTools: ProjectToolName[] = [
+  PROJECT_TOOL_NAMES.RECENT_PROJECTS,
+  PROJECT_TOOL_NAMES.CREATE_PROJECT,
+];
+// TypeScript catches typos!
+```
+
+<br />
+
+## Code Generation: `turbo gen tool`
+
+<br />
+
+Creating tools manually is error-prone. We use generators:
+
+<br />
+
+```bash
+turbo gen tool \
+  -a "project-ai" \
+  -a "archive-project" \
+  -a "Archive a project and its associated data" \
+  -a "false" \
+  -a "false"
+```
+
+<br />
+
+Parameters:
+- **domain**: Which AI package
+- **name**: Tool name in kebab-case
+- **description**: LLM-visible description
+- **hasArtifact**: Create streaming artifact for UI updates
+- **isGenerator**: Use generator function for progress streaming
+
+<br />
+
+The generator creates the full structure:
+
+```
+packages/project-ai/src/tools/archive-project/
+├── archive-project-tool.ts
+├── archive-project-tool.test.ts
+└── index.ts
+```
+
+<br />
+
+## Generator Functions for Streaming
+
+<br />
+
+Long-running tools use generator functions to stream progress:
+
+<br />
+
+```typescript
+export const analyzeDataTool = (params: { sessionToken: string }) => ({
+  description: "Analyze large dataset with progress updates",
+  inputSchema,
+
+  execute: async function* ({ datasetId }) {
+    yield { text: "Starting analysis..." };
+
+    yield { text: "Loading dataset..." };
+    const data = await loadDataset(datasetId);
+
+    yield { text: `Processing ${data.length} records...` };
+    const results = await processData(data);
+
+    yield {
+      text: `Analysis complete: ${results.summary}`,
+      forceStop: true  // Signals completion
+    };
+  },
+});
+```
+
+<br />
+
+The UI receives each `yield` as a streaming update.
+
+<br />
+
+## Composing Tools into Agents
+
+<br />
+
+Individual tools become powerful when composed:
+
+<br />
+
+```typescript
+// packages/project-ai/src/agents/project-orchestrator.ts
+
+import {
+  recentProjectsTool,
+  createProjectTool,
+  getProjectInfoTool
+} from "../tools";
+
+export const createProjectAgent = (params: AgentParams) => {
+  const tools = {
+    recentProjects: recentProjectsTool(params),
+    createProject: createProjectTool(params),
+    getProjectInfo: getProjectInfoTool(params),
+  };
+
+  return {
+    systemPrompt: `You are a project management assistant.
+Use the available tools to help users manage their projects.
+
+When a user asks about their projects, first use recentProjects
+to show what's active. If they want details, use getProjectInfo.`,
+
+    tools,
+    model: "claude-sonnet-4-20250514",
+  };
+};
+```
+
+<br />
+
+## Testing AI Tools
+
+<br />
+
+Tools need two types of tests:
+
+<br />
+
+### Unit Tests: Logic and Structure
+
+<br />
+
+```typescript
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { recentProjectsTool, TOOL_NAME } from "./recent-projects-tool";
+
+// Define mock OUTSIDE vi.mock - bun quirk
+const mockGetProjects = vi.fn();
+
+vi.mock("@bts/core-api", () => ({
+  createProjectAPIClient: vi.fn().mockReturnValue({
+    sdk: { getProjects_$adminProjects: mockGetProjects },
+  }),
+}));
+
+describe("recentProjectsTool", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("exports correct tool name", () => {
+    expect(TOOL_NAME).toBe("recentProjects");
+  });
+
+  it("returns projects on success", async () => {
+    mockGetProjects.mockResolvedValue({
+      data: [{ id: 1, name: "Test Project", status: "in_field" }],
+    });
+
+    const tool = recentProjectsTool({ sessionToken: "test-token" });
+    const result = await tool.execute({ filter: "in_flight", limit: 10 });
+
+    expect(result.status).toBe("success");
+    expect(result.projects).toHaveLength(1);
+  });
+
+  it("handles missing session token", async () => {
+    const tool = recentProjectsTool({ sessionToken: "" });
+    const result = await tool.execute({ filter: "recent", limit: 5 });
+
+    expect(result.status).toBe("error");
+    expect(result.reason).toContain("Session token");
+  });
+});
+```
+
+<br />
+
+### Evals: Output Quality
+
+<br />
+
+For testing that AI uses tools correctly (covered in Part 8):
+
+<br />
+
+```typescript
+evalite("Project Agent Tool Selection", {
+  data: [
+    { input: "Show me my recent projects", expected: "recentProjects" },
+    { input: "Create a new survey project", expected: "createProject" },
+  ],
+  task: async (input) => {
+    const result = await runAgentWithInput(input);
+    return result.toolsUsed[0];
+  },
+  scorers: [exactMatch],
+});
+```
+
+<br />
+
+## The Development Workflow
+
+<br />
+
+When adding a new AI capability:
+
+<br />
+
+1. **Generate the scaffold**:
+   ```bash
+   turbo gen tool
+   ```
+
+2. **Implement the logic** in `{tool-name}-tool.ts`
+
+3. **Write unit tests** - mock API calls, test error cases
+
+4. **Export from index.ts** - add to TOOL_NAMES object
+
+5. **Add to relevant agent** if needed for chat
+
+6. **Run checks**:
+   ```bash
+   bun run check-types
+   bun run test --filter=@bts/{domain}-ai
+   ```
+
+7. **Write evals** for user-facing AI behavior
+
+<br />
+
+## Benefits of This Architecture
+
+<br />
+
+**Consistency**: Any developer can understand any tool. The pattern is identical.
+
+**Discoverability**: `PROJECT_TOOL_NAMES.` autocomplete shows all available tools.
+
+**Type safety**: Parameters, results, and names are strongly typed.
+
+**Testability**: Clear boundaries make mocking straightforward.
+
+**Scalability**: Adding tool #71 is as easy as tool #1.
+
+<br />
+
+## What We Learned
+
+<br />
+
+**1. Invest in shared utilities early**
+
+Creating `@bts/core-ai` with `ToolResult`, error handlers, and wrappers paid off immediately.
+
+<br />
+
+**2. Zod descriptions matter**
+
+The `.describe()` calls on schema fields directly influence how well the LLM uses your tools.
+
+<br />
+
+**3. Tool names should be verbs**
+
+`createProject` not `projectCreator`. `getRecentProjects` not `recentProjectsFetcher`. LLMs reason better about actions.
+
+<br />
+
+**4. Generator functions for anything over 2 seconds**
+
+Users abandon tools that appear frozen. Streaming progress keeps them engaged.
+
+<br />
+
+---
+
+<br />
+
+*This architecture transforms AI tool development from artisanal one-offs to systematic production. When you need to build dozens of tools, having generators, shared types, and consistent patterns isn't optional - it's essential.*
+
+<br />
+
+---
+
+<br />
+
+*This concludes our 13-part series on plan-based development with Claude Code. From planning documents to TypeScript strict mode, from Turborepo caching to AI tool testing with Evalite, we've covered the complete workflow that enables sustainable velocity in a large monorepo.*
+
+<br />
+
+*The principles compound: write before you code, verify continuously, trust your type system, leverage AI assistance. Each practice reinforces the others, creating a development workflow that's faster and more reliable than traditional approaches.*

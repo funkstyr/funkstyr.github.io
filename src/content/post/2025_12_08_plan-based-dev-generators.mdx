@@ -1,0 +1,522 @@
+---
+title:  "Plan-Based Dev with Claude Code: Part 11"
+description: "Turborepo generators for consistent scaffolding across 60+ packages"
+publishDate: "08 Dec 2025"
+tags: ["turborepo", "monorepo", "code-generation", "tooling", "plop"]
+---
+
+<hr />
+
+*This is Part 11 of our series on plan-based development with Claude Code. Today we explore code generators - the automation that keeps a large monorepo consistent.*
+
+<br />
+
+## The Consistency Problem
+
+<br />
+
+When you create your fifth package, you're copying from the fourth. When you create your twentieth, you're copying from... which one? The one that happened to be open? The newest? The one with the cleanest pattern?
+
+<br />
+
+Copy-paste creates drift. Small differences accumulate:
+- Package A has `test` script, Package B has `test:unit`
+- Some packages export from `./dist`, others from `./src`
+- Test setup files are named differently across packages
+
+<br />
+
+These inconsistencies compound. Tools that work for one package fail for another. Developers waste time debugging configuration instead of building features.
+
+<br />
+
+## Generators: Consistency by Construction
+
+<br />
+
+Code generators flip the script. Instead of copying and modifying, you describe what you want and let the generator create it correctly:
+
+<br />
+
+```bash
+turbo gen package
+# ? Package name: my-feature
+# ? Package type: Library
+# ? Description: Feature X implementation
+# ? Include tests: Yes
+# Created packages/my-feature with correct structure
+```
+
+<br />
+
+Every package created this way has:
+- Identical script names
+- Consistent export structure
+- Same test configuration
+- Matching TypeScript settings
+
+<br />
+
+## Turborepo + Plop.js
+
+<br />
+
+Turborepo includes built-in generator support powered by Plop.js. Configuration lives in `turbo/generators/config.cjs`:
+
+<br />
+
+```javascript
+module.exports = function generator(plop) {
+  // Register helpers for case conversion
+  plop.setHelper("pascalCase", (text) => toPascalCase(text));
+  plop.setHelper("camelCase", (text) => toCamelCase(text));
+
+  // Define generators
+  plop.setGenerator("package", {
+    description: "Create a new package",
+    prompts: [...],
+    actions: [...],
+  });
+};
+```
+
+<br />
+
+Templates live in `turbo/generators/templates/` using Handlebars syntax.
+
+<br />
+
+## Our Five Generator Types
+
+<br />
+
+### 1. Package Generator
+
+<br />
+
+Creates new shared packages in `packages/`:
+
+<br />
+
+```bash
+# Interactive
+turbo gen package
+
+# Non-interactive (for automation)
+turbo gen package -a "my-pkg" -a "library" -a "My description" -a "true"
+```
+
+<br />
+
+**Package types:**
+- `react` - UI components with JSX, jsdom test environment
+- `library` - Pure TypeScript, node test environment
+- `schema` - Zod schemas with validation patterns
+- `config` - Shared configuration, no build step
+
+<br />
+
+**What it creates:**
+
+```
+packages/my-pkg/
+├── package.json      # Correct scripts, dependencies, exports
+├── tsconfig.json     # Extends base config
+├── tsdown.config.ts  # Build configuration
+├── vitest.config.ts  # Test configuration (if enabled)
+└── src/
+    ├── index.ts      # Main export with example code
+    └── index.test.ts # Example test (if enabled)
+```
+
+<br />
+
+**Template example** (`templates/package/library/package.json.hbs`):
+
+<br />
+
+```handlebars
+{
+  "name": "@bts/{{name}}",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "{{description}}",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "tsdown",
+    "check-types": "tsc --noEmit"{{#if hasTests}},
+    "test": "vitest run"{{/if}}
+  }
+}
+```
+
+<br />
+
+The `{{#if hasTests}}` conditional ensures test scripts only appear when tests are enabled.
+
+<br />
+
+### 2. Component Generator
+
+<br />
+
+Creates React components in existing UI packages:
+
+<br />
+
+```bash
+turbo gen component -a "core-ui" -a "data-table" -a "true"
+```
+
+<br />
+
+**Parameters:**
+- `package` - Target UI package (core-ui, form-ui, chart-ui, etc.)
+- `name` - Component name in kebab-case
+- `hasTest` - Whether to create a test file
+
+<br />
+
+**What it creates:**
+
+```
+packages/core-ui/src/data-table/
+├── data-table.tsx
+├── data-table.test.tsx  # If hasTest
+└── index.ts
+```
+
+<br />
+
+And automatically updates `packages/core-ui/src/index.ts` to export the new component.
+
+<br />
+
+### 3. Router Generator
+
+<br />
+
+Creates domain routers for the API layer:
+
+<br />
+
+```bash
+turbo gen router -a "inventory" -a "Inventory management" -a "false" -a "true"
+```
+
+<br />
+
+**Parameters:**
+- `domain` - Domain name (becomes @bts/inventory-router)
+- `description` - Router description
+- `hasEffect` - Include Effect TS integration
+- `hasTests` - Include test setup
+
+<br />
+
+**What it creates:**
+
+```
+packages/inventory-router/
+├── package.json
+├── tsconfig.json
+├── src/
+│   ├── index.ts           # Router exports
+│   └── inventory.router.ts # Router implementation
+└── turbo.json             # Task configuration with tags
+```
+
+<br />
+
+### 4. Tool Generator
+
+<br />
+
+Creates AI tools for existing AI packages:
+
+<br />
+
+```bash
+turbo gen tool -a "project-ai" -a "archive-project" -a "Archive a project" -a "false" -a "true"
+```
+
+<br />
+
+**Parameters:**
+- `domain` - AI package (project-ai, results-ai, survey-ai, etc.)
+- `name` - Tool name in kebab-case
+- `description` - LLM-visible description
+- `hasArtifact` - Create streaming artifact for UI
+- `isGenerator` - Use generator function for streaming progress
+
+<br />
+
+**What it creates:**
+
+```
+packages/project-ai/src/tools/archive-project/
+├── archive-project-tool.ts       # Tool implementation
+├── archive-project-tool.test.ts  # Unit tests
+└── index.ts                      # Re-exports
+```
+
+<br />
+
+The template includes the full tool pattern:
+
+<br />
+
+```typescript
+// Generated tool structure
+export const TOOL_NAME = "{{camelCase name}}";
+
+export const {{camelCase name}}Tool = tool({
+  description: `{{description}}`,
+  parameters: z.object({
+    input: z.string().describe("The input to process"),
+  }),
+  {{#if isGenerator}}
+  execute: async function* ({ input }) {
+    yield { text: "Starting..." };
+    // Implementation
+    yield { text: result, forceStop: true };
+  },
+  {{else}}
+  execute: async ({ input }) => {
+    return { success: true, result };
+  },
+  {{/if}}
+});
+```
+
+<br />
+
+### 5. AI Package Generator
+
+<br />
+
+Creates entirely new AI domain packages:
+
+<br />
+
+```bash
+turbo gen ai-package -a "logistics" -a "Logistics AI tools" -a "true" -a "true" -a "false"
+```
+
+<br />
+
+**Parameters:**
+- `domain` - Domain name (becomes @bts/logistics-ai)
+- `description` - Package description
+- `hasTools` - Include tools directory
+- `hasArtifacts` - Include artifacts directory
+- `hasAgents` - Include agents directory
+
+<br />
+
+**What it creates:**
+
+```
+packages/logistics-ai/
+├── package.json
+├── tsconfig.json
+├── vitest.config.ts
+└── src/
+    ├── index.ts
+    ├── config.ts
+    ├── types/index.ts
+    ├── tools/          # If hasTools
+    │   ├── index.ts
+    │   └── example.ts
+    ├── artifacts/      # If hasArtifacts
+    │   ├── index.ts
+    │   └── example.ts
+    └── agents/         # If hasAgents
+        ├── index.ts
+        └── example.ts
+```
+
+<br />
+
+## Interactive vs Non-Interactive Mode
+
+<br />
+
+**Interactive mode** for manual use:
+```bash
+turbo gen package
+# Prompts guide you through options
+```
+
+<br />
+
+**Non-interactive mode** for automation/scripts:
+```bash
+turbo gen package -a "name" -a "type" -a "description" -a "hasTests"
+# Arguments passed in order, no prompts
+```
+
+<br />
+
+This is crucial for:
+- CI pipelines that scaffold before testing
+- Scripts that create multiple packages
+- Claude Code workflows that generate code
+
+<br />
+
+## Helper Functions for Templates
+
+<br />
+
+Handlebars helpers transform names:
+
+<br />
+
+```javascript
+plop.setHelper("pascalCase", (text) => toPascalCase(text));
+plop.setHelper("camelCase", (text) => toCamelCase(text));
+plop.setHelper("constantCase", (text) => toConstantCase(text));
+```
+
+<br />
+
+Usage in templates:
+
+```handlebars
+// From "my-feature" input:
+{{name}}           → my-feature
+{{pascalCase name}} → MyFeature
+{{camelCase name}}  → myFeature
+{{constantCase name}} → MY_FEATURE
+```
+
+<br />
+
+This ensures naming conventions are enforced across generated files.
+
+<br />
+
+## Keeping Generators in Sync
+
+<br />
+
+Generators rot if you don't maintain them. When patterns evolve:
+
+<br />
+
+1. **Update templates first**: Change the generator template
+2. **Generate a new package**: Use the generator to create a test package
+3. **Verify it works**: Build, test, type-check
+4. **Consider migration**: Should existing packages be updated?
+
+<br />
+
+We update generators when:
+- Adding new dependencies that should be standard
+- Changing build tool configuration
+- Updating test patterns
+- Adding new export patterns
+
+<br />
+
+## The Workflow with Claude
+
+<br />
+
+Claude Code knows about generators from CLAUDE.md:
+
+<br />
+
+```markdown
+## Commands
+
+# Generators (always use for new packages)
+turbo gen package        # New package
+turbo gen tool           # New AI tool
+turbo gen component      # New UI component
+```
+
+<br />
+
+When you ask Claude to create a new package, it uses the generator:
+
+<br />
+
+```
+> Create a new @bts/notifications package for handling push notifications
+
+Claude runs: turbo gen package -a "notifications" -a "library" -a "Push notification handling" -a "true"
+```
+
+<br />
+
+This ensures Claude-created packages match hand-created ones exactly.
+
+<br />
+
+## Benefits Over Manual Creation
+
+<br />
+
+**Consistency**: Every package follows the same structure
+
+**Speed**: New package in seconds, not minutes of copying/editing
+
+**Correctness**: No forgotten configurations or typos
+
+**Discoverability**: `turbo gen --help` shows available generators
+
+**Maintainability**: Update one template, affect all future packages
+
+<br />
+
+## Getting Started with Generators
+
+<br />
+
+1. **Create the config file**:
+   ```
+   turbo/generators/config.cjs
+   ```
+
+2. **Add your first generator**:
+   ```javascript
+   plop.setGenerator("package", {
+     description: "Create a new package",
+     prompts: [{ type: "input", name: "name", message: "Name:" }],
+     actions: [{ type: "add", path: "packages/{{name}}/package.json", templateFile: "templates/package.json.hbs" }],
+   });
+   ```
+
+3. **Create the template**:
+   ```
+   turbo/generators/templates/package.json.hbs
+   ```
+
+4. **Test it**:
+   ```bash
+   turbo gen package
+   ```
+
+<br />
+
+Start simple - one generator, one template. Add complexity as patterns emerge.
+
+<br />
+
+---
+
+<br />
+
+*Code generators transform package creation from error-prone copying to reliable automation. In a monorepo with 60+ packages, this consistency isn't optional - it's essential.*
+
+<br />
+
+*Next up in Part 12: Effect TS patterns - structured errors and dependency injection for maintainable services.*

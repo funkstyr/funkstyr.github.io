@@ -1,6 +1,9 @@
 {
   "name": "Michael Funk - Software Engineer",
   "short_name": "Funk",
+  "description": "Personal website and blog of Michael Funk, a Senior Software Engineer specializing in full-stack development.",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -15,5 +18,6 @@
   ],
   "theme_color": "#0f172a",
   "background_color": "#f1f5f9",
-  "display": "standalone"
+  "display": "standalone",
+  "categories": ["personal", "portfolio", "blog", "technology"]
 }

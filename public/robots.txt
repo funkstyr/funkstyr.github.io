@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /resume/print/
 
 Sitemap: https://funkstyr.me/sitemap-index.xml

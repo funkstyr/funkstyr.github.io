@@ -15,6 +15,8 @@ export const GET = async () => {
       description: post.data.description,
       pubDate: post.data.publishDate,
       link: `/blog/${post.slug}`,
+      categories: post.data.tags,
+      author: "funk-michael@outlook.com (Michael Funk)",
     })),
   });
 };

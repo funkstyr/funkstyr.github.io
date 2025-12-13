@@ -22,7 +22,13 @@ export default defineConfig({
     expressiveCode(expressiveCodeOptions),
     icon(),
     mdx(),
-    sitemap(),
+    sitemap({
+      filter: (page) => !page.includes("/resume/print/"),
+      serialize: (item) => ({
+        ...item,
+        lastmod: new Date().toISOString(),
+      }),
+    }),
   ],
 
   vite: {

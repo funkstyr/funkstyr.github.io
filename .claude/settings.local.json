@@ -3,7 +3,8 @@
     "allow": [
       "Bash(bun run type-check:*)",
       "Bash(bun run build)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(find:*)"
     ]
   }
 }

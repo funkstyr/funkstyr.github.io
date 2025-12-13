@@ -13,6 +13,8 @@ const post = defineCollection({
     z.object({
       title: z.string().max(60),
       description: z.string().min(10).max(160),
+      // Optional subtitle for series posts (e.g., "Claude Code Series · Part 1")
+      subtitle: z.string().max(60).optional(),
       publishDate: z
         .string()
         .or(z.date())

@@ -32,8 +32,9 @@ bun run clean            # Clean node_modules
 - **Content Collections**: Blog posts are managed via Astro's content collections in `src/content/post/`
 - Posts support both `.md` and `.mdx` formats with frontmatter validation defined in `src/content/config.ts`
 - Draft posts are filtered out in production via `getAllPosts()` in `src/utils/post.ts`
-- Required frontmatter: `title`, `description`, `publishDate`
-- Optional frontmatter: `updatedDate`, `coverImage`, `tags`, `ogImage`, `draft`
+- Required frontmatter: `title` (max 60 chars), `description` (10-160 chars), `publishDate`
+- Optional frontmatter: `updatedDate`, `coverImage`, `tags`, `ogImage`, `draft`, `order`
+- `order` field (number, default 0): Controls display order for posts on the same day - higher values appear first
 
 ### Key Configuration Files
 
@@ -147,6 +148,11 @@ const { class: className, title, ...rest } = Astro.props;
 
 **Named Slots:** Components support optional icon slots (`icon`, `icon-before`, `icon-after`) for flexible composition.
 
+**Recursive Components:** Use `<Astro.self>` for recursive rendering (see `TOCHeading.astro` for hierarchical headings):
+```astro
+{subheadings.map((subheading) => <Astro.self heading={subheading} />)}
+```
+
 ### Image Handling
 
 **Dynamic Image Imports:** Card and ProjectCard components use `import.meta.glob` for runtime image validation:
@@ -178,6 +184,7 @@ import { Icon } from "astro-icon/components";
 - Reads from `localStorage` key `theme` and system `prefers-color-scheme`
 - Sets `dark` class on document root
 - Custom event `theme-change` for cross-component communication
+- Handles View Transitions with `astro:after-swap` hook
 
 **CSS Variables:** Defined in `global.css` using HSL format:
 - Light mode in `:root`, dark mode overrides in `.dark`
@@ -193,7 +200,13 @@ import { Icon } from "astro-icon/components";
 - Conditional article metadata when `articleDate` prop exists
 - Title format: `Page Title • Site Title`
 
-**JSON-LD:** `JsonLd.astro` provides Person schema with skills, job title, social profiles.
+**JSON-LD Schemas:**
+- `JsonLd.astro` - Person schema with skills, job title, social profiles
+- `BlogPostSchema.astro` - BlogPosting schema with keywords from tags
+- `ResumeSchema.astro` - Person schema with experience as OrganizationRole, education as alumniOf
+- `BreadcrumbSchema.astro` - Generic breadcrumb builder (takes array of `{name, url}`)
+
+All schemas use `set:html` with `JSON.stringify()`. Multiple schema scripts can exist on the same page.
 
 **Pagefind Search:** Blog content uses `data-pagefind-body` and `data-pagefind-filter='tag'` attributes.
 
@@ -214,7 +227,18 @@ export function cn(...inputs: ClassValue[]) {
 - `toggleClass()`, `elementHasClass()`
 - `rootInDarkMode()` - checks `data-theme` attribute (not class)
 
-**`src/utils/generateToc.ts`** - Generates hierarchical table of contents from markdown headings.
+**`src/utils/generateToc.ts`** - Generates hierarchical table of contents from markdown headings. Uses `<Astro.self>` for recursive rendering in `TOCHeading.astro`.
+
+**`src/utils/post.ts`** - Post collection management:
+- `getAllPosts()` - Fetches posts, filters drafts in production
+- `sortMDByDate()` - Sorts by date (uses `updatedDate` if available), then by `order` field for same-day posts
+- `getUniqueTags()` / `getUniqueTagsWithCount()` - Tag extraction utilities
+- `getPostNavigation()` - Gets prev/next posts for navigation
+
+**`src/utils/analytics.ts`** - PostHog tracking utilities:
+- All functions check `typeof window !== "undefined"` before calling PostHog
+- Event properties use snake_case convention
+- Organized by feature: `trackBlogScrollDepth()`, `trackBlogPostCompleted()`, `trackExternalLinkClick()`, etc.
 
 ### Accessibility Patterns
 
@@ -232,8 +256,99 @@ export function cn(...inputs: ClassValue[]) {
 ### Analytics
 
 **PostHog:** Configured in `PostHog.astro` with `VITE_POSTHOG_KEY` environment variable.
+- Respects Do Not Track (DNT) browser setting
+- Uses `person_profiles: "identified_only"` for cost efficiency
+- Session recording enabled with privacy controls (`maskAllInputs`, `maskTextSelector`)
+
+**Blog Analytics (in `BlogPost.astro`):**
+- Scroll depth tracking at 25%, 50%, 75%, 100% milestones with time-to-reach
+- Post completion tracking when comments section enters viewport
+- External link click tracking with platform detection
+- TOC link click tracking
+- Print intent tracking
 
 **Giscus Comments:** GitHub Discussions-based comments in `Comments.astro`, repo: `funkstyr/funkstyr.github.io`.
+
+## Claude Commands & Skills
+
+This project includes custom Claude Code slash commands and skills in `.claude/`.
+
+### Available Commands
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| `/find <query>` | Search for code, patterns, or implementations | `/find polymorphic component` |
+| `/research <topic>` | Research and plan a feature or solution | `/research add search functionality` |
+| `/review <target>` | Review code with PR-quality feedback | `/review staged` or `/review src/components/Card.astro` |
+| `/test <target>` | Run verification checks (lint, type-check, build) | `/test src/utils/date.ts` |
+| `/understand <code>` | Deep explanation of code or patterns | `/understand content collections` |
+| `/write <description>` | Generate code following repo patterns | `/write new blog post component` |
+
+### Available Skills
+
+Skills activate automatically based on conversation context:
+
+| Skill | Activates When |
+|-------|----------------|
+| `content` | Working with blog posts, MDX, frontmatter, tags |
+| `find` | Searching for code ("where is...", "find the...") |
+| `research` | Planning features, discussing architecture |
+| `review` | Reviewing code, checking quality |
+| `test` | Testing, verification, build issues |
+| `type-safety` | Type errors, TypeScript patterns |
+| `understand` | Explaining code ("what does this do", "how does X work") |
+| `write` | Creating new code, components, pages |
+
+### Adding New Blog Posts
+
+Use the `/write` command or follow this pattern:
+
+1. Create file in `src/content/post/` with naming: `YYYY_MM_DD_post-slug.mdx`
+2. Include required frontmatter:
+```yaml
+---
+title: "Post Title"
+description: "Brief description for SEO"
+publishDate: "2025-01-15"
+tags: ["tag1", "tag2"]
+---
+```
+3. Run `bun run build` to verify content schema validation
+
+### Pagination Patterns
+
+**Blog Archive** (`src/pages/blog/[...page].astro`):
+```typescript
+export const getStaticPaths = (async ({ paginate }) => {
+  const allPosts = await getAllPosts();
+  const allPostsByDate = sortMDByDate(allPosts);
+  return paginate(allPostsByDate, { pageSize: 10, props: { uniqueTags } });
+}) satisfies GetStaticPaths;
+```
+
+**Tag Pagination** (`src/pages/tags/[tag]/[...page].astro`):
+- Creates paginated routes for each unique tag
+- Uses `flatMap` to generate all tag + page combinations
+
+**PaginationLink Type:**
+```typescript
+type PaginationLink = {
+  url: string;
+  text?: string;    // Display text
+  srLabel?: string; // Screen reader label
+};
+```
+
+## Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Components | PascalCase | `PostPreview.astro` |
+| Utilities | camelCase | `getFormattedDate()` |
+| CSS classes | kebab-case | `sr-only`, `data-theme` |
+| Analytics events | snake_case | `blog_scroll_depth` |
+| Data attributes | kebab-case | `data-astro-prefetch` |
+| Blog post files | `YYYY_MM_DD_slug.mdx` | `2025_01_15_my-post.mdx` |
 
 ## Important Notes
 
@@ -242,3 +357,5 @@ export function cn(...inputs: ClassValue[]) {
 - The `getAllPosts()` function must be used to properly filter drafts in production
 - Use `data-astro-prefetch` attribute on navigation links for prefetching
 - Print/PDF pages must use `<style is:global>` to style html/body elements
+- Use `cn()` for all dynamic class composition to handle Tailwind conflicts
+- Always check `typeof window !== "undefined"` before using browser APIs in scripts

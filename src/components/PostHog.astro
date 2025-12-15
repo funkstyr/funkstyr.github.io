@@ -1,19 +1,27 @@
 ---
 // PostHog Analytics Configuration
 // Docs: https://posthog.com/docs/libraries/js
+
+// Pass env var from server to client via define:vars
+// This ensures the value is properly injected at build time
+const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 ---
 
-<script>
+<script is:inline define:vars={{ posthogKey }}>
   // Check for Do Not Track preference
-  const doNotTrack =
-    navigator.doNotTrack === "1" ||
-    (window as unknown as { doNotTrack?: string }).doNotTrack === "1";
-  const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
+  // var doNotTrack = navigator.doNotTrack === "1" || window.doNotTrack === "1";
 
-  // Only initialize PostHog if DNT is not set and we have an API key
-  if (!doNotTrack && posthogKey) {
+  // Debug logging (remove after confirming it works)
+  // console.log("[PostHog Debug]", {
+  //   keyPresent: !!posthogKey,
+  //   keyLength: posthogKey.length,
+  //   doNotTrack: doNotTrack,
+  //   willInit: !!posthogKey,
+  // });
+
+  // Only initialize PostHog if we have an API key
+  if (posthogKey) {
     // PostHog loader snippet
-    // @ts-nocheck
     !(function (t, e) {
       var o, n, p, r;
       e.__SV ||
@@ -22,22 +30,21 @@
         (e.init = function (i, s, a) {
           function g(t, e) {
             var o = e.split(".");
-            2 == o.length && ((t = t[o[0]]), (e = o[1])),
+            (2 == o.length && ((t = t[o[0]]), (e = o[1])),
               (t[e] = function () {
                 t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
-              });
+              }));
           }
-          ((p = t.createElement("script")).type = "text/javascript"),
+          (((p = t.createElement("script")).type = "text/javascript"),
             (p.crossOrigin = "anonymous"),
             (p.async = !0),
             (p.src =
               s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") +
               "/static/array.js"),
-            // @ts-expect-error
             (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(
               p,
               r
-            );
+            ));
           var u = e;
           for (
             void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
@@ -45,7 +52,9 @@
               u.toString = function (t) {
                 var e = "posthog";
                 return (
-                  "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e
+                  "posthog" !== a && (e += "." + a),
+                  t || (e += " (stub)"),
+                  e
                 );
               },
               u.people.toString = function () {
@@ -103,11 +112,12 @@
       capture_exceptions: true,
 
       // Performance callback - capture initial page context
-      loaded: (posthog) => {
+      loaded: function (posthog) {
         // Track blog post views with metadata
         if (window.location.pathname.startsWith("/blog/")) {
-          const slug = window.location.pathname.split("/blog/")[1]?.replace(/\/$/, "");
+          var slug = window.location.pathname.split("/blog/")[1];
           if (slug) {
+            slug = slug.replace(/\/$/, "");
             posthog.capture("blog_post_viewed", {
               title: document.title.split(" • ")[0],
               slug: slug,

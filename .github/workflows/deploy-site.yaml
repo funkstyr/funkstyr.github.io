@@ -1,4 +1,4 @@
-name: Resume
+name: Site
 
 on:
   # Trigger the workflow every time you push to the `main` branch

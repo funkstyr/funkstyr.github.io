@@ -4,6 +4,7 @@ import Section from "../components/Section.astro";
 import ProfileHeader from "../components/ProfileHeader.astro";
 import FeaturedSeries from "../components/FeaturedSeries.astro";
 import { getAllPosts, sortMDByDate } from "../utils/post";
+import { resumeData } from "../data/resume";
 
 const allPosts = await getAllPosts();
 const sortedPosts = sortMDByDate(allPosts);
@@ -11,6 +12,8 @@ const sortedPosts = sortMDByDate(allPosts);
 const claudeCodeSeries = sortedPosts
   .filter((post) => post.data.subtitle?.includes("Claude Code Series"))
   .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+
+const { aboutMe, whatIDo } = resumeData;
 ---
 
 <PageLayout meta={{ title: "About Me" }}>
@@ -19,46 +22,20 @@ const claudeCodeSeries = sortedPosts
 
     <Section title='About Me'>
       <div class='space-y-4'>
-        <p class='text-muted-foreground'>
-          Hi! I'm Michael, a fullstack developer with a passion for building
-          scalable, user-focused applications. I specialize in React and the
-          modern JavaScript ecosystem, with experience across the full stack.
-        </p>
-        <p class='text-muted-foreground'>
-          Currently, I work as a Software Engineer at Highlight, where I build
-          AI-powered features, architect monorepo solutions, and help teams ship
-          code with confidence. I love working in fast-paced environments where
-          quality and velocity go hand-in-hand.
-        </p>
+        {aboutMe.map((paragraph) => (
+          <p class='text-muted-foreground'>{paragraph}</p>
+        ))}
       </div>
     </Section>
 
     <Section title='What I Do'>
       <div class='space-y-4'>
-        <div>
-          <h3 class='font-bold mb-2'>Frontend Development</h3>
-          <p class='text-muted-foreground'>
-            Building responsive, accessible user interfaces with React, Next.js,
-            and TypeScript. I focus on creating delightful user experiences
-            backed by solid testing practices.
-          </p>
-        </div>
-        <div>
-          <h3 class='font-bold mb-2'>Backend & Infrastructure</h3>
-          <p class='text-muted-foreground'>
-            Designing APIs and services with .NET Core, Node.js, and modern
-            cloud platforms. I enjoy working with Docker, Kubernetes, and AWS to
-            build scalable systems.
-          </p>
-        </div>
-        <div>
-          <h3 class='font-bold mb-2'>Developer Experience</h3>
-          <p class='text-muted-foreground'>
-            Improving workflows through monorepo architecture, CI/CD pipelines,
-            and tooling. I believe great developer experience leads to better
-            products.
-          </p>
-        </div>
+        {whatIDo.map((item) => (
+          <div>
+            <h3 class='font-bold mb-2'>{item.title}</h3>
+            <p class='text-muted-foreground'>{item.description}</p>
+          </div>
+        ))}
       </div>
     </Section>
 

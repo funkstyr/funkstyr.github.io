@@ -4,6 +4,7 @@
 import "../styles/global.css";
 
 import { siteConfig } from "../site.config";
+import { resumeData } from "../data/resume";
 import type { SiteMeta } from "../types";
 import JsonLd from "./JsonLd.astro";
 
@@ -12,10 +13,11 @@ type Props = SiteMeta;
 const { articleDate, articleTags, description, ogImage, ogImageAlt, title } =
 	Astro.props;
 
+const { contact } = resumeData;
 const titleSeparator = "•";
 const isHomepage = Astro.url.pathname === "/" || Astro.url.pathname === "";
 const siteTitle = isHomepage
-	? `Michael Funk - Senior Software Engineer ${titleSeparator} ${siteConfig.title}`
+	? `${contact.name} - Senior Software Engineer ${titleSeparator} ${siteConfig.title}`
 	: `${title} ${titleSeparator} ${siteConfig.title}`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL(
@@ -68,6 +70,10 @@ const socialImageURL = new URL(
 
 {/* Canonical URL */}
 <link rel='canonical' href={canonicalURL} />
+
+{/* Hreflang */}
+<link rel='alternate' hreflang={siteConfig.lang} href={canonicalURL} />
+<link rel='alternate' hreflang='x-default' href={canonicalURL} />
 
 {/* Primary Meta Tags */}
 <meta content={siteTitle} name='title' />

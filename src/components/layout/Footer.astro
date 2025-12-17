@@ -1,6 +1,13 @@
 ---
 import { Icon } from "astro-icon/components";
+import { resumeData, getSocialLink } from "../../data/resume";
+
 const today = new Date();
+const { contact } = resumeData;
+const linkedIn = getSocialLink("LinkedIn");
+const github = getSocialLink("GitHub");
+const twitter = getSocialLink("Twitter");
+const instagram = getSocialLink("Instagram");
 ---
 
 <footer class='mx-auto mt-24 w-full' id='footer'>
@@ -9,40 +16,46 @@ const today = new Date();
       class='flex flex-col items-center gap-y-3 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-y-0'
     >
       <div class='flex gap-x-4 text-sm'>
-        <!-- <a
-          class='inline-flex gap-x-2 text-gray-600 hover:text-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600'
-          href='/terms'>Terms</a
-        >
-
-        <a
-          class='inline-flex gap-x-2 text-gray-600 hover:text-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600'
-          href='/privacy'>Privacy</a
-        > -->
         <p class=''>
-          &copy; {today.getFullYear()} Michael Funk. All rights reserved. Opinions
-          are my own.
+          &copy; {today.getFullYear()}
+          {contact.name}. All rights reserved. Opinions are my own.
         </p>
       </div>
 
       <div class='flex items-center justify-between'>
         <!-- Social Brands -->
         <div class='flex items-center gap-x-4'>
-          <a href='https://www.linkedin.com/in/michaelafunk' target='_blank' data-track-social='linkedin'>
+          <a href={linkedIn?.url} target='_blank' data-track-social='linkedin'>
             <span class='sr-only'
-              >Go to my linkedin profile (opens in new tab)</span
+              >Go to my LinkedIn profile (opens in new tab)</span
             >
             <Icon size='24' name='tabler:brand-linkedin' aria-hidden='true' />
           </a>
 
-          <a href='https://github.com/funkstyr' target='_blank' data-track-social='github'>
-            <span class='sr-only'>Go to my GitHub repo (opens in new tab)</span>
+          <a href={github?.url} target='_blank' data-track-social='github'>
+            <span class='sr-only'
+              >Go to my GitHub profile (opens in new tab)</span
+            >
             <Icon size='24' name='tabler:brand-github' aria-hidden='true' />
           </a>
 
-          <!-- <a href='https://bsky.app/profile/funkstyr.me' target='_blank'>
-            <span class='sr-only'>Follow on Bluesky (opens in new tab)</span>
-            <Icon size='24' name='tabler:brand-bluesky' aria-hidden='true' />
-          </a> -->
+          <a href={twitter?.url} target='_blank' data-track-social='twitter'>
+            <span class='sr-only'
+              >Go to my Twitter/X profile (opens in new tab)</span
+            >
+            <Icon size='24' name='tabler:brand-x' aria-hidden='true' />
+          </a>
+
+          <a
+            href={instagram?.url}
+            target='_blank'
+            data-track-social='instagram'
+          >
+            <span class='sr-only'
+              >Go to my Instagram profile (opens in new tab)</span
+            >
+            <Icon size='24' name='tabler:brand-instagram' aria-hidden='true' />
+          </a>
 
           <!-- <a href='https://strike.me/funkstyr/' target='_blank'>
             <span class='sr-only'>Donate or sponsor</span>
@@ -60,7 +73,11 @@ const today = new Date();
 
   document.querySelectorAll("[data-track-social]").forEach((link) => {
     link.addEventListener("click", () => {
-      const platform = (link as HTMLElement).dataset.trackSocial as "linkedin" | "github";
+      const platform = (link as HTMLElement).dataset.trackSocial as
+        | "linkedin"
+        | "github"
+        | "twitter"
+        | "instagram";
       if (platform) {
         trackFooterSocialClick(platform);
       }

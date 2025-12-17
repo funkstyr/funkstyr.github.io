@@ -10,6 +10,17 @@ export type ContactInfo = {
   currentCompanyUrl: string;
 };
 
+export type SocialLink = {
+  platform: string;
+  url: string;
+  username: string;
+};
+
+export type WhatIDo = {
+  title: string;
+  description: string;
+};
+
 export type SkillCategory = {
   title: string;
   skills: string[];
@@ -53,6 +64,9 @@ export type ResumeSummary = {
 export type ResumeData = {
   contact: ContactInfo;
   summary: ResumeSummary;
+  aboutMe: string[];
+  whatIDo: WhatIDo[];
+  socialLinks: SocialLink[];
   experience: Experience[];
   education: Education[];
   projects: Project[];
@@ -80,6 +94,52 @@ export const resumeData: ResumeData = {
     ],
     detailed: `Senior Software Engineer with 8+ years of experience building scalable web applications and leading technical initiatives. Expert in React, TypeScript, and modern JavaScript ecosystems with strong full-stack capabilities in .NET Core and cloud infrastructure. Proven track record of architecting monorepo strategies, establishing testing frameworks, and delivering high-impact features from concept to production.`,
   },
+
+  aboutMe: [
+    "Hi! I'm Michael, a fullstack developer with a passion for building scalable, user-focused applications. I specialize in React and the modern JavaScript ecosystem, with experience across the full stack.",
+    "Currently, I work as a Software Engineer at Highlight, where I build AI-powered features, architect monorepo solutions, and help teams ship code with confidence. I love working in fast-paced environments where quality and velocity go hand-in-hand.",
+  ],
+
+  whatIDo: [
+    {
+      title: "Frontend Development",
+      description:
+        "Building responsive, accessible user interfaces with React, Next.js, and TypeScript. I focus on creating delightful user experiences backed by solid testing practices.",
+    },
+    {
+      title: "Backend & Infrastructure",
+      description:
+        "Designing APIs and services with .NET Core, Node.js, and modern cloud platforms. I enjoy working with Docker, Kubernetes, and AWS to build scalable systems.",
+    },
+    {
+      title: "Developer Experience",
+      description:
+        "Improving workflows through monorepo architecture, CI/CD pipelines, and tooling. I believe great developer experience leads to better products.",
+    },
+  ],
+
+  socialLinks: [
+    {
+      platform: "LinkedIn",
+      url: "https://www.linkedin.com/in/michaelafunk/",
+      username: "michaelafunk",
+    },
+    {
+      platform: "GitHub",
+      url: "https://github.com/funkstyr/",
+      username: "funkstyr",
+    },
+    {
+      platform: "Twitter",
+      url: "https://x.com/funkstyr/",
+      username: "funkstyr",
+    },
+    {
+      platform: "Instagram",
+      url: "https://www.instagram.com/_funkstyr/",
+      username: "_funkstyr",
+    },
+  ],
 
   experience: [
     {
@@ -233,4 +293,21 @@ export function getSkillsByCategory(title: string): string[] {
 // Helper to get experience for print (excludes items marked excludeFromPrint)
 export function getPrintExperience(): Experience[] {
   return resumeData.experience.filter((exp) => !exp.excludeFromPrint);
+}
+
+// Helper to get social link by platform
+export function getSocialLink(platform: string): SocialLink | undefined {
+  return resumeData.socialLinks.find(
+    (link) => link.platform.toLowerCase() === platform.toLowerCase(),
+  );
+}
+
+// Helper to get all social URLs for schema.org sameAs
+export function getSocialUrls(): string[] {
+  return resumeData.socialLinks.map((link) => link.url);
+}
+
+// Helper to get all skills as flat array for schema.org knowsAbout
+export function getAllSkills(): string[] {
+  return resumeData.skills.flatMap((cat) => cat.skills);
 }

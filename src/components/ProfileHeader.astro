@@ -1,20 +1,24 @@
 ---
 import Label from "./Label.astro";
 import Avatar from "./Avatar.astro";
+import { resumeData, getSocialLink } from "../data/resume";
+
+const { contact } = resumeData;
+const linkedIn = getSocialLink("LinkedIn");
 ---
 
 <section class='flex flex-col items-center gap-y-7'>
   <Avatar />
 
   <div class='flex flex-col items-center gap-y-4'>
-    <h1 class='text-3xl font-bold'>Michael Funk</h1>
+    <h1 class='text-3xl font-bold'>{contact.name}</h1>
 
     <div class='flex flex-wrap justify-center gap-x-7 gap-y-3'>
       <Label
-        title='Highlight'
+        title={contact.currentCompany}
         as='a'
-        aria-label='Highlight website'
-        href='https://www.letshighlight.com/'
+        aria-label={`${contact.currentCompany} website`}
+        href={contact.currentCompanyUrl}
         target='_blank'
       >
         <span class='sr-only'>(opens in new tab)</span>
@@ -48,7 +52,7 @@ import Avatar from "./Avatar.astro";
         title='Linkedin'
         as='a'
         aria-label='Linkedin profile'
-        href='https://www.linkedin.com/in/michaelafunk/'
+        href={linkedIn?.url}
         target='_blank'
       >
         <span class='sr-only'>(opens in new tab)</span>

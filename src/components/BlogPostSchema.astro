@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 
 import { siteConfig } from "../site.config";
+import { resumeData } from "../data/resume";
 
 interface Props {
 	post: CollectionEntry<"post">;
@@ -12,6 +13,9 @@ const { post, url } = Astro.props;
 const { title, description, publishDate, updatedDate, coverImage, tags } =
 	post.data;
 
+const { contact } = resumeData;
+const siteUrl = "https://funkstyr.me";
+
 const schema = {
 	"@context": "https://schema.org",
 	"@type": "BlogPosting",
@@ -19,13 +23,13 @@ const schema = {
 	description: description,
 	author: {
 		"@type": "Person",
-		name: "Michael Funk",
-		url: "https://funkstyr.me/",
+		name: contact.name,
+		url: `${siteUrl}/`,
 	},
 	publisher: {
 		"@type": "Person",
-		name: "Michael Funk",
-		url: "https://funkstyr.me/",
+		name: contact.name,
+		url: `${siteUrl}/`,
 	},
 	datePublished: publishDate.toISOString(),
 	...(updatedDate && { dateModified: updatedDate.toISOString() }),

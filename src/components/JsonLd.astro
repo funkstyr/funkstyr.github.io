@@ -1,69 +1,53 @@
 ---
 import { siteConfig } from "../site.config";
+import { resumeData, getSocialUrls, getAllSkills } from "../data/resume";
+
+const { contact, education } = resumeData;
+const siteUrl = "https://funkstyr.me";
 
 const websiteSchema = {
 	"@context": "https://schema.org",
 	"@type": "WebSite",
-	"@id": "https://funkstyr.me/#website",
-	name: "Michael Funk's personal website",
-	url: "https://funkstyr.me/",
+	"@id": `${siteUrl}/#website`,
+	name: `${contact.name}'s personal website`,
+	url: `${siteUrl}/`,
 	description: siteConfig.description,
 	inLanguage: siteConfig.lang,
 	publisher: {
-		"@id": "https://funkstyr.me/#person",
+		"@id": `${siteUrl}/#person`,
 	},
 	keywords: [
 		"Web",
 		"Technology",
 		"Software Development",
 		"Software Engineering",
-		"React",
-		"Next",
-		"Typescript",
+		...getAllSkills().slice(0, 5),
 	],
 };
 
 const personSchema = {
 	"@context": "https://schema.org",
 	"@type": "Person",
-	"@id": "https://funkstyr.me/#person",
-	name: "Michael Funk",
+	"@id": `${siteUrl}/#person`,
+	name: contact.name,
 	alternateName: "funkstyr",
-	url: "https://funkstyr.me/",
-	image: "https://funkstyr.me/social_card.jpg",
+	url: `${siteUrl}/`,
+	image: `${siteUrl}/social_card.jpg`,
 	jobTitle: "Senior Software Engineer",
 	worksFor: {
 		"@type": "Organization",
-		name: "Highlight",
-		url: "https://highlight.io/",
+		name: contact.currentCompany,
+		url: contact.currentCompanyUrl,
 	},
 	alumniOf: {
 		"@type": "CollegeOrUniversity",
-		name: "California State University, Stanislaus",
+		name: education[0]?.institution,
 	},
-	sameAs: [
-		"https://github.com/funkstyr/",
-		"https://www.linkedin.com/in/michaelafunk/",
-		"https://bsky.app/profile/funkstyr.me/",
-		"https://x.com/funkstyr/",
-	],
+	sameAs: getSocialUrls(),
 	knowsAbout: [
 		"Software Development",
 		"Software Engineering",
-		"TypeScript",
-		"JavaScript",
-		"React",
-		"Next.js",
-		"Redux",
-		"Node.js",
-		"Turborepo",
-		"Monorepo Architecture",
-		"AWS",
-		"Docker",
-		"Kubernetes",
-		"PostgreSQL",
-		"GraphQL",
-		"REST APIs",
+		...getAllSkills(),
 	],
 };
 ---

@@ -67,13 +67,6 @@ export function trackResumeSectionView(
   });
 }
 
-/**
- * Track clicks on resume section links/buttons
- */
-export function trackResumeSectionClick(section: string): void {
-  trackEvent("resume_section_clicked", { section });
-}
-
 // ============================================
 // Blog Post Events
 // ============================================
@@ -125,13 +118,6 @@ export function trackBlogPostCompleted(
   });
 }
 
-/**
- * Track when a blog post is printed
- */
-export function trackBlogPostPrint(slug: string): void {
-  trackEvent("blog_post_printed", { post_slug: slug });
-}
-
 // ============================================
 // External Link Events
 // ============================================
@@ -144,20 +130,6 @@ export type ExternalPlatform =
   | "other";
 
 /**
- * Track clicks on external links (social profiles, etc.)
- */
-export function trackExternalLinkClick(
-  platform: ExternalPlatform,
-  url: string,
-): void {
-  trackEvent("external_link_clicked", {
-    platform,
-    url,
-    page: typeof window !== "undefined" ? window.location.pathname : "",
-  });
-}
-
-/**
  * Track clicks specifically to professional profiles from resume
  */
 export function trackExternalProfileClick(
@@ -168,19 +140,6 @@ export function trackExternalProfileClick(
     platform,
     url,
   });
-}
-
-// ============================================
-// Contact Events
-// ============================================
-
-/**
- * Track contact attempts via different methods
- */
-export function trackContactAttempt(
-  method: "email" | "linkedin" | "github",
-): void {
-  trackEvent("contact_attempted", { method });
 }
 
 // ============================================
@@ -251,23 +210,6 @@ export function trackToolClick(toolName: string, category: string): void {
   trackEvent("tool_clicked", {
     tool_name: toolName,
     category,
-  });
-}
-
-/**
- * Track navigation between pages
- */
-export function trackNavigation(from: string, to: string): void {
-  trackEvent("navigation", { from, to });
-}
-
-/**
- * Track search queries (if search is implemented)
- */
-export function trackSearch(query: string, resultsCount: number): void {
-  trackEvent("search_performed", {
-    query,
-    results_count: resultsCount,
   });
 }
 

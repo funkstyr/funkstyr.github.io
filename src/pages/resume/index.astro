@@ -115,12 +115,17 @@ const { summary, experience, education, projects, skills } = resumeData;
   import {
     trackExternalProfileClick,
     trackResumeSectionView,
+    trackResumeView,
+    trackResumePrint,
     detectPlatformFromUrl,
     trackEvent,
   } from "../../utils/analytics";
 
   // Track page load time for section visibility calculations
   const pageLoadTime = Date.now();
+
+  // Track resume page view
+  trackResumeView();
 
   // Track external profile clicks (LinkedIn, GitHub)
   document
@@ -157,9 +162,7 @@ const { summary, experience, education, projects, skills } = resumeData;
 
   // Track print intent
   window.addEventListener("beforeprint", () => {
-    trackEvent("resume_print_initiated", {
-      time_on_page: Math.round((Date.now() - pageLoadTime) / 1000),
-    });
+    trackResumePrint();
   });
 
   // Track all external link clicks with platform detection

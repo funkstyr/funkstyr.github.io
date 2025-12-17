@@ -8,20 +8,21 @@ const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 ---
 
 <script is:inline define:vars={{ posthogKey }}>
-  // Check for Do Not Track preference
-  // var doNotTrack = navigator.doNotTrack === "1" || window.doNotTrack === "1";
-
-  // Debug logging (remove after confirming it works)
-  // console.log("[PostHog Debug]", {
-  //   keyPresent: !!posthogKey,
-  //   keyLength: posthogKey.length,
-  //   doNotTrack: doNotTrack,
-  //   willInit: !!posthogKey,
-  // });
-
   // Only initialize PostHog if we have an API key
   if (posthogKey) {
-    // PostHog loader snippet
+    // Defer PostHog loading until page is interactive to avoid blocking critical resources
+    var posthogInitialized = false;
+
+    function initPostHog() {
+      if (posthogInitialized) return;
+      posthogInitialized = true;
+
+      // Remove event listeners once initialized
+      document.removeEventListener("click", initPostHog);
+      document.removeEventListener("scroll", initPostHog);
+      document.removeEventListener("keydown", initPostHog);
+
+      // PostHog loader snippet
     !(function (t, e) {
       var o, n, p, r;
       e.__SV ||
@@ -141,5 +142,18 @@ const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
         }
       },
     });
+    } // end initPostHog function
+
+    // Initialize on user interaction (click, scroll, or keypress)
+    document.addEventListener("click", initPostHog, { once: true, passive: true });
+    document.addEventListener("scroll", initPostHog, { once: true, passive: true });
+    document.addEventListener("keydown", initPostHog, { once: true, passive: true });
+
+    // Fallback: initialize after browser is idle, or after 4 seconds max
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(initPostHog, { timeout: 4000 });
+    } else {
+      setTimeout(initPostHog, 4000);
+    }
   }
 </script>

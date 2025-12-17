@@ -23,10 +23,19 @@ const {
 
 const socialImage = ogImage ?? `/og-image/${slug}.png`;
 const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString();
-const { headings } = await post.render();
+const { headings, remarkPluginFrontmatter } = await post.render();
+const readingTime = remarkPluginFrontmatter.minutesRead;
 ---
 
 <PageLayout meta={{ articleDate, articleTags: tags, description, ogImage: socialImage, title }}>
+  <div
+    id="post-data"
+    data-title={title}
+    data-slug={slug}
+    data-tags={JSON.stringify(tags || [])}
+    data-reading-time={readingTime}
+    hidden
+  />
   <BlogPostSchema post={post} url={Astro.url.href} />
   <BreadcrumbSchema
     items={[
@@ -147,6 +156,7 @@ const { headings } = await post.render();
   import {
     trackBlogScrollDepth,
     trackBlogPostCompleted,
+    trackBlogPostView,
     trackBlogNavClick,
     trackEvent,
     getScrollPercent,
@@ -155,6 +165,18 @@ const { headings } = await post.render();
 
   const scrollBtn = document.getElementById("to-top-btn") as HTMLButtonElement;
   const targetHeader = document.getElementById("blog-hero") as HTMLDivElement;
+
+  // Track blog post view
+  const postData = document.getElementById("post-data");
+  if (postData) {
+    const title = postData.dataset.title || "";
+    const slug = postData.dataset.slug || "";
+    const tags = JSON.parse(postData.dataset.tags || "[]");
+    const readingTimeStr = postData.dataset.readingTime || "0";
+    // Parse "X min read" to get just the number
+    const readingTime = parseInt(readingTimeStr.split(" ")[0], 10) || 0;
+    trackBlogPostView(title, slug, tags, readingTime);
+  }
 
   function callback(entries: IntersectionObserverEntry[]) {
     entries.forEach((entry) => {

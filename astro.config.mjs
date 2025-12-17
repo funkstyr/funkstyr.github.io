@@ -16,6 +16,11 @@ export default defineConfig({
   site: process.env.SITE_URL,
   prefetch: true,
 
+  // Inline all CSS to eliminate render-blocking stylesheets
+  build: {
+    inlineStylesheets: "always",
+  },
+
   //   output: "server",
 
   integrations: [

@@ -34,6 +34,10 @@ if (!images[imagePath])
   <Image
     src={images[imagePath]()}
     alt={`${altText} project photo`}
+    width={400}
+    height={192}
+    format='avif'
+    quality={60}
     class='h-48 w-full rounded-2xl rounded-bl-none rounded-br-none object-cover'
     loading='lazy'
   />

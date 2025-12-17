@@ -44,6 +44,10 @@ if (imagePath) {
       <Image
         src={images[imagePath]()}
         alt={altText}
+        width={48}
+        height={48}
+        format='avif'
+        quality={60}
         class={cn("mb-3 md:mb-0", imageClass)}
         loading='lazy'
       />

@@ -21,7 +21,7 @@ const siteTitle = isHomepage
 	: `${title} ${titleSeparator} ${siteConfig.title}`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL(
-  ogImage ? ogImage : "/social_card.jpg",
+  ogImage ? ogImage : "/avatar.jpg",
   Astro.url
 ).href;
 ---

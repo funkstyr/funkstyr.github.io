@@ -46,10 +46,10 @@ export function getUniqueTagsWithCount(
 /** Get the previous and next posts for navigation */
 export function getPostNavigation(
   posts: Array<CollectionEntry<"post">>,
-  currentSlug: string,
+  currentId: string,
 ) {
   const sortedPosts = sortMDByDate([...posts]);
-  const currentIndex = sortedPosts.findIndex((p) => p.slug === currentSlug);
+  const currentIndex = sortedPosts.findIndex((p) => p.id === currentId);
 
   return {
     prev:

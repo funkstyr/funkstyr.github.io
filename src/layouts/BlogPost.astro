@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { render } from "astro:content";
 
 import BlogHero from "../components/blog/Hero.astro";
 import BlogPostSchema from "../components/BlogPostSchema.astro";
@@ -18,12 +19,12 @@ interface Props {
 const { post, prev, next } = Astro.props;
 const {
   data: { description, ogImage, publishDate, tags, title, updatedDate },
-  slug,
+  id,
 } = post;
 
-const socialImage = ogImage ?? `/og-image/${slug}.png`;
+const socialImage = ogImage ?? `/og-image/${id}.png`;
 const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString();
-const { headings, remarkPluginFrontmatter } = await post.render();
+const { headings, remarkPluginFrontmatter } = await render(post);
 const readingTime = remarkPluginFrontmatter.minutesRead;
 ---
 
@@ -31,7 +32,7 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
   <div
     id="post-data"
     data-title={title}
-    data-slug={slug}
+    data-slug={id}
     data-tags={JSON.stringify(tags || [])}
     data-reading-time={readingTime}
     hidden
@@ -64,10 +65,10 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
       </Button>
       {prev && (
         <a
-          href={`/blog/${prev.slug}`}
+          href={`/blog/${prev.id}`}
           class='text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1'
           data-track-blog-nav='previous'
-          data-to-slug={prev.slug}
+          data-to-slug={prev.id}
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -122,10 +123,10 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
     {next && (
       <div class='mt-12 pt-8 border-t border-border'>
         <a
-          href={`/blog/${next.slug}`}
+          href={`/blog/${next.id}`}
           class='text-muted-foreground hover:text-foreground transition-colors flex items-center justify-end gap-1'
           data-track-blog-nav='next'
-          data-to-slug={next.slug}
+          data-to-slug={next.id}
         >
           <span>Next: {next.data.title}</span>
           <svg

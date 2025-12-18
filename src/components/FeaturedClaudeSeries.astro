@@ -15,7 +15,7 @@ const firstPost = claudeCodeSeries[0];
   <div class='rounded-2xl border border-border bg-primary-foreground px-5 py-4'>
     <div>
       <a
-        href={`/blog/${firstPost?.slug}/`}
+        href={`/blog/${firstPost?.id}/`}
         class='text-lg font-bold transition-all hover:text-muted-foreground'
         data-astro-prefetch
       >
@@ -25,7 +25,7 @@ const firstPost = claudeCodeSeries[0];
         A guide on building a development workflow that's faster and more reliable. Covers plan-based development, TypeScript, Turborepo, testing LLM outputs, and juggling this across packages.
       </p>
       <a
-        href={`/blog/${firstPost?.slug}/`}
+        href={`/blog/${firstPost?.id}/`}
         class='inline-block mt-3 text-sm font-medium transition-all hover:text-muted-foreground'
         data-astro-prefetch
       >

@@ -34,7 +34,7 @@ export const GET = async () => {
       title: post.data.title,
       description: post.data.description,
       pubDate: post.data.publishDate,
-      link: `/blog/${post.slug}`,
+      link: `/blog/${post.id}`,
       categories: post.data.tags,
       author: `${contact.email} (${contact.name})`,
     })),

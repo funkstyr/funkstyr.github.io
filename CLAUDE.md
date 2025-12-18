@@ -29,15 +29,22 @@ bun run clean            # Clean node_modules
 
 ### Content Management
 
-- **Content Collections**: Blog posts are managed via Astro's content collections in `src/content/post/`
-- Posts support both `.md` and `.mdx` formats with frontmatter validation defined in `src/content/config.ts`
+- **Content Layer API**: Blog posts use Astro's Content Layer API with `glob()` loader in `src/content.config.ts`
+- Posts are stored in `src/content/post/` and support both `.md` and `.mdx` formats
 - Draft posts are filtered out in production via `getAllPosts()` in `src/utils/post.ts`
 - Required frontmatter: `title` (max 60 chars), `description` (10-160 chars), `publishDate`
 - Optional frontmatter: `updatedDate`, `coverImage`, `tags`, `ogImage`, `draft`, `order`
 - `order` field (number, default 0): Controls display order for posts on the same day - higher values appear first
+- **Post identifier**: Use `post.id` (not `post.slug`) to reference post identifiers
+- **Rendering content**: Use `render(entry)` from `astro:content`, not `entry.render()`:
+```typescript
+import { render } from "astro:content";
+const { Content, headings, remarkPluginFrontmatter } = await render(entry);
+```
 
 ### Key Configuration Files
 
+- `src/content.config.ts`: Content Layer API configuration with `glob()` loader and Zod schema
 - `src/site.config.ts`: Central configuration for site metadata, menu links, and Expressive Code theme settings
 - `astro.config.mjs`: Astro configuration including integrations (MDX, sitemap, expressive-code, icon)
 - The site URL is loaded from `.env` via `SITE_URL` environment variable (see `.env.sample`)
@@ -355,6 +362,9 @@ type PaginationLink = {
 - When adding new blog posts, create them in `src/content/post/` with proper frontmatter
 - Tags are automatically lowercased and deduplicated via the schema transform
 - The `getAllPosts()` function must be used to properly filter drafts in production
+- Use `post.id` (not `post.slug`) when referencing post identifiers in URLs and navigation
+- Content config is at `src/content.config.ts` (not in `src/content/` directory)
+- Use `render(entry)` from `astro:content` to render content entries
 - Use `data-astro-prefetch` attribute on navigation links for prefetching
 - Print/PDF pages must use `<style is:global>` to style html/body elements
 - Use `cn()` for all dynamic class composition to handle Tailwind conflicts

@@ -77,7 +77,7 @@ export type ResumeData = {
 export const resumeData: ResumeData = {
   contact: {
     name: "Michael Funk",
-    title: "Senior Software Engineer | Full Stack Developer",
+    title: "Senior Software Engineer | Full Stack",
     email: "funk-michael@outlook.com",
     linkedIn: "michaelafunk",
     linkedInUrl: "https://www.linkedin.com/in/michaelafunk/",
@@ -298,7 +298,7 @@ export function getPrintExperience(): Experience[] {
 // Helper to get social link by platform
 export function getSocialLink(platform: string): SocialLink | undefined {
   return resumeData.socialLinks.find(
-    (link) => link.platform.toLowerCase() === platform.toLowerCase(),
+    (link) => link.platform.toLowerCase() === platform.toLowerCase()
   );
 }
 

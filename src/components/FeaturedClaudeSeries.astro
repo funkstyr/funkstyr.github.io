@@ -1,0 +1,36 @@
+---
+import { getAllPosts, sortMDByDate } from "../utils/post";
+
+const allPosts = await getAllPosts();
+const sortedPosts = sortMDByDate(allPosts);
+
+const claudeCodeSeries = sortedPosts
+  .filter((post) => post.data.subtitle?.includes("Claude Code Series"))
+  .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+
+const firstPost = claudeCodeSeries[0];
+---
+
+{claudeCodeSeries.length > 0 && (
+  <div class='rounded-2xl border border-border bg-primary-foreground px-5 py-4'>
+    <div>
+      <a
+        href={`/blog/${firstPost?.slug}/`}
+        class='text-lg font-bold transition-all hover:text-muted-foreground'
+        data-astro-prefetch
+      >
+        AI-Assisted Development with Claude Code
+      </a>
+      <p class='text-sm text-muted-foreground mt-1'>
+        A guide on building a development workflow that's faster and more reliable. Covers plan-based development, TypeScript, Turborepo, testing LLM outputs, and juggling this across packages.
+      </p>
+      <a
+        href={`/blog/${firstPost?.slug}/`}
+        class='inline-block mt-3 text-sm font-medium transition-all hover:text-muted-foreground'
+        data-astro-prefetch
+      >
+        Start with Part 1 →
+      </a>
+    </div>
+  </div>
+)}

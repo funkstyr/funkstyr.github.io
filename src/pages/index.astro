@@ -2,16 +2,8 @@
 import PageLayout from "../layouts/BaseLayout.astro";
 import Section from "../components/Section.astro";
 import ProfileHeader from "../components/ProfileHeader.astro";
-import FeaturedSeries from "../components/FeaturedSeries.astro";
-import { getAllPosts, sortMDByDate } from "../utils/post";
+import FeaturedClaudeSeries from "../components/FeaturedClaudeSeries.astro";
 import { resumeData } from "../data/resume";
-
-const allPosts = await getAllPosts();
-const sortedPosts = sortMDByDate(allPosts);
-
-const claudeCodeSeries = sortedPosts
-  .filter((post) => post.data.subtitle?.includes("Claude Code Series"))
-  .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
 
 const { aboutMe, whatIDo } = resumeData;
 ---
@@ -40,11 +32,7 @@ const { aboutMe, whatIDo } = resumeData;
     </Section>
 
     <Section title='Featured Series'>
-      <FeaturedSeries
-        title='AI-Assisted Development with Claude Code'
-        description={`A guide on building a development workflow that's faster and more reliable. Covers plan-based development, TypeScript, Turborepo, testing LLM outputs, and juggling this across packages.`}
-        posts={claudeCodeSeries}
-      />
+      <FeaturedClaudeSeries />
     </Section>
   </div>
 </PageLayout>

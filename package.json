@@ -17,13 +17,13 @@
     "clean": "git clean -xdf node_modules"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.6-alpha.0",
-    "@astrojs/mdx": "^5.0.0-alpha.0",
-    "@astrojs/rss": "^4.0.15-alpha.0",
-    "@astrojs/sitemap": "^3.6.1-alpha.1",
+    "@astrojs/check": "^0.9.6-beta.1",
+    "@astrojs/mdx": "^5.0.0-beta.1",
+    "@astrojs/rss": "^4.0.15-beta.1",
+    "@astrojs/sitemap": "^3.6.1-beta.2",
     "@iconify-json/tabler": "^1.2.26",
     "@tailwindcss/vite": "^4.1.18",
-    "astro": "^6.0.0-alpha.4",
+    "astro": "^6.0.0-beta.1",
     "astro-expressive-code": "^0.41.5",
     "astro-icon": "^1.1.5",
     "clsx": "^2.1.1",

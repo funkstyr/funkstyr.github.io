@@ -1,0 +1,243 @@
+---
+title: "When to Ralph, When to Code"
+subtitle: "Ralph Loop Series · Part 6"
+description: "Lessons learned and guidelines for autonomous vs. interactive AI development"
+publishDate: "13 Jan 2026"
+tags: ["ai", "automation", "best-practices"]
+order: 6
+---
+
+<hr />
+
+*This is Part 6 of a series on the Ralph Loop. Today we synthesize lessons learned and provide guidelines for when autonomous AI development makes sense.*
+
+<br />
+
+## What We Learned
+
+<br />
+
+After running Ralph on dozens of feature phases, patterns emerged:
+
+<br />
+
+### What Ralph Handles Well
+
+<br />
+
+**Repetitive implementation** - Creating 30 similar API endpoints, adding tests for existing functions, migrating patterns across files. The tasks Claude finds "boring" but executes reliably.
+
+<br />
+
+**Well-defined systems** - When you have clear types, existing patterns, and good test coverage, Claude excels. The constraints guide it.
+
+<br />
+
+**Isolated changes** - Tasks that don't require understanding complex interdependencies. Add this field, implement this formula, create this component.
+
+<br />
+
+**Backend work** - Services, database operations, business logic. Claude's bread and butter.
+
+<br />
+
+### What Ralph Struggles With
+
+<br />
+
+**Emergent architecture** - When the right approach only becomes clear during implementation, Claude makes poor decisions early and compounds them.
+
+<br />
+
+**Frontend polish** - Animations, responsive layouts, visual refinement. These require human judgment about what "looks right."
+
+<br />
+
+**Complex state** - Multi-step async flows, race conditions, state machines with many transitions. Claude loses track of edge cases.
+
+<br />
+
+**Integration work** - Connecting to external APIs, debugging environment issues, handling deployment. Too many unknowns.
+
+<br />
+
+## The Decision Framework
+
+<br />
+
+Before starting Ralph, ask:
+
+<br />
+
+| Question | If Yes → Ralph | If No → Interactive |
+|----------|---------------|---------------------|
+| Are requirements well-defined? | ✓ | ✗ |
+| Do patterns exist to follow? | ✓ | ✗ |
+| Is each task completable in isolation? | ✓ | ✗ |
+| Would you trust a junior dev unsupervised? | ✓ | ✗ |
+| Is failure cheap to fix? | ✓ | ✗ |
+
+<br />
+
+If you answered "no" to any of these, interactive Claude Code sessions are probably better.
+
+<br />
+
+## The Hybrid Approach
+
+<br />
+
+Our actual workflow combines both modes:
+
+<br />
+
+**Phase 1: Interactive Discovery**
+- Explore the problem space with Claude
+- Make architectural decisions together
+- Write the first implementation of tricky parts
+
+<br />
+
+**Phase 2: Ralph for Volume**
+- Break remaining work into atomic tasks
+- Run Ralph for the mechanical implementation
+- Review results periodically
+
+<br />
+
+**Phase 3: Interactive Polish**
+- Fix stuck points manually
+- Refine edge cases
+- Add finishing touches
+
+<br />
+
+This captures the best of both: human judgment for decisions, AI for execution.
+
+<br />
+
+## Prompt Evolution
+
+<br />
+
+Your Ralph prompts will improve over time. Track what causes stuck states:
+
+<br />
+
+| Stuck Pattern | Prompt Fix |
+|---------------|------------|
+| Tests not run | Add explicit "run tests before marking complete" |
+| Types missing | Add "ensure all new types are exported" |
+| Wrong directory | Add specific file paths to each task |
+| Incomplete tasks | Add definition of done checklist |
+| Context loss | Add more background in prompt header |
+
+<br />
+
+Each failure teaches you what Claude needs to succeed autonomously.
+
+<br />
+
+## Cost Considerations
+
+<br />
+
+Ralph uses more API calls than interactive development. For our 114-task phase:
+
+<br />
+
+- 68 iterations × ~3,000 tokens input × ~2,000 tokens output
+- Roughly 200K input + 140K output tokens
+- At current Claude pricing: ~$3-5 per phase
+
+<br />
+
+Compare to the developer time saved: 6 hours autonomous vs. 40+ hours manual. The economics strongly favor Ralph for suitable tasks.
+
+<br />
+
+## The Mental Model Shift
+
+<br />
+
+Traditional development: **You write code, Claude assists.**
+
+<br />
+
+Ralph development: **Claude writes code, you supervise.**
+
+<br />
+
+This is a different skill set:
+- Writing clear specifications instead of code
+- Reviewing AI output instead of creating from scratch
+- Debugging prompts instead of debugging implementations
+- Managing autonomous processes instead of hands-on-keyboard
+
+<br />
+
+Some developers find this disorienting. Others find it liberating. Know which camp you're in.
+
+<br />
+
+## What's Next
+
+<br />
+
+Ralph is a starting point, not an endpoint. The pattern scales:
+
+<br />
+
+**Parallel Ralph** - Run multiple Ralph instances on independent feature branches, merge the results.
+
+<br />
+
+**Hierarchical Ralph** - A "supervisor" Claude instance that monitors multiple worker Ralphs and handles coordination.
+
+<br />
+
+**Self-improving Ralph** - Let Claude refine its own prompts based on what causes stuck states.
+
+<br />
+
+We're experimenting with all of these. The fundamental insight—externalize state, loop until done, detect stuck—applies at every scale.
+
+<br />
+
+## Getting Started
+
+<br />
+
+If you want to try Ralph:
+
+<br />
+
+1. **Start small** - A 10-task feature, not 100
+2. **Stay present** - Watch the first run, don't go AFK
+3. **Iterate the prompt** - Refine based on failure patterns
+4. **Keep tasks atomic** - Smaller is better until you calibrate
+5. **Trust but verify** - Review the code Claude produces
+
+<br />
+
+The `ralph.sh` script from our Aqua-tics project is available as a starting point. Adapt it to your workflow.
+
+<br />
+
+## The Bottom Line
+
+<br />
+
+Ralph doesn't replace developer skill—it redirects it. Instead of typing code, you're specifying tasks, writing prompts, and reviewing output. The leverage is enormous: one developer supervising Ralph produces the output of a small team.
+
+<br />
+
+The question isn't whether AI will change how we build software. It's whether you'll be the one writing the prompts or competing with those who do.
+
+<br />
+
+---
+
+<br />
+
+*Thanks for reading the Ralph Loop series. Questions or experiences to share? Find me on Twitter.*

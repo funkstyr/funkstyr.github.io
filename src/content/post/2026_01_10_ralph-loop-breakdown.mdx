@@ -1,0 +1,253 @@
+---
+title: "Breaking Down Features into Ralph-Ready Tasks"
+subtitle: "Ralph Loop Series · Part 3"
+description: "How /breakdown converts PRDs into executable task lists for autonomous implementation"
+publishDate: "10 Jan 2026"
+tags: ["ai", "automation", "planning", "tooling"]
+order: 3
+---
+
+<hr />
+
+*This is Part 3 of a series on the Ralph Loop. Today we cover the task breakdown system that converts feature specifications into atomic, executable tasks.*
+
+<br />
+
+## The Breakdown Problem
+
+<br />
+
+You can't hand Claude a 2,000-word PRD and say "implement this." Even with the Ralph loop, that's too vague. Claude needs discrete tasks it can complete in single iterations.
+
+<br />
+
+The `/breakdown` command solves this. It takes a PRD and produces:
+- `IMPLEMENTATION_PLAN.md` - Checkbox task list
+- `RALPH_PROMPT.md` - Iteration instructions
+- Linear issues - For tracking in your project management tool
+
+<br />
+
+## What Makes a Good Task
+
+<br />
+
+Tasks need to be **atomic**: completable in one Claude iteration (roughly 5-15 minutes of work).
+
+<br />
+
+**Too big**:
+```markdown
+- [ ] Implement the battle system
+```
+
+**Too small**:
+```markdown
+- [ ] Add HP field to BattleStats type
+- [ ] Add AGG field to BattleStats type
+- [ ] Add RES field to BattleStats type
+```
+
+**Just right**:
+```markdown
+- [ ] Create BattleStats type with HP, AGG, RES, AGI, VIT fields
+- [ ] Implement damage calculation using BattleStats
+- [ ] Add type advantage multipliers to damage formula
+```
+
+<br />
+
+## The Breakdown Process
+
+<br />
+
+Start with a PRD. Ours live in `tasks/` with a standard format:
+
+<br />
+
+```markdown
+# PRD: Fish Genetics System
+
+## Problem
+Fish breeding produces offspring with random stats. We need
+a genetics system where stats are inherited from parents.
+
+## Requirements
+1. Each fish has genetic alleles for battle stats
+2. Offspring inherit alleles from both parents
+3. Expressed stats are the maximum of both alleles
+4. Rare color morphs can appear through breeding
+
+## Success Criteria
+- Breeding two high-AGG parents produces high-AGG offspring
+- Color inheritance follows Mendelian genetics
+- Stats have meaningful variance, not just copies
+```
+
+<br />
+
+## Running /breakdown
+
+<br />
+
+```
+/breakdown tasks/prd-genetics.md
+```
+
+<br />
+
+Claude analyzes the PRD and produces structured output:
+
+<br />
+
+```markdown
+# IMPLEMENTATION_PLAN.md
+
+## Phase 8.1: Core Genetics Foundation
+- [ ] AQU-89: Create GeneticAllele type with stat properties
+- [ ] AQU-90: Implement allele inheritance function
+- [ ] AQU-91: Add stat expression calculation (max of alleles)
+- [ ] AQU-92: Create breeding compatibility checker
+
+## Phase 8.2: Color Morphs
+- [ ] AQU-93: Define color allele types (dominant/recessive)
+- [ ] AQU-94: Implement Mendelian inheritance for colors
+- [ ] AQU-95: Add rare morph probability calculations
+- [ ] AQU-96: Create color preview for breeding pairs
+```
+
+<br />
+
+Notice:
+- Tasks are grouped into logical phases
+- Each task has a Linear issue ID (AQU-XX)
+- Tasks are small enough for single iterations
+- Tasks have clear, specific scope
+
+<br />
+
+## The Art of Decomposition
+
+<br />
+
+Good breakdown requires understanding both the domain and Claude's capabilities.
+
+<br />
+
+**Group by dependency**: Tasks that share setup should be adjacent.
+
+```markdown
+# Good - shared context
+- [ ] Create BattleState type
+- [ ] Implement state machine transitions
+- [ ] Add victory/defeat detection
+
+# Bad - context switching
+- [ ] Create BattleState type
+- [ ] Add fish color variants
+- [ ] Implement state machine
+```
+
+<br />
+
+**Front-load types**: Define data structures before logic.
+
+```markdown
+# Good
+- [ ] Define GeneticAllele type
+- [ ] Define InheritanceResult type
+- [ ] Implement inheritance algorithm
+
+# Bad - types as afterthought
+- [ ] Implement inheritance algorithm
+- [ ] Fix TypeScript errors
+- [ ] Add missing types
+```
+
+<br />
+
+**Include testing explicitly**: Don't assume Claude will test.
+
+```markdown
+- [ ] Implement damage calculation
+- [ ] Add tests for damage edge cases (0 defense, crits)
+- [ ] Test type advantage multipliers
+```
+
+<br />
+
+## Linear Integration
+
+<br />
+
+The `/breakdown` command creates Linear issues automatically:
+
+<br />
+
+```bash
+Creating issues in Linear...
+✓ AQU-89: Create GeneticAllele type
+✓ AQU-90: Implement allele inheritance
+✓ AQU-91: Add stat expression calculation
+...
+Created 24 issues in project AQU
+```
+
+<br />
+
+As Ralph completes tasks, it updates Linear status:
+
+<br />
+
+```markdown
+## In RALPH_PROMPT.md
+
+When completing a task:
+1. Mark checkbox [x] in IMPLEMENTATION_PLAN.md
+2. Update Linear issue status to "Done"
+   Command: /linear update AQU-89 --status done
+```
+
+<br />
+
+This keeps your project management in sync with actual progress.
+
+<br />
+
+## Breakdown Quality Checklist
+
+<br />
+
+Before starting Ralph, verify your breakdown:
+
+<br />
+
+- [ ] Each task completable in one iteration?
+- [ ] Dependencies flow top-to-bottom?
+- [ ] Types defined before implementation?
+- [ ] Tests included explicitly?
+- [ ] File paths specified where relevant?
+- [ ] Linear issues created and linked?
+
+<br />
+
+## The Feedback Loop
+
+<br />
+
+As Ralph runs, you'll discover breakdown issues:
+
+<br />
+
+- Task too big → Split it
+- Missing prerequisite → Add a task before it
+- Unclear scope → Rewrite with specifics
+- Repeated failures → Add more context to RALPH_PROMPT.md
+
+<br />
+
+This refinement is normal. Your second Ralph run on a similar feature will have much better task decomposition.
+
+<br />
+
+*Next up in Part 4: Safety features—how ralph.sh prevents runaway loops and detects when Claude is stuck.*

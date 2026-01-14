@@ -1,0 +1,194 @@
+---
+title: "The Ralph Loop: Autonomous AI That Actually Finishes"
+subtitle: "Ralph Loop Series · Part 1"
+description: "How we solved AI laziness with a self-correcting autonomous development loop"
+publishDate: "08 Jan 2026"
+tags: ["ai", "automation", "claude-code", "tooling"]
+order: 1
+---
+
+<hr />
+
+*This is Part 1 of a series on the Ralph Loop, an autonomous AI development pattern. We'll explore how running Claude in a loop with smart safeguards creates a development workflow where AI actually completes tasks instead of giving up halfway.*
+
+<br />
+
+## The Problem: AI Laziness
+
+<br />
+
+If you've used AI for coding, you've hit this wall:
+
+<br />
+
+You give Claude a complex task—refactor this module, implement this feature, fix these 15 type errors. It starts strong, does the first few steps, then... trails off. "I've made progress on the refactoring. Would you like me to continue?"
+
+<br />
+
+Yes. Obviously. That's why I asked you to do it.
+
+<br />
+
+This isn't a bug. It's a feature of how large language models work. They're trained on conversation patterns where humans provide feedback. They naturally checkpoint and ask for direction. Great for learning, terrible for actually shipping code.
+
+<br />
+
+## The Symptoms
+
+<br />
+
+We noticed these patterns repeatedly:
+
+<br />
+
+1. **Premature completion signals**: "I've updated the main files" (but not the tests, types, or exports)
+2. **Context loss**: After several turns, Claude forgets early requirements
+3. **Decision fatigue**: Asking for confirmation on obvious choices instead of just doing them
+4. **Scope creep avoidance**: Stopping at the letter of the request rather than the spirit
+
+<br />
+
+When building our idle aquarium game with 30+ fish species, a genetics system, and Pokemon-style battles, these issues became blockers. A single feature might touch 15 files across 6 packages. We needed AI that would actually finish the job.
+
+<br />
+
+## Enter Ralph
+
+<br />
+
+We named it after Ralph Wiggum from The Simpsons—the character who keeps trying no matter what. That's exactly what we needed: an AI that keeps going until the task is truly done.
+
+<br />
+
+The concept is simple:
+
+<br />
+
+```
+while (tasks_remain && not_stuck):
+    run_claude_on_next_task()
+    check_completion()
+    track_progress()
+```
+
+<br />
+
+The implementation is where it gets interesting.
+
+<br />
+
+## How Ralph Works
+
+<br />
+
+The Ralph loop has three components:
+
+<br />
+
+**1. IMPLEMENTATION_PLAN.md** - A checklist of every task to complete
+
+```markdown
+## Phase 8.1: Core Genetics
+- [x] Create battle stat types (HP, AGG, RES, AGI, VIT)
+- [x] Implement allele inheritance system
+- [ ] Add stat expression formula
+- [ ] Create breeding compatibility checks
+
+## Phase 8.2: Battle Engine
+- [ ] Implement turn-based state machine
+- [ ] Add damage calculation with type advantages
+- [ ] Create AI opponent decision making
+```
+
+<br />
+
+**2. RALPH_PROMPT.md** - Detailed instructions Claude follows each iteration
+
+```markdown
+# Your Task
+You are implementing Phase 8 of Aqua-tics.
+
+## Instructions
+1. Read IMPLEMENTATION_PLAN.md to find the next unchecked task
+2. Implement it fully (code, tests, types)
+3. Mark the checkbox as [x] when complete
+4. If ALL tasks are done, output: IMPLEMENTATION_COMPLETE
+
+## Context
+- Use existing patterns in packages/game-core/src/
+- Run tests with `bun test` before marking complete
+- Update Linear issues when finishing sub-phases
+```
+
+<br />
+
+**3. ralph.sh** - The loop script that orchestrates everything
+
+```bash
+./scripts/ralph.sh RALPH_PROMPT.md 20
+```
+
+<br />
+
+That `20` is the iteration limit—a safety valve we'll discuss later.
+
+<br />
+
+## The Loop in Action
+
+<br />
+
+Each iteration:
+
+<br />
+
+1. **Claude reads the prompt** and finds the next unchecked task
+2. **Implements the task** - writes code, runs tests, fixes issues
+3. **Marks it complete** in IMPLEMENTATION_PLAN.md
+4. **Checks for completion** - are all boxes checked?
+5. **Ralph checks for progress** - did something actually happen?
+6. **Loop continues** or exits based on completion signals
+
+<br />
+
+The magic is that Claude picks up exactly where it left off. Context loss doesn't matter because the state is externalized in markdown files. Each iteration is a fresh Claude session that immediately orients itself from the checklist.
+
+<br />
+
+## Why This Works
+
+<br />
+
+Several factors make Ralph effective:
+
+<br />
+
+**Externalized state**: Claude doesn't need to remember what it did—it reads the current state from files.
+
+**Clear completion criteria**: Check a box, move on. No ambiguity about "is this done?"
+
+**Atomic tasks**: Each checkbox is small enough to complete in one iteration.
+
+**Progress tracking**: The script detects when Claude is stuck and can break out.
+
+<br />
+
+## Results
+
+<br />
+
+Using Ralph for Phase 8 of our game (genetics and battle system):
+
+<br />
+
+- **114 tasks** across 6 sub-phases
+- **95 completed autonomously** before human intervention needed
+- Tasks that would take days of babysitting Claude completed **overnight**
+
+<br />
+
+The mental model shift: instead of pair programming with AI, you become a supervisor reviewing completed work.
+
+<br />
+
+*Next up in Part 2: We'll dissect RALPH_PROMPT.md and show how to write instructions that Claude actually follows.*

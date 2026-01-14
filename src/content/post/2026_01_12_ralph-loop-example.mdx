@@ -1,0 +1,346 @@
+---
+title: "Building a Pokemon-Style Battle System with Ralph"
+subtitle: "Ralph Loop Series · Part 5"
+description: "A complete walkthrough of implementing Aqua-tics Phase 8 using autonomous AI development"
+publishDate: "12 Jan 2026"
+tags: ["ai", "automation", "game-dev", "case-study"]
+order: 5
+---
+
+<hr />
+
+*This is Part 5 of a series on the Ralph Loop. Today we walk through a real implementation: adding a genetics-based battle system to our idle aquarium game.*
+
+<br />
+
+## The Feature
+
+<br />
+
+Aqua-tics is an idle clicker game where you manage aquariums and breed fish. Phase 8 adds:
+
+<br />
+
+- **Genetics System**: Fish inherit stats from parents through alleles
+- **Battle System**: Pokemon-style turn-based combat
+- **Type Advantages**: Rock-paper-scissors between Aggressive/Peaceful/Territorial
+- **PvP & PvE**: Battle Tower, Gym Leaders, ranked matchmaking
+
+<br />
+
+This is 114 tasks across 6 sub-phases. Perfect for Ralph.
+
+<br />
+
+## Step 1: The PRD
+
+<br />
+
+We started with a PRD in `tasks/prd-phase-8.md`:
+
+<br />
+
+```markdown
+# Phase 8: Fish Genetics & Battle System
+
+## Problem
+Fish breeding currently produces random offspring. Players want
+meaningful choices in breeding for competitive battling.
+
+## Core Mechanics
+
+### Genetics
+- Each fish has alleles for 5 battle stats: HP, AGG, RES, AGI, VIT
+- Offspring inherit one allele from each parent per stat
+- Expressed stat = max(allele1, allele2)
+
+### Battle
+- Turn-based, Pokemon-style
+- Damage = (ATK * Move.Power) / (DEF * 0.5) * Type * Random
+- Three behavior types with rock-paper-scissors advantages
+- Speed determines turn order
+
+### Content
+- Battle Tower: 50 floors of increasing difficulty
+- Gym Leaders: 8 bosses with unique strategies
+- PvP: Elo-ranked 3v3 team battles
+```
+
+<br />
+
+## Step 2: The Breakdown
+
+<br />
+
+```
+/breakdown tasks/prd-phase-8.md
+```
+
+<br />
+
+This produced IMPLEMENTATION_PLAN.md with 114 tasks:
+
+<br />
+
+```markdown
+## Phase 8.1: Core Genetics (AQU-89 to AQU-96)
+- [ ] AQU-89: Create GeneticAllele and BattleStats types
+- [ ] AQU-90: Implement allele inheritance function
+- [ ] AQU-91: Add stat expression formula (max of alleles)
+- [ ] AQU-92: Create breeding compatibility rules
+- [ ] AQU-93: Implement color morph inheritance
+- [ ] AQU-94: Add mutation probability for rare traits
+- [ ] AQU-95: Create genetics preview for breeding UI
+- [ ] AQU-96: Add tests for inheritance edge cases
+
+## Phase 8.2: Behavior Types & Moves (AQU-97 to AQU-101)
+- [ ] AQU-97: Define Aggressive/Peaceful/Territorial types
+- [ ] AQU-98: Create type advantage matrix (1.5x/1.0x/0.75x)
+- [ ] AQU-99: Implement move database with power/accuracy
+- [ ] AQU-100: Add type-specific move pools per fish
+- [ ] AQU-101: Create move learning through leveling
+
+## Phase 8.3: Battle Engine (AQU-102 to AQU-111)
+- [ ] AQU-102: Create BattleState type and state machine
+- [ ] AQU-103: Implement turn order calculation
+- [ ] AQU-104: Add damage formula with type advantages
+- [ ] AQU-105: Implement critical hit mechanics
+- [ ] AQU-106: Add status effects (stunned, weakened)
+- [ ] AQU-107: Create victory/defeat detection
+- [ ] AQU-108: Implement battle rewards calculation
+- [ ] AQU-109: Add battle UI components
+- [ ] AQU-110: Create battle animation system
+- [ ] AQU-111: Add battle log/history
+
+... (continues for 114 total tasks)
+```
+
+<br />
+
+## Step 3: The Ralph Prompt
+
+<br />
+
+RALPH_PROMPT.md was crafted for this phase:
+
+<br />
+
+```markdown
+# Phase 8: Fish Genetics & Battle System
+
+You are implementing a Pokemon-style battle system for Aqua-tics.
+
+## Your Workflow
+1. Read IMPLEMENTATION_PLAN.md
+2. Find first unchecked `- [ ]` task
+3. Implement it fully with tests
+4. Run `bun test` to verify
+5. Mark checkbox `- [x]`
+6. Update Linear: `/linear update AQU-XX --status done`
+
+## Key Files
+- `packages/game-core/src/fish.ts` - Fish species definitions
+- `packages/game-core/src/breeding.ts` - Existing breeding logic
+- `packages/game-core/src/battle/` - New battle system (create this)
+- `packages/game-core/src/__tests__/` - Test files
+
+## Type Advantage Matrix
+Aggressive → beats → Peaceful (1.5x)
+Peaceful → beats → Territorial (1.5x)
+Territorial → beats → Aggressive (1.5x)
+Same type: 1.0x, Disadvantage: 0.75x
+
+## Damage Formula
+Base = (Attacker.AGG * Move.Power) / (Defender.RES * 0.5)
+Final = Base * TypeMultiplier * Random(0.85-1.0) * CritMultiplier
+
+## Completion
+When ALL 114 tasks are checked, output: IMPLEMENTATION_COMPLETE
+```
+
+<br />
+
+## Step 4: Running Ralph
+
+<br />
+
+```bash
+./scripts/ralph.sh RALPH_PROMPT.md 30
+```
+
+<br />
+
+We set 30 iterations for the initial run—conservative for 114 tasks, but this was our first attempt.
+
+<br />
+
+### Iteration 1-8: Genetics Foundation
+
+<br />
+
+Ralph knocked out the genetics system efficiently:
+
+<br />
+
+```
+[14:00:01] Iteration 1: AQU-89 - Created BattleStats type ✓
+[14:05:23] Iteration 2: AQU-90 - Implemented inheritance ✓
+[14:10:45] Iteration 3: AQU-91 - Added stat expression ✓
+...
+[14:52:18] Iteration 8: AQU-96 - Added inheritance tests ✓
+```
+
+<br />
+
+Files created:
+- `packages/game-core/src/genetics.ts`
+- `packages/game-core/src/__tests__/genetics.test.ts`
+
+<br />
+
+### Iteration 9-15: First Stuck State
+
+<br />
+
+At AQU-102 (battle state machine), Claude struggled:
+
+<br />
+
+```
+[15:12:00] Iteration 9: AQU-102 - Attempting state machine
+[15:17:34] Iteration 10: AQU-102 - Still working...
+[15:23:01] Iteration 11: AQU-102 - No progress detected
+[15:28:45] ⚠️ CIRCUIT BREAKER: 3 iterations, no completion
+```
+
+<br />
+
+**The issue**: Claude was creating a state machine but not marking the task complete because tests weren't passing.
+
+<br />
+
+**The fix**: We ran the tests manually, found a type mismatch, fixed it, and resumed:
+
+<br />
+
+```bash
+# Fix the type error
+vim packages/game-core/src/battle/state-machine.ts
+
+# Resume with more iterations
+./scripts/ralph.sh RALPH_PROMPT.md 25
+```
+
+<br />
+
+### Iteration 16-45: Smooth Sailing
+
+<br />
+
+After the fix, Ralph completed 30 tasks without intervention:
+
+<br />
+
+```
+Phase 8.3: Battle Engine - 10/10 complete
+Phase 8.4: PvE Content - 7/7 complete
+Phase 8.5: PvP System - 8/8 complete
+Phase 8.6: Polish - 5/6 in progress
+```
+
+<br />
+
+### Final Stuck State: Animation System
+
+<br />
+
+AQU-110 (battle animations) required frontend work that our backend-focused prompt didn't address well. We handled that manually.
+
+<br />
+
+## Final Results
+
+<br />
+
+| Metric | Value |
+|--------|-------|
+| Total tasks | 114 |
+| Completed by Ralph | 95 (83%) |
+| Manual interventions | 4 |
+| Total iterations | 68 |
+| Wall clock time | ~6 hours |
+| Circuit breaker triggers | 3 |
+
+<br />
+
+## What Ralph Built
+
+<br />
+
+The genetics system:
+
+```typescript
+// packages/game-core/src/genetics.ts
+export function inheritAlleles(
+  parent1: FishGenetics,
+  parent2: FishGenetics
+): FishGenetics {
+  return {
+    hp: [randomAllele(parent1.hp), randomAllele(parent2.hp)],
+    agg: [randomAllele(parent1.agg), randomAllele(parent2.agg)],
+    res: [randomAllele(parent1.res), randomAllele(parent2.res)],
+    agi: [randomAllele(parent1.agi), randomAllele(parent2.agi)],
+    vit: [randomAllele(parent1.vit), randomAllele(parent2.vit)],
+  };
+}
+
+export function expressStats(genetics: FishGenetics): BattleStats {
+  return {
+    hp: Math.max(...genetics.hp) * 3 + 50,
+    agg: Math.max(...genetics.agg),
+    res: Math.max(...genetics.res),
+    agi: Math.max(...genetics.agi),
+    vit: Math.max(...genetics.vit),
+  };
+}
+```
+
+<br />
+
+The battle engine:
+
+```typescript
+// packages/game-core/src/battle/damage.ts
+export function calculateDamage(
+  attacker: BattleFish,
+  defender: BattleFish,
+  move: Move
+): DamageResult {
+  const base = (attacker.stats.agg * move.power) / (defender.stats.res * 0.5);
+  const typeMultiplier = getTypeAdvantage(attacker.behavior, defender.behavior);
+  const variance = 0.85 + Math.random() * 0.15;
+  const isCrit = Math.random() < 0.05 + attacker.stats.agi / 100;
+  const critMultiplier = isCrit ? 2 : 1;
+
+  return {
+    damage: Math.floor(base * typeMultiplier * variance * critMultiplier),
+    isCritical: isCrit,
+    typeAdvantage: typeMultiplier > 1 ? 'super' : typeMultiplier < 1 ? 'not' : 'neutral',
+  };
+}
+```
+
+<br />
+
+## Lessons from This Run
+
+<br />
+
+1. **State machines are hard** - Claude struggled with complex state logic. Break into smaller pieces.
+2. **Frontend tasks need different prompts** - Backend-focused instructions don't work for UI.
+3. **Tests are the blocker** - Most stuck states were test failures, not implementation issues.
+4. **6 hours beats 6 days** - Manual implementation would have taken a week of focused work.
+
+<br />
+
+*Next up in Part 6: Lessons learned and when Ralph is (and isn't) the right tool.*

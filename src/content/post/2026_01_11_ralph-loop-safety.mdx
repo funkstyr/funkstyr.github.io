@@ -1,0 +1,301 @@
+---
+title: "Circuit Breakers: Keeping Ralph Under Control"
+subtitle: "Ralph Loop Series · Part 4"
+description: "Safety features that prevent runaway loops and detect stuck states"
+publishDate: "11 Jan 2026"
+tags: ["ai", "automation", "reliability"]
+order: 4
+---
+
+<hr />
+
+*This is Part 4 of a series on the Ralph Loop. Today we cover the safety mechanisms that make autonomous AI development reliable instead of terrifying.*
+
+<br />
+
+## The Fear
+
+<br />
+
+Running AI in an unsupervised loop sounds dangerous. What if it:
+
+<br />
+
+- Loops forever, burning API credits?
+- Gets stuck, repeating the same error endlessly?
+- Marks tasks complete without actually doing them?
+- Makes things worse with each iteration?
+
+<br />
+
+These are real risks. Ralph addresses each one.
+
+<br />
+
+## Safety Layer 1: Iteration Limits
+
+<br />
+
+The simplest protection is a hard stop:
+
+<br />
+
+```bash
+./scripts/ralph.sh RALPH_PROMPT.md 20
+```
+
+<br />
+
+That `20` means: run at most 20 iterations, then stop regardless. For a 24-task phase, this is usually enough. For larger phases, increase it.
+
+<br />
+
+If you omit the limit, Ralph runs until completion markers are found—useful when you're monitoring, risky when AFK.
+
+<br />
+
+## Safety Layer 2: Completion Detection
+
+<br />
+
+Ralph watches for explicit completion signals:
+
+<br />
+
+```bash
+COMPLETION_MARKERS=(
+    "IMPLEMENTATION_COMPLETE"
+    "ALL_TASKS_COMPLETE"
+    "RALPH_COMPLETE"
+)
+```
+
+<br />
+
+But here's the clever part: **Ralph requires TWO completion signals before exiting**.
+
+<br />
+
+Why? Claude sometimes outputs "IMPLEMENTATION_COMPLETE" mid-task when discussing what it *would* say when done. Requiring two consecutive signals eliminates false positives.
+
+<br />
+
+```bash
+# In ralph.sh
+if [[ $completion_count -ge 2 ]]; then
+    echo "✓ Confirmed complete (2+ signals)"
+    exit 0
+fi
+```
+
+<br />
+
+## Safety Layer 3: Progress Tracking
+
+<br />
+
+The most important safety feature: detecting when Claude is stuck.
+
+<br />
+
+Each iteration, ralph.sh checks:
+
+<br />
+
+1. **Did checkboxes change?** Compare IMPLEMENTATION_PLAN.md before and after.
+2. **Did files change?** Check git diff for actual code modifications.
+3. **Is the output different?** Detect repeated error messages.
+
+<br />
+
+```bash
+# Check for progress
+TASKS_BEFORE=$(grep -c "\- \[x\]" IMPLEMENTATION_PLAN.md)
+# ... run Claude ...
+TASKS_AFTER=$(grep -c "\- \[x\]" IMPLEMENTATION_PLAN.md)
+
+if [[ $TASKS_AFTER -eq $TASKS_BEFORE ]]; then
+    NO_PROGRESS_COUNT=$((NO_PROGRESS_COUNT + 1))
+fi
+```
+
+<br />
+
+## Safety Layer 4: Circuit Breaker
+
+<br />
+
+When stuck, Ralph doesn't just warn—it stops:
+
+<br />
+
+```bash
+# Circuit breaker thresholds
+MAX_NO_PROGRESS=3      # Stop after 3 iterations with no task completion
+MAX_SAME_ERROR=5       # Stop after 5 identical error outputs
+```
+
+<br />
+
+The circuit breaker triggers when:
+
+<br />
+
+- **3 iterations** pass with no checkbox changes
+- **5 iterations** produce the same error output
+- **Rate limit** is approached (100 calls/hour)
+
+<br />
+
+When triggered:
+
+<br />
+
+```
+⚠️  CIRCUIT BREAKER TRIGGERED
+    Reason: No progress for 3 iterations
+    Last task attempted: AQU-103
+    Iterations completed: 12/20
+
+    Review the logs and fix the blocking issue before resuming.
+```
+
+<br />
+
+## Safety Layer 5: Rate Limiting
+
+<br />
+
+Claude API has rate limits. Ralph tracks call timestamps:
+
+<br />
+
+```bash
+# Track API calls
+CALL_TIMESTAMPS=()
+MAX_CALLS_PER_HOUR=100
+
+check_rate_limit() {
+    local hour_ago=$(date -d '1 hour ago' +%s)
+    local recent_calls=0
+
+    for ts in "${CALL_TIMESTAMPS[@]}"; do
+        if [[ $ts -gt $hour_ago ]]; then
+            ((recent_calls++))
+        fi
+    done
+
+    if [[ $recent_calls -ge $MAX_CALLS_PER_HOUR ]]; then
+        echo "Rate limit approaching. Pausing..."
+        sleep 300  # Wait 5 minutes
+    fi
+}
+```
+
+<br />
+
+## Safety Layer 6: Logging
+
+<br />
+
+Every Ralph run creates detailed logs:
+
+<br />
+
+```bash
+LOG_FILE="ralph_$(date +%Y%m%d_%H%M%S).log"
+```
+
+<br />
+
+The log captures:
+- Full Claude output for each iteration
+- Task status changes
+- Error messages
+- Timing information
+
+<br />
+
+When something goes wrong, you can trace exactly what happened:
+
+<br />
+
+```
+[2026-01-13 14:23:15] Iteration 7 started
+[2026-01-13 14:23:15] Current task: AQU-103
+[2026-01-13 14:24:02] Claude output: 2,847 tokens
+[2026-01-13 14:24:02] Tasks completed: 6 → 7
+[2026-01-13 14:24:03] Linear updated: AQU-103 → Done
+```
+
+<br />
+
+## The Dashboard
+
+<br />
+
+Ralph shows real-time status while running:
+
+<br />
+
+```
+╭─────────────────────────────────────╮
+│  RALPH LOOP - Phase 8 Genetics      │
+├─────────────────────────────────────┤
+│  Iteration:     12 / 20             │
+│  Tasks:         18 / 24 (75%)       │
+│  No Progress:   0 / 3               │
+│  Same Error:    0 / 5               │
+│  API Calls:     12 / 100 (hour)     │
+│  Status:        ✓ Running           │
+╰─────────────────────────────────────╯
+```
+
+<br />
+
+At a glance: are we making progress? Are we approaching limits?
+
+<br />
+
+## Recovery Workflows
+
+<br />
+
+When Ralph stops due to a circuit breaker:
+
+<br />
+
+1. **Read the logs** - What was Claude trying to do?
+2. **Check the task** - Is it poorly specified?
+3. **Look at the code** - Did Claude create a mess to clean up?
+4. **Fix the blocker** - Often a type error or test failure
+5. **Resume** - `./scripts/ralph.sh RALPH_PROMPT.md 10`
+
+<br />
+
+The fix-and-resume cycle is normal. Ralph handles the routine tasks; you handle the exceptions.
+
+<br />
+
+## Tuning Safety Parameters
+
+<br />
+
+Default settings work for most cases, but adjust based on your needs:
+
+<br />
+
+| Scenario | Iteration Limit | No Progress | Same Error |
+|----------|-----------------|-------------|------------|
+| AFK overnight | 20-30 | 3 | 5 |
+| Active monitoring | unlimited | 5 | 10 |
+| New codebase | 10 | 2 | 3 |
+| Trusted prompt | 50+ | 5 | 10 |
+
+<br />
+
+Conservative settings for unfamiliar territory. Looser settings once you trust the prompt.
+
+<br />
+
+*Next up in Part 5: A complete walkthrough of implementing the Aqua-tics battle system using Ralph.*

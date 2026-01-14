@@ -8,29 +8,60 @@ const claudeCodeSeries = sortedPosts
   .filter((post) => post.data.subtitle?.includes("Claude Code Series"))
   .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
 
-const firstPost = claudeCodeSeries[0];
+const ralphLoopSeries = sortedPosts
+  .filter((post) => post.data.subtitle?.includes("Ralph Loop Series"))
+  .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+
+const claudeFirstPost = claudeCodeSeries[0];
+const ralphFirstPost = ralphLoopSeries[0];
 ---
 
-{claudeCodeSeries.length > 0 && (
-  <div class='rounded-2xl border border-border bg-primary-foreground px-5 py-4'>
-    <div>
-      <a
-        href={`/blog/${firstPost?.id}/`}
-        class='text-lg font-bold transition-all hover:text-muted-foreground'
-        data-astro-prefetch
-      >
-        AI-Assisted Development with Claude Code
-      </a>
-      <p class='text-sm text-muted-foreground mt-1'>
-        A guide on building a development workflow that's faster and more reliable. Covers plan-based development, TypeScript, Turborepo, testing LLM outputs, and juggling this across packages.
-      </p>
-      <a
-        href={`/blog/${firstPost?.id}/`}
-        class='inline-block mt-3 text-sm font-medium transition-all hover:text-muted-foreground'
-        data-astro-prefetch
-      >
-        Start with Part 1 →
-      </a>
+<div class='flex flex-col gap-4'>
+  {claudeCodeSeries.length > 0 && (
+    <div class='rounded-2xl border border-border bg-primary-foreground px-5 py-4'>
+      <div>
+        <a
+          href={`/blog/${claudeFirstPost?.id}/`}
+          class='text-lg font-bold transition-all hover:text-muted-foreground'
+          data-astro-prefetch
+        >
+          AI-Assisted Development with Claude Code
+        </a>
+        <p class='text-sm text-muted-foreground mt-1'>
+          A guide on building a development workflow that's faster and more reliable. Covers plan-based development, TypeScript, Turborepo, testing LLM outputs, and juggling this across packages.
+        </p>
+        <a
+          href={`/blog/${claudeFirstPost?.id}/`}
+          class='inline-block mt-3 text-sm font-medium transition-all hover:text-muted-foreground'
+          data-astro-prefetch
+        >
+          Start with Part 1 →
+        </a>
+      </div>
     </div>
-  </div>
-)}
+  )}
+
+  {ralphLoopSeries.length > 0 && (
+    <div class='rounded-2xl border border-border bg-primary-foreground px-5 py-4'>
+      <div>
+        <a
+          href={`/blog/${ralphFirstPost?.id}/`}
+          class='text-lg font-bold transition-all hover:text-muted-foreground'
+          data-astro-prefetch
+        >
+          The Ralph Loop: Autonomous AI Development
+        </a>
+        <p class='text-sm text-muted-foreground mt-1'>
+          How we solved AI laziness with a self-correcting loop that actually finishes tasks. Covers task breakdowns, prompt engineering, safety features, and real-world implementation.
+        </p>
+        <a
+          href={`/blog/${ralphFirstPost?.id}/`}
+          class='inline-block mt-3 text-sm font-medium transition-all hover:text-muted-foreground'
+          data-astro-prefetch
+        >
+          Start with Part 1 →
+        </a>
+      </div>
+    </div>
+  )}
+</div>

@@ -1,0 +1,269 @@
+---
+title: "Crafting the Perfect Ralph Prompt"
+subtitle: "Ralph Loop Series · Part 2"
+description: "How to write RALPH_PROMPT.md files that Claude actually follows"
+publishDate: "09 Jan 2026"
+tags: ["ai", "automation", "prompt-engineering"]
+order: 2
+---
+
+<hr />
+
+*This is Part 2 of a series on the Ralph Loop. Today we dissect RALPH_PROMPT.md—the instruction document that makes autonomous AI development work.*
+
+<br />
+
+## The Prompt is Everything
+
+<br />
+
+When Claude runs in a loop, it starts fresh each iteration. No memory of what it did last time. No context about your project beyond what you provide.
+
+<br />
+
+RALPH_PROMPT.md is that context. Get it wrong and Claude wastes iterations confused. Get it right and it becomes a tireless implementation machine.
+
+<br />
+
+## Anatomy of a Ralph Prompt
+
+<br />
+
+Every effective Ralph prompt has these sections:
+
+<br />
+
+### 1. The Mission Statement
+
+<br />
+
+Start with exactly what Claude is doing and why.
+
+<br />
+
+```markdown
+# Phase 8: Fish Genetics & Battle System
+
+You are implementing the genetics and battle system for Aqua-tics,
+an idle aquarium game. This phase adds Pokemon-style battles where
+fish stats are inherited through breeding.
+```
+
+<br />
+
+This isn't just documentation—it's priming. Claude performs better when it understands the big picture.
+
+<br />
+
+### 2. The Task Discovery Instructions
+
+<br />
+
+Tell Claude exactly how to find its next task:
+
+<br />
+
+```markdown
+## Finding Your Next Task
+
+1. Read `IMPLEMENTATION_PLAN.md`
+2. Find the first unchecked task `- [ ]`
+3. This is your task for this iteration
+4. Do NOT skip ahead or work on multiple tasks
+```
+
+<br />
+
+The "do NOT skip ahead" is crucial. Without it, Claude tries to be helpful by tackling multiple items, creating merge conflicts with itself.
+
+<br />
+
+### 3. Implementation Standards
+
+<br />
+
+Define what "done" means:
+
+<br />
+
+```markdown
+## Definition of Done
+
+A task is complete when:
+- [ ] Code compiles with no TypeScript errors
+- [ ] All tests pass (`bun test`)
+- [ ] New code has tests (aim for 80% coverage)
+- [ ] Exports are updated in package index files
+- [ ] The checkbox in IMPLEMENTATION_PLAN.md is marked [x]
+```
+
+<br />
+
+Without explicit standards, Claude marks tasks complete prematurely.
+
+<br />
+
+### 4. Codebase Context
+
+<br />
+
+Point Claude to relevant patterns:
+
+<br />
+
+```markdown
+## Key Files & Patterns
+
+**Game Logic**: `packages/game-core/src/`
+- Fish definitions: `fish.ts`
+- Breeding logic: `breeding.ts`
+- Battle system: `battle/` directory
+
+**Existing Patterns to Follow**:
+- Use Zod for all schemas
+- Export types from `types.ts` files
+- Tests go in `__tests__/` directories
+```
+
+<br />
+
+This saves Claude from exploring your entire monorepo each iteration.
+
+<br />
+
+### 5. Completion Markers
+
+<br />
+
+Define how to signal "all done":
+
+<br />
+
+```markdown
+## When Everything is Complete
+
+When ALL tasks in IMPLEMENTATION_PLAN.md are checked [x]:
+1. Run the full test suite
+2. Verify no TypeScript errors
+3. Output exactly: IMPLEMENTATION_COMPLETE
+
+Do NOT output this marker until truly finished.
+```
+
+<br />
+
+The ralph.sh script watches for these markers to know when to stop.
+
+<br />
+
+## Common Prompt Mistakes
+
+<br />
+
+**Too vague**:
+```markdown
+# Bad
+Implement the battle system.
+```
+
+```markdown
+# Good
+Implement the turn-based battle state machine in
+packages/game-core/src/battle/state-machine.ts.
+Use the existing BattleState type from types.ts.
+```
+
+<br />
+
+**No file paths**:
+```markdown
+# Bad
+Add tests for the breeding system.
+```
+
+```markdown
+# Good
+Add tests in packages/game-core/src/__tests__/breeding.test.ts
+covering edge cases for incompatible fish pairings.
+```
+
+<br />
+
+**Ambiguous completion**:
+```markdown
+# Bad
+Mark the task done when you think it's ready.
+```
+
+```markdown
+# Good
+Mark the checkbox [x] only after:
+1. `bun run typecheck` shows no errors
+2. `bun test breeding` passes
+```
+
+<br />
+
+## The Full Template
+
+<br />
+
+Here's the template we use for every Ralph prompt:
+
+<br />
+
+```markdown
+# [Phase Name]: [Feature Description]
+
+## Overview
+[2-3 sentences about what this phase accomplishes]
+
+## Your Workflow
+1. Read IMPLEMENTATION_PLAN.md
+2. Find the first unchecked `- [ ]` task
+3. Implement it completely
+4. Mark it `- [x]` when done
+5. If all tasks complete, output: IMPLEMENTATION_COMPLETE
+
+## Definition of Done
+- Code compiles (`bun run typecheck`)
+- Tests pass (`bun test`)
+- New functionality has tests
+- Exports updated in index files
+- Checkbox marked in IMPLEMENTATION_PLAN.md
+
+## Key Files
+[List of important files and what they contain]
+
+## Patterns to Follow
+[Code style, naming conventions, architectural patterns]
+
+## Completion Markers
+When truly finished, output one of:
+- IMPLEMENTATION_COMPLETE
+- ALL_TASKS_COMPLETE
+- RALPH_COMPLETE
+
+## Notes
+[Any phase-specific gotchas or requirements]
+```
+
+<br />
+
+## Iteration is Key
+
+<br />
+
+Your first Ralph prompt will be wrong. Claude will misinterpret something, skip steps, or mark tasks done too early.
+
+<br />
+
+That's fine. Watch the first few iterations, see where Claude goes astray, and refine the prompt. After 2-3 revisions, you'll have instructions that work reliably.
+
+<br />
+
+The time invested in prompt refinement pays off across dozens of autonomous iterations.
+
+<br />
+
+*Next up in Part 3: We'll cover the task breakdown system and how `/breakdown` converts PRDs into executable task lists.*

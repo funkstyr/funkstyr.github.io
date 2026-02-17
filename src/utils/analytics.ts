@@ -181,7 +181,9 @@ export function trackHeaderNavClick(destination: string): void {
 /**
  * Track clicks on footer social links
  */
-export function trackFooterSocialClick(platform: "linkedin" | "github" | "twitter" | "instagram"): void {
+export function trackFooterSocialClick(
+  platform: "linkedin" | "github" | "twitter" | "instagram",
+): void {
   trackEvent("footer_social_clicked", {
     platform,
     page: typeof window !== "undefined" ? window.location.pathname : "",

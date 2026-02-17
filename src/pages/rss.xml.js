@@ -1,8 +1,7 @@
 import rss from "@astrojs/rss";
-
+import { resumeData } from "../data/resume";
 import { siteConfig } from "../site.config";
 import { getAllPosts } from "../utils";
-import { resumeData } from "../data/resume";
 
 export const GET = async () => {
   const posts = await getAllPosts();

@@ -5,18 +5,18 @@ import { siteConfig } from "../site.config";
 export const prerender = true;
 
 export const GET: APIRoute = ({ site }) => {
-	const {
-		contact,
-		summary,
-		aboutMe,
-		whatIDo,
-		experience,
-		education,
-		projects,
-		skills,
-	} = resumeData;
+  const {
+    contact,
+    summary,
+    aboutMe,
+    whatIDo,
+    experience,
+    education,
+    projects,
+    skills,
+  } = resumeData;
 
-	const markdown = `# ${contact.name}
+  const markdown = `# ${contact.name}
 
 > ${contact.title}
 
@@ -49,46 +49,46 @@ ${skills.map((category) => `### ${category.title}\n${category.skills.join(", ")}
 ## Experience
 
 ${experience
-	.map(
-		(exp) => `### ${exp.position} at ${exp.company}
+  .map(
+    (exp) => `### ${exp.position} at ${exp.company}
 ${exp.startDate} - ${exp.endDate}${exp.location ? ` | ${exp.location}` : ""}
 ${exp.website ? `${exp.website}` : ""}
 
 ${exp.achievements.map((achievement) => `- ${achievement}`).join("\n")}
 
 **Skills:** ${exp.skills.join(", ")}`,
-	)
-	.join("\n\n")}
+  )
+  .join("\n\n")}
 
 ## Education
 
 ${education
-	.map(
-		(edu) => `### ${edu.institution}
+  .map(
+    (edu) => `### ${edu.institution}
 ${edu.degree}${edu.minor ? ` | Minor: ${edu.minor}` : ""}
 ${edu.website ? `${edu.website}` : ""}`,
-	)
-	.join("\n\n")}
+  )
+  .join("\n\n")}
 
 ## Projects
 
 ${projects
-	.filter((project) => project.description)
-	.map(
-		(project) => `### ${project.title}
+  .filter((project) => project.description)
+  .map(
+    (project) => `### ${project.title}
 ${project.description}
 ${project.url ? `${project.url}` : ""}`,
-	)
-	.join("\n\n")}
+  )
+  .join("\n\n")}
 
 ---
 
 This file is auto-generated from ${siteConfig.title} for LLM consumption.
 `;
 
-	return new Response(markdown, {
-		headers: {
-			"Content-Type": "text/plain; charset=utf-8",
-		},
-	});
+  return new Response(markdown, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+    },
+  });
 };

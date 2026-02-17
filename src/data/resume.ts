@@ -298,7 +298,7 @@ export function getPrintExperience(): Experience[] {
 // Helper to get social link by platform
 export function getSocialLink(platform: string): SocialLink | undefined {
   return resumeData.socialLinks.find(
-    (link) => link.platform.toLowerCase() === platform.toLowerCase()
+    (link) => link.platform.toLowerCase() === platform.toLowerCase(),
   );
 }
 

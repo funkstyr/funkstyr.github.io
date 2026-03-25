@@ -2,7 +2,7 @@ import "dotenv/config";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import rehypeExternalLinks from "rehype-external-links";
@@ -38,6 +38,22 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+  },
+
+  fonts: [
+    {
+      provider: fontProviders.fontshare(),
+      name: "Satoshi",
+      cssVariable: "--font-sans",
+      styles: ["normal", "italic"],
+    },
+  ],
+
+  experimental: {
+    rustCompiler: true,
+    queuedRendering: {
+      enabled: true,
+    },
   },
 
   markdown: {

@@ -4,24 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@font-face {
-  font-family: "Satoshi";
-  src:
-    url("/fonts/Satoshi-Variable.woff2") format("woff2"),
-    url("/fonts/Satoshi-Variable.ttf") format("truetype");
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Satoshi";
-  src:
-    url("/fonts/Satoshi-VariableItalic.woff2") format("woff2"),
-    url("/fonts/Satoshi-VariableItalic.ttf") format("truetype");
-  font-style: italic;
-  font-display: swap;
-}
-
 :root {
   --background: 210 33% 99%;
   --foreground: 240 10% 3.9%;
@@ -68,6 +50,7 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-sans);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

@@ -8,8 +8,12 @@ const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 ---
 
 <script is:inline define:vars={{ posthogKey }}>
-  // Only initialize PostHog if we have an API key
-  if (posthogKey) {
+  // Respect Do Not Track (DNT) and Global Privacy Control (GPC) browser preferences
+  var doNotTrack = navigator.doNotTrack === "1" || window.doNotTrack === "1";
+  var globalPrivacyControl = navigator.globalPrivacyControl === true;
+
+  // Only initialize PostHog if privacy signals are not set and we have an API key
+  if (!doNotTrack && !globalPrivacyControl && posthogKey) {
     // Defer PostHog loading until page is interactive to avoid blocking critical resources
     var posthogInitialized = false;
 

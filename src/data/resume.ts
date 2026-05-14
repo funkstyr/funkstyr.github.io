@@ -3,7 +3,6 @@ export type ContactInfo = {
   name: string;
   title: string;
   email: string;
-  linkedIn: string;
   linkedInUrl: string;
   location: string;
   currentCompany: string;
@@ -77,44 +76,44 @@ export type ResumeData = {
 export const resumeData: ResumeData = {
   contact: {
     name: "Michael Funk",
-    title: "Senior Software Engineer | Full Stack",
+    title: "Senior Software Engineer",
     email: "funk-michael@outlook.com",
-    linkedIn: "michaelafunk",
-    linkedInUrl: "https://www.linkedin.com/in/michaelafunk/",
+    linkedInUrl: "https://www.linkedin.com/in/michaelafunk",
     location: "Sacramento, CA",
-    currentCompany: "Highlight",
-    currentCompanyUrl: "https://www.letshighlight.com/",
+    currentCompany: "",
+    currentCompanyUrl: "",
   },
 
   summary: {
     short: [
-      "Fullstack developer that specializes in React",
-      "Sometimes dabble in .Net Core",
-      "Currently enjoy developing in a bun monorepo",
+      "Senior fullstack engineer specializing in React and TypeScript",
+      "10+ years across consumer apps, B2B platforms, and AI-powered features",
+      "Equally comfortable in .NET Core, Node.js, and modern monorepos",
     ],
-    detailed: `Senior Software Engineer with 8+ years of experience building scalable web applications and leading technical initiatives. Expert in React, TypeScript, and modern JavaScript ecosystems with strong full-stack capabilities in .NET Core and cloud infrastructure. Proven track record of architecting monorepo strategies, establishing testing frameworks, and delivering high-impact features from concept to production.`,
+    detailed:
+      "Fullstack engineer with over a decade of experience, mostly in TypeScript and React on the front and .NET Core or Node on the back. Recent work has been monorepo architecture, LLM-powered features against the Anthropic models, and the less glamorous infrastructure (testing, CI, observability) that keeps small teams shipping without breaking things in production.",
   },
 
   aboutMe: [
-    "Hi! I'm Michael, a fullstack developer with a passion for building scalable, user-focused applications. I specialize in React and the modern JavaScript ecosystem, with experience across the full stack.",
-    "Currently, I work as a Software Engineer at Highlight, where I build AI-powered features, architect monorepo solutions, and help teams ship code with confidence. I love working in fast-paced environments where quality and velocity go hand-in-hand.",
+    "Hi, I'm Michael. I've been writing software for about ten years, mostly on small teams where the line between frontend and backend is wherever you stop typing.",
+    "Lately that's meant LLM features against the Anthropic API, untangling a couple of apps into a Turborepo monorepo, and the kind of test and observability work that's easier to skip than to come back and add a year later.",
   ],
 
   whatIDo: [
     {
       title: "Frontend Development",
       description:
-        "Building responsive, accessible user interfaces with React, Next.js, and TypeScript. I focus on creating delightful user experiences backed by solid testing practices.",
+        "React and Next.js, mostly. I care about accessibility and tend to write Playwright tests for anything I'd be sad to see break in production.",
     },
     {
       title: "Backend & Infrastructure",
       description:
-        "Designing APIs and services with .NET Core, Node.js, and modern cloud platforms. I enjoy working with Docker, Kubernetes, and AWS to build scalable systems.",
+        ".NET Core and Node, deployed onto AWS via Docker and Kubernetes. Comfortable enough in Terraform to make a change without paging anyone.",
     },
     {
       title: "Developer Experience",
       description:
-        "Improving workflows through monorepo architecture, CI/CD pipelines, and tooling. I believe great developer experience leads to better products.",
+        "Monorepos, CI pipelines, codegen. The things that compound. If a teammate's iteration loop is slow, that's the bug I want to fix first.",
     },
   ],
 
@@ -129,33 +128,24 @@ export const resumeData: ResumeData = {
       url: "https://github.com/funkstyr/",
       username: "funkstyr",
     },
-    {
-      platform: "Twitter",
-      url: "https://x.com/funkstyr/",
-      username: "funkstyr",
-    },
-    {
-      platform: "Instagram",
-      url: "https://www.instagram.com/_funkstyr/",
-      username: "_funkstyr",
-    },
   ],
 
   experience: [
     {
       company: "Highlight",
-      position: "Senior Software Engineer II",
+      position: "Senior Software Engineer",
       startDate: "June 2022",
-      endDate: "Current",
+      endDate: "May 2026",
       location: "Remote",
       website: "https://www.letshighlight.com/",
       achievements: [
-        "Integrated Anthropic Claude API to build conversational AI assistant for analyzing study results and generating actionable insights",
-        "Architected monorepo strategy with Turborepo and pnpm workspaces, enabling atomic cross-package changes across 3+ applications",
-        "Led full-stack development of consumer-facing app from POC to production, including onboarding flows, SMS verification, and mobile-optimized experiences",
-        "Built analytics dashboard with interactive visualizations, cross-tabulation analysis, and export capabilities for market research teams",
-        "Established API package architecture with RTK Query integrations, caching strategies, and Zod schema generation for type safety across the monorepo",
-        "Implemented testing and observability infrastructure with Playwright E2E suites, Datadog RUM, and Amplitude analytics",
+        "Created an AI-assisted setup wizard that turned a short study description or scoping document into a configured project",
+        "Built a Claude-powered assistant that lets researchers ask questions about study results in plain English instead of pivoting CSVs",
+        "Migrated three apps into a monorepo, splitting code into feature packages and cutting CI times with caching",
+        "Took the consumer app from POC to launch, including onboarding, SMS verification, and the rest of the mobile flow",
+        "Shipped an analytics dashboard with cross-tab analysis and CSV export for the market research team",
+        "Set up shared API packages with RTK Query hooks and types by running codegen off of an OpenAPI spec for C# APIs",
+        "Utilized a shared component library so the consumer, client, and admin applications pulled from the same primitives",
       ],
       skills: [
         "React",
@@ -176,9 +166,9 @@ export const resumeData: ResumeData = {
       location: "Remote",
       website: "https://www.avbmarketing.com/",
       achievements: [
-        "Migrated Create React App (CRA) to Next.js for platform serving 800+ e-commerce websites, improving SEO and initial page load performance",
-        "Internationalized two React applications for English and French markets, expanding customer reach across North America",
-        "Integrated third-party credit verification and payment providers, facilitating $9M+ monthly revenue through checkout systems",
+        "Migrated the e-commerce storefront (~800 sites) from custom webpack to Next.js for the SEO and TTI wins",
+        "Added French localization to two apps so the same codebase could serve our Canadian customers",
+        "Integrated the credit-check and payment vendors behind the checkout flow, which facilitated roughly $9M/month",
       ],
       skills: ["React", "Next.js", "Redux", "Docker", "AWS"],
     },
@@ -190,8 +180,8 @@ export const resumeData: ResumeData = {
       location: "Folsom, CA",
       website: "https://www.intel.com/",
       achievements: [
-        "Developed internal test automation suite for NAND memory validation using Python and Django, improving testing efficiency and coverage",
-        "Created comprehensive onboarding documentation for local development environment setup, reducing new developer ramp-up time",
+        "Worked on a Django and Angular based test automation suite for NAND memory validation, allowing for quick edits and reruns",
+        "Updated the local-environment setup docs that new hires kept getting stuck on",
       ],
       skills: ["AngularJS", "Python", "Django", "SQLAlchemy"],
     },
@@ -203,9 +193,9 @@ export const resumeData: ResumeData = {
       location: "Modesto, CA",
       website: "https://www.stanag.org/",
       achievements: [
-        "Built offline-capable Progressive Web Application (PWA) for field phytosanitary inspections on iPads, enabling data collection without network connectivity",
-        "Developed web application for scale testing records with automated PDF generation for inspection certifications and invoices",
-        "Automated fiscal year reporting with Python scripts to process Excel inspection data and generate vehicle-based reports",
+        "Built an offline-capable PWA for inspectors doing phytosanitary work on iPads in orchards where signal is unreliable",
+        "Wrote a scale-testing app that generated the inspection certificates and invoices the office had been producing by hand",
+        "Used Python to produce per-vehicle milage reports from inspector Excel logs for yearly audits",
       ],
       skills: ["React", "Docker", "Python"],
     },
@@ -217,9 +207,9 @@ export const resumeData: ResumeData = {
       location: "Remote",
       website: "https://www.nice.com/",
       achievements: [
-        "Developed Aspect telephony interface using C# and ZeroMQ to ingest real-time agent and call events for analytics processing",
-        "Implemented factory pattern architecture to integrate multiple audio vendors including inContact, enabling flexible third-party integrations",
-        "Built code generation tool to scaffold customer-specific projects, accelerating new client onboarding and reducing setup time",
+        "Wrote the C# / ZeroMQ adapter that pulled real-time agent and call events out of Aspect for the analytics pipeline",
+        "Refactored the audio-vendor integrations behind a factory so adding inContact didn't require a new branch of the code",
+        "Built a codegen tool that scaffolded the per-customer project setup that had been eating about a week per client onboarding",
       ],
       skills: ["C#", "ZeroMQ"],
       excludeFromPrint: true,
@@ -256,19 +246,38 @@ export const resumeData: ResumeData = {
       skills: ["TypeScript", "JavaScript", "C#", "SQL", "Python"],
     },
     {
+      title: "AI / LLM",
+      skills: [
+        "Anthropic Claude API",
+        "LLM integration",
+        "Prompt engineering",
+        "Tool use / function calling",
+      ],
+    },
+    {
       title: "Frontend",
       skills: [
         "React",
         "Next.js",
         "Redux",
         "Tailwind CSS",
+        "Storybook",
+        "Vitest",
         "Playwright",
         "Testing Library",
       ],
     },
     {
       title: "Backend",
-      skills: [".NET Core", "Node.js", "Hono", "tRPC", "PostgreSQL"],
+      skills: [
+        ".NET Core",
+        "Node.js",
+        "Hono",
+        "REST APIs",
+        "GraphQL",
+        "OpenAPI/Swagger",
+        "PostgreSQL",
+      ],
     },
     {
       title: "DevOps",
@@ -277,7 +286,8 @@ export const resumeData: ResumeData = {
         "Kubernetes",
         "AWS",
         "Turborepo",
-        "CI/CD",
+        "GitHub Actions",
+        "Terraform",
         "Nginx",
         "Git",
       ],

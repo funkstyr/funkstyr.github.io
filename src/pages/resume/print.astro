@@ -11,10 +11,10 @@ const printExperience = getPrintExperience();
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang='en'>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <title>{contact.name} - Resume</title>
     <style is:global>
       /* Reset and base styles */
@@ -45,8 +45,6 @@ const printExperience = getPrintExperience();
       .header {
         text-align: center;
         margin-bottom: 0.15in;
-        border-bottom: 1px solid #000;
-        padding-bottom: 0.1in;
       }
 
       .name {
@@ -168,7 +166,8 @@ const printExperience = getPrintExperience();
 
       /* Print styles */
       @media print {
-        html, body {
+        html,
+        body {
           width: 216mm; /* Letter width */
           height: 279mm; /* Letter height */
           font-size: 10pt;
@@ -222,69 +221,82 @@ const printExperience = getPrintExperience();
     </style>
   </head>
   <body>
-    <button class="print-notice" onclick="window.print()">
+    <button class='print-notice' onclick='window.print()'>
       Press Ctrl+P or click to print/save as PDF
     </button>
 
-    <header class="header">
-      <h1 class="name">{contact.name.toUpperCase()}</h1>
-      <p class="title">{contact.title}</p>
-      <p class="contact">
+    <header class='header'>
+      <h1 class='name'>{contact.name.toUpperCase()}</h1>
+      <p class='title'>{contact.title}</p>
+      <p class='contact'>
         <a href={`mailto:${contact.email}`}>{contact.email}</a>
         <span>|</span>
-        <a href={contact.linkedInUrl}>linkedin.com/in/{contact.linkedIn}</a>
+        <a href={contact.linkedInUrl}>LinkedIn</a>
         <span>|</span>
         <span>{contact.location}</span>
       </p>
     </header>
 
-    <section class="section">
-      <h2 class="section-title">Professional Summary</h2>
-      <p class="summary">{summary.detailed}</p>
+    <section class='section'>
+      <h2 class='section-title'>Professional Summary</h2>
+      <p class='summary'>{summary.detailed}</p>
     </section>
 
-    <section class="section">
-      <h2 class="section-title">Experience</h2>
+    <section class='section'>
+      <h2 class='section-title'>Experience</h2>
 
-      {printExperience.map((exp) => (
-        <div class="job">
-          <div class="job-header">
-            <span class="job-title">{exp.position}</span>
-            <span class="job-date">{exp.startDate} - {exp.endDate === "Current" ? "Present" : exp.endDate}</span>
+      {
+        printExperience.map((exp) => (
+          <div class='job'>
+            <div class='job-header'>
+              <span class='job-title'>{exp.position}</span>
+              <span class='job-date'>
+                {exp.startDate} -{" "}
+                {exp.endDate === "Current" ? "Present" : exp.endDate}
+              </span>
+            </div>
+            <p class='job-company'>
+              {exp.company}
+              {exp.location ? `, ${exp.location}` : ""}
+            </p>
+            <ul class='job-achievements'>
+              {exp.achievements.map((achievement) => (
+                <li>{achievement}</li>
+              ))}
+            </ul>
           </div>
-          <p class="job-company">{exp.company}{exp.location ? `, ${exp.location}` : ""}</p>
-          <ul class="job-achievements">
-            {exp.achievements.map((achievement) => (
-              <li>{achievement}</li>
-            ))}
-          </ul>
-        </div>
-      ))}
+        ))
+      }
     </section>
 
-    <section class="section">
-      <h2 class="section-title">Skills</h2>
-      <div class="skills-grid">
-        {skills.map((category) => (
-          <div class="skill-row">
-            <span class="skill-category">{category.title}:</span>
-            {" "}{category.skills.join(", ")}
-          </div>
-        ))}
+    <section class='section'>
+      <h2 class='section-title'>Skills</h2>
+      <div class='skills-grid'>
+        {
+          skills.map((category) => (
+            <div class='skill-row'>
+              <span class='skill-category'>{category.title}:</span>{" "}
+              {category.skills.join(", ")}
+            </div>
+          ))
+        }
       </div>
     </section>
 
-    <section class="section">
-      <h2 class="section-title">Education</h2>
-      {education.map((edu) => (
-        <div class="education-item">
-          <span class="education-school">{edu.institution}</span>
-          <br />
-          <span class="education-degree">
-            {edu.degree}{edu.minor ? ` | Minor: ${edu.minor}` : ""}
-          </span>
-        </div>
-      ))}
+    <section class='section'>
+      <h2 class='section-title'>Education</h2>
+      {
+        education.map((edu) => (
+          <div class='education-item'>
+            <span class='education-school'>{edu.institution}</span>
+            <br />
+            <span class='education-degree'>
+              {edu.degree}
+              {edu.minor ? ` | Minor: ${edu.minor}` : ""}
+            </span>
+          </div>
+        ))
+      }
     </section>
 
     <script>

@@ -15,21 +15,25 @@ const linkedIn = getSocialLink("LinkedIn");
     <h1 class='text-3xl font-bold'>{contact.name}</h1>
 
     <div class='flex flex-wrap justify-center gap-x-7 gap-y-3'>
-      <Label
-        title={contact.currentCompany}
-        as='a'
-        aria-label={`${contact.currentCompany} website`}
-        href={contact.currentCompanyUrl}
-        target='_blank'
-      >
-        <span class='sr-only'>(opens in new tab)</span>
-        <Icon
-          slot='icon'
-          class='h-5 w-5'
-          name='tabler:briefcase'
-          aria-hidden='true'
-        />
-      </Label>
+      {
+        contact.currentCompany && (
+          <Label
+            title={contact.currentCompany}
+            as='a'
+            aria-label={`${contact.currentCompany} website`}
+            href={contact.currentCompanyUrl}
+            target='_blank'
+          >
+            <span class='sr-only'>(opens in new tab)</span>
+            <Icon
+              slot='icon'
+              class='h-5 w-5'
+              name='tabler:briefcase'
+              aria-hidden='true'
+            />
+          </Label>
+        )
+      }
       <!--
       <Label title='Sacramento, CA'>
         <svg

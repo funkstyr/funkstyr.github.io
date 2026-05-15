@@ -140,7 +140,7 @@ export const resumeData: ResumeData = {
       website: "https://www.letshighlight.com/",
       achievements: [
         "Created an AI-assisted setup wizard that turned a short study description or scoping document into a configured project",
-        "Built a Claude-powered assistant that lets researchers ask questions about study results in plain English instead of pivoting CSVs",
+        "Built an AI chat that lets researchers ask questions about study results in plain English instead of pivoting CSVs",
         "Migrated three apps into a monorepo, splitting code into feature packages and cutting CI times with caching",
         "Took the consumer app from POC to launch, including onboarding, SMS verification, and the rest of the mobile flow",
         "Shipped an analytics dashboard with cross-tab analysis and CSV export for the market research team",
@@ -181,7 +181,8 @@ export const resumeData: ResumeData = {
       website: "https://www.intel.com/",
       achievements: [
         "Worked on a Django and Angular based test automation suite for NAND memory validation, allowing for quick edits and reruns",
-        "Updated the local-environment setup docs that new hires kept getting stuck on",
+        "Utilize SQLAlchemy for relational model and D3 to display filtered graphs displaying execution trends",
+        "Refresh and add documentation to allow for expedited onboarding",
       ],
       skills: ["AngularJS", "Python", "Django", "SQLAlchemy"],
     },

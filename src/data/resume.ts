@@ -96,7 +96,7 @@ export const resumeData: ResumeData = {
 
   aboutMe: [
     "Hi, I'm Michael. I've been writing software for about ten years, mostly on small teams where the line between frontend and backend is wherever you stop typing.",
-    "Lately that's meant LLM features against the Anthropic API, untangling a couple of apps into a Turborepo monorepo, and the kind of test and observability work that's easier to skip than to come back and add a year later.",
+    "Lately that's meant LLM features against the Anthropic models, untangling a couple of apps into a Turborepo monorepo, and the kind of test and observability work that's easier to skip than to come back and add a year later.",
   ],
 
   whatIDo: [
@@ -249,7 +249,7 @@ export const resumeData: ResumeData = {
     {
       title: "AI / LLM",
       skills: [
-        "Anthropic Claude API",
+        "Anthropic Claude models",
         "LLM integration",
         "Prompt engineering",
         "Tool use / function calling",

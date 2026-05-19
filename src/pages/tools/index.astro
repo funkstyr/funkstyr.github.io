@@ -13,7 +13,7 @@ const _DESIGN = [
   },
 ];
 
-const DEVELOPMENT = [
+const WORKSPACE = [
   {
     name: "Code",
     description: "IDE",
@@ -22,10 +22,10 @@ const DEVELOPMENT = [
     iconBgColor: "#2C2C32",
   },
   {
-    name: "Bun",
-    description: "Runtime",
-    href: "https://bun.sh/",
-    iconPath: "bun",
+    name: "Claude",
+    description: "Assistant",
+    href: "https://www.claude.com/",
+    iconPath: "claude",
     iconBgColor: "#06A67F",
   },
   {
@@ -35,12 +35,119 @@ const DEVELOPMENT = [
     iconPath: "warp",
     iconBgColor: "#06A67F",
   },
+];
+
+const ENVIRONMENT = [
   {
-    name: "Claude",
-    description: "Assistant",
-    href: "https://www.claude.com/",
-    iconPath: "claude",
+    name: "Bun",
+    description: "Runtime",
+    href: "https://bun.sh/",
+    iconPath: "bun",
     iconBgColor: "#06A67F",
+  },
+  {
+    name: "Node",
+    description: "Runtime",
+    href: "https://nodejs.org/",
+    iconPath: "node",
+    iconBgColor: "#06A67F",
+  },
+  {
+    name: "pnpm",
+    description: "Package Manager",
+    href: "https://pnpm.io/",
+    iconPath: "pnpm",
+    iconBgColor: "#06A67F",
+  },
+  {
+    name: "Turborepo",
+    description: "Monorepo",
+    href: "https://turborepo.com/",
+    iconPath: "turbo",
+    iconBgColor: "#06A67F",
+  },
+  {
+    name: "oxc",
+    description: "Linter / Formatter",
+    href: "https://oxc.rs/",
+    iconPath: "oxc",
+    iconBgColor: "#06A67F",
+  },
+];
+
+const FRAMEWORKS = [
+  {
+    name: "React",
+    description: "UI",
+    href: "https://react.dev/",
+    iconPath: "tabler:brand-react",
+    iconBgColor: "#2C2C32",
+  },
+  {
+    name: "Tailwind",
+    description: "CSS",
+    href: "https://tailwindcss.com/",
+    iconPath: "tabler:brand-tailwind",
+    iconBgColor: "#2C2C32",
+  },
+  {
+    name: "Next.js",
+    description: "Frontend",
+    href: "https://nextjs.org/",
+    iconPath: "tabler:brand-nextjs",
+    iconBgColor: "#2C2C32",
+  },
+  {
+    name: "TanStack Start",
+    description: "Frontend",
+    href: "https://tanstack.com/start",
+    iconPath: "tabler:stack-2",
+    iconBgColor: "#2C2C32",
+  },
+  {
+    name: "Hono",
+    description: "Backend",
+    href: "https://hono.dev/",
+    iconPath: "tabler:flame",
+    iconBgColor: "#2C2C32",
+  },
+  {
+    name: "Vite",
+    description: "Build",
+    href: "https://vite.dev/",
+    iconPath: "tabler:brand-vite",
+    iconBgColor: "#2C2C32",
+  },
+];
+
+const LIBRARIES = [
+  {
+    name: "TanStack",
+    description: "Query / Router / Forms",
+    href: "https://tanstack.com/",
+    iconPath: "tabler:stack-2",
+    iconBgColor: "#2C2C32",
+  },
+  {
+    name: "Redux Toolkit",
+    description: "State Management",
+    href: "https://redux-toolkit.js.org/",
+    iconPath: "tabler:brand-redux",
+    iconBgColor: "#2C2C32",
+  },
+  {
+    name: "Zod",
+    description: "Schema Validation",
+    href: "https://zod.dev/",
+    iconPath: "tabler:shield-check",
+    iconBgColor: "#2C2C32",
+  },
+  {
+    name: "Drizzle",
+    description: "ORM",
+    href: "https://orm.drizzle.team/",
+    iconPath: "tabler:database",
+    iconBgColor: "#2C2C32",
   },
 ];
 
@@ -108,9 +215,18 @@ const HOSTING = [
         <p>Tools and software I use daily</p>
       </div>
 
-      <ToolSection title='Development' tools={DEVELOPMENT} />
+      <ToolSection title='Workspace' tools={WORKSPACE} />
       <ToolSection title='Hosting' tools={HOSTING} />
       <!-- <ToolSection title='Design' tools={DESIGN} /> -->
+
+      <div>
+        <h1 class='mb-1 text-2xl font-bold'>Stack</h1>
+        <p>Frameworks and libraries I build with</p>
+      </div>
+
+      <ToolSection title='Environment' tools={ENVIRONMENT} />
+      <ToolSection title='Frameworks' tools={FRAMEWORKS} />
+      <ToolSection title='Libraries' tools={LIBRARIES} />
     </div>
   </div>
 </PageLayout>

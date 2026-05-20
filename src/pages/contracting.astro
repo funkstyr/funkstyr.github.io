@@ -1,0 +1,121 @@
+---
+import PageLayout from "../layouts/BaseLayout.astro";
+import Section from "../components/Section.astro";
+import ProfileHeader from "../components/ProfileHeader.astro";
+import Button from "../components/Button.astro";
+import SkillLayout from "../components/SkillLayout.astro";
+import { contractingData } from "../data/contracting";
+import { resumeData } from "../data/resume";
+
+const { intro, services, stack, ctas } = contractingData;
+const { contact } = resumeData;
+
+const siteUrl = "https://funkstyr.me";
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: `${contact.name} — Contract software engineering`,
+  url: `${siteUrl}/contracting/`,
+  provider: {
+    "@type": "Person",
+    name: contact.name,
+    url: `${siteUrl}/`,
+    email: contact.email,
+    jobTitle: contact.title,
+  },
+  areaServed: "Remote",
+  serviceType: services.map((s) => s.title),
+};
+---
+
+<PageLayout
+  meta={{
+    title: "Contracting",
+    description:
+      "Available for contract and consulting work — TypeScript, React, .NET, Node, and Claude LLM features.",
+  }}
+>
+  <script
+    type='application/ld+json'
+    set:html={JSON.stringify(serviceSchema)}
+  />
+
+  <a
+    href='#contact'
+    class='sr-only focus:not-sr-only focus:block focus:static focus:z-50 focus:p-4 m-4'
+    >Skip to contact</a
+  >
+
+  <div class='flex w-full flex-col gap-y-10'>
+    <ProfileHeader />
+
+    <Section title='Available for contract work'>
+      <div class='space-y-4'>
+        {
+          intro.map((paragraph) => (
+            <p class='text-muted-foreground'>{paragraph}</p>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section title='What I can help with' id='services'>
+      <div class='space-y-5'>
+        {
+          services.map((service) => (
+            <div>
+              <h3 class='font-bold mb-1'>{service.title}</h3>
+              <p class='text-muted-foreground'>{service.description}</p>
+            </div>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section title='Stack' id='stack'>
+      {stack.map((group) => <SkillLayout title={group.title} skills={group.items} />)}
+    </Section>
+
+    <Section title='Get in touch' id='contact'>
+      <div class='flex flex-col gap-y-3'>
+        <p class='text-muted-foreground'>
+          Send a short note about what you're building and the timeline you have in mind, and I'll get back to you within a couple of days.
+        </p>
+        <div class='flex flex-wrap gap-3'>
+          {
+            ctas.map((cta) => (
+              <Button
+                as='a'
+                title={cta.label}
+                href={cta.href}
+                data-track-contracting-cta={cta.method}
+              />
+            ))
+          }
+        </div>
+      </div>
+    </Section>
+  </div>
+</PageLayout>
+
+<script>
+  import {
+    trackContractingView,
+    trackContractingCtaClick,
+  } from "../utils/analytics";
+
+  trackContractingView();
+
+  document
+    .querySelectorAll<HTMLAnchorElement>("[data-track-contracting-cta]")
+    .forEach((link) => {
+      link.addEventListener("click", () => {
+        const method = link.dataset.trackContractingCta as
+          | "email"
+          | "linkedin"
+          | undefined;
+        if (method) trackContractingCtaClick(method);
+      });
+    });
+</script>

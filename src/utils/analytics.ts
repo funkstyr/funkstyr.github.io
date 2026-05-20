@@ -216,6 +216,28 @@ export function trackToolClick(toolName: string, category: string): void {
 }
 
 // ============================================
+// Contracting Page Events
+// ============================================
+
+/**
+ * Track when someone views the contracting page
+ */
+export function trackContractingView(): void {
+  trackEvent("contracting_viewed", {
+    referrer: typeof document !== "undefined" ? document.referrer : "",
+  });
+}
+
+/**
+ * Track clicks on a contracting page CTA (email / linkedin)
+ */
+export function trackContractingCtaClick(method: "email" | "linkedin"): void {
+  trackEvent("contracting_cta_clicked", {
+    method,
+  });
+}
+
+// ============================================
 // Utility Functions
 // ============================================
 

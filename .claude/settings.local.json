@@ -1,10 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(bun run type-check:*)",
-      "Bash(bun run build)",
-      "Bash(grep:*)",
-      "Bash(find:*)"
-    ]
+    "allow": ["Bash(grep:*)", "Bash(find:*)", "Bash(bun run *)"]
   }
 }

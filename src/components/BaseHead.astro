@@ -3,11 +3,12 @@
 // all pages through the use of the <BaseHead /> component.
 import "../styles/global.css";
 
-import { Font } from "astro:assets";
+import { Font, getImage } from "astro:assets";
 import { siteConfig } from "../site.config";
 import { resumeData } from "../data/resume";
 import type { SiteMeta } from "../types";
 import JsonLd from "./JsonLd.astro";
+import avatarSrc from "../assets/avatar.jpg";
 
 type Props = SiteMeta;
 
@@ -25,6 +26,24 @@ const socialImageURL = new URL(
   ogImage ? ogImage : "/avatar.jpg",
   Astro.url
 ).href;
+
+// Preload the AVIF avatar on pages that render it (home + resume) so it
+// races the parser to first paint instead of waiting for body discovery.
+const showsAvatar =
+  Astro.url.pathname === "/" ||
+  Astro.url.pathname === "" ||
+  Astro.url.pathname.startsWith("/resume");
+const preloadAvatar = showsAvatar
+  ? await getImage({
+      src: avatarSrc,
+      width: 224,
+      height: 224,
+      format: "avif",
+      quality: 33,
+    })
+  : null;
+
+const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 ---
 
 <meta charset='utf-8' />
@@ -32,14 +51,7 @@ const socialImageURL = new URL(
   content='width=device-width, initial-scale=1.0, shrink-to-fit=no'
   name='viewport'
 />
-<meta content='IE=edge' http-equiv='X-UA-Compatible' />
 <title>{siteTitle}</title>
-
-{/* Icons / Favicon */}
-<!-- <link href="favicon/favicon.ico" rel="icon" sizes="any" />
-<link href="favicon/icon.svg" rel="icon" type="image/svg+xml" />
-<link href="/apple-touch-icon.png" rel="apple-touch-icon" />
-<link href="/manifest.webmanifest" rel="manifest" /> -->
 
 <link
   rel='apple-touch-icon'
@@ -60,8 +72,28 @@ const socialImageURL = new URL(
 />
 <link rel='manifest' href='/favicon/site.webmanifest' />
 
+{/* LCP image preload (only on pages that render it) */}
+{preloadAvatar && (
+  <link
+    rel='preload'
+    as='image'
+    type='image/avif'
+    href={preloadAvatar.src}
+    fetchpriority='high'
+  />
+)}
+
 {/* Font preloads */}
 <Font cssVariable="--font-sans" preload />
+
+{/* Open early connections to PostHog endpoints so the eventual analytics
+    request doesn't pay full DNS + TLS RTT when it fires. */}
+{posthogKey && (
+  <>
+    <link rel='preconnect' href='https://us.i.posthog.com' crossorigin />
+    <link rel='preconnect' href='https://us-assets.i.posthog.com' crossorigin />
+  </>
+)}
 
 {/* Canonical URL */}
 <link rel='canonical' href={canonicalURL} />

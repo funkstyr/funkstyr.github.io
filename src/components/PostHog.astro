@@ -1,163 +1,131 @@
 ---
 // PostHog Analytics Configuration
 // Docs: https://posthog.com/docs/libraries/js
-
-// Pass env var from server to client via define:vars
-// This ensures the value is properly injected at build time
+//
+// Loading strategy: do nothing until the browser is idle OR the user makes
+// a meaningful interaction (click / scroll / keydown), then lazy-init.
+// Session recording is disabled to avoid shipping rrweb on every page.
 const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 ---
 
+{posthogKey && (
 <script is:inline define:vars={{ posthogKey }}>
-  // Respect Do Not Track (DNT) and Global Privacy Control (GPC) browser preferences
-  var doNotTrack = navigator.doNotTrack === "1" || window.doNotTrack === "1";
-  var globalPrivacyControl = navigator.globalPrivacyControl === true;
+  (() => {
+    if (navigator.doNotTrack === "1" || window.doNotTrack === "1") return;
+    if (navigator.globalPrivacyControl === true) return;
 
-  // Only initialize PostHog if privacy signals are not set and we have an API key
-  if (!doNotTrack && !globalPrivacyControl && posthogKey) {
-    // Defer PostHog loading until page is interactive to avoid blocking critical resources
-    var posthogInitialized = false;
+    let booted = false;
+    const events = ["pointerdown", "scroll", "keydown"];
 
-    function initPostHog() {
-      if (posthogInitialized) return;
-      posthogInitialized = true;
+    const boot = () => {
+      if (booted) return;
+      booted = true;
+      for (const e of events) document.removeEventListener(e, boot);
 
-      // Remove event listeners once initialized
-      document.removeEventListener("click", initPostHog);
-      document.removeEventListener("scroll", initPostHog);
-      document.removeEventListener("keydown", initPostHog);
+      // PostHog snippet (loader only — full SDK is pulled in by the loader).
+      !(function (t, e) {
+        var o, n, p, r;
+        e.__SV ||
+          ((window.posthog = e),
+          (e._i = []),
+          (e.init = function (i, s, a) {
+            function g(t, e) {
+              var o = e.split(".");
+              (2 == o.length && ((t = t[o[0]]), (e = o[1])),
+                (t[e] = function () {
+                  t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+                }));
+            }
+            (((p = t.createElement("script")).type = "text/javascript"),
+              (p.crossOrigin = "anonymous"),
+              (p.async = !0),
+              (p.src =
+                s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") +
+                "/static/array.js"),
+              (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(
+                p,
+                r
+              ));
+            var u = e;
+            for (
+              void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+                u.people = u.people || [],
+                u.toString = function (t) {
+                  var e = "posthog";
+                  return (
+                    "posthog" !== a && (e += "." + a),
+                    t || (e += " (stub)"),
+                    e
+                  );
+                },
+                u.people.toString = function () {
+                  return u.toString(1) + ".people (stub)";
+                },
+                o =
+                  "init be ws Ss me ys capture Ne calculateEventProperties xs register register_once register_for_session unregister unregister_for_session Rs getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Is ks createPersonProfile Ps bs opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing $s debug Es getPageViewId captureTraceFeedback captureTraceMetric".split(
+                    " "
+                  ),
+                n = 0;
+              n < o.length;
+              n++
+            )
+              g(u, o[n]);
+            e._i.push([i, s, a]);
+          }),
+          (e.__SV = 1));
+      })(document, window.posthog || []);
 
-      // PostHog loader snippet
-    !(function (t, e) {
-      var o, n, p, r;
-      e.__SV ||
-        ((window.posthog = e),
-        (e._i = []),
-        (e.init = function (i, s, a) {
-          function g(t, e) {
-            var o = e.split(".");
-            (2 == o.length && ((t = t[o[0]]), (e = o[1])),
-              (t[e] = function () {
-                t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
-              }));
-          }
-          (((p = t.createElement("script")).type = "text/javascript"),
-            (p.crossOrigin = "anonymous"),
-            (p.async = !0),
-            (p.src =
-              s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") +
-              "/static/array.js"),
-            (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(
-              p,
-              r
-            ));
-          var u = e;
-          for (
-            void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
-              u.people = u.people || [],
-              u.toString = function (t) {
-                var e = "posthog";
-                return (
-                  "posthog" !== a && (e += "." + a),
-                  t || (e += " (stub)"),
-                  e
-                );
-              },
-              u.people.toString = function () {
-                return u.toString(1) + ".people (stub)";
-              },
-              o =
-                "init be ws Ss me ys capture Ne calculateEventProperties xs register register_once register_for_session unregister unregister_for_session Rs getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Is ks createPersonProfile Ps bs opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing $s debug Es getPageViewId captureTraceFeedback captureTraceMetric".split(
-                  " "
-                ),
-              n = 0;
-            n < o.length;
-            n++
-          )
-            g(u, o[n]);
-          e._i.push([i, s, a]);
-        }),
-        (e.__SV = 1));
-    })(document, window.posthog || []);
+      posthog.init(posthogKey, {
+        api_host: "https://us.i.posthog.com",
+        person_profiles: "identified_only",
 
-    // Initialize PostHog with optimized configuration
-    posthog.init(posthogKey, {
-      api_host: "https://us.i.posthog.com",
+        capture_pageview: true,
+        capture_pageleave: true,
 
-      // Use identified_only for cost-effective anonymous analytics
-      // This prevents creating person profiles for every visitor
-      person_profiles: "identified_only",
+        // Session recording disabled — rrweb is too heavy for the perf budget.
+        disable_session_recording: true,
 
-      // Pageview tracking
-      capture_pageview: true,
-      capture_pageleave: true, // Required for bounce rate calculation
+        autocapture: {
+          dom_event_allowlist: ["click", "submit"],
+          element_allowlist: ["a", "button", "form"],
+        },
 
-      // Session recording with privacy controls
-      disable_session_recording: false,
-      session_recording: {
-        maskAllInputs: true,
-        maskTextSelector: "[data-mask], .email, .phone, .sensitive",
-        blockSelector: "[data-block-recording]",
-        recordCrossOriginIframes: false,
-      },
+        capture_exceptions: true,
 
-      // Autocapture settings - limit to meaningful interactions
-      autocapture: {
-        dom_event_allowlist: ["click", "submit", "change"],
-        element_allowlist: [
-          "a",
-          "button",
-          "form",
-          "input",
-          "select",
-          "textarea",
-        ],
-      },
-
-      // Capture JavaScript errors for debugging
-      capture_exceptions: true,
-
-      // Performance callback - capture initial page context
-      loaded: function (posthog) {
-        // Track blog post views with metadata
-        if (window.location.pathname.startsWith("/blog/")) {
-          var slug = window.location.pathname.split("/blog/")[1];
-          if (slug) {
-            slug = slug.replace(/\/$/, "");
-            posthog.capture("blog_post_viewed", {
-              title: document.title.split(" • ")[0],
-              slug: slug,
-              path: window.location.pathname,
+        loaded: function (posthog) {
+          const path = window.location.pathname;
+          if (path.startsWith("/blog/")) {
+            const slug = path.split("/blog/")[1].replace(/\/$/, "");
+            if (slug) {
+              posthog.capture("blog_post_viewed", {
+                title: document.title.split(" • ")[0],
+                slug: slug,
+                path: path,
+                referrer: document.referrer,
+              });
+            }
+          } else if (path === "/resume/" || path === "/resume") {
+            posthog.capture("resume_viewed", {
               referrer: document.referrer,
+              source:
+                new URLSearchParams(window.location.search).get("utm_source") ||
+                "direct",
             });
           }
-        }
+        },
+      });
+    };
 
-        // Track resume page views with referrer info
-        if (
-          window.location.pathname === "/resume/" ||
-          window.location.pathname === "/resume"
-        ) {
-          posthog.capture("resume_viewed", {
-            referrer: document.referrer,
-            source:
-              new URLSearchParams(window.location.search).get("utm_source") ||
-              "direct",
-          });
-        }
-      },
-    });
-    } // end initPostHog function
+    for (const e of events)
+      document.addEventListener(e, boot, { once: true, passive: true });
 
-    // Initialize on user interaction (click, scroll, or keypress)
-    document.addEventListener("click", initPostHog, { once: true, passive: true });
-    document.addEventListener("scroll", initPostHog, { once: true, passive: true });
-    document.addEventListener("keydown", initPostHog, { once: true, passive: true });
-
-    // Fallback: initialize after browser is idle, or after 4 seconds max
+    // Fallback for users who never interact: wait until the browser is
+    // genuinely idle, with a generous timeout so we never block real work.
     if ("requestIdleCallback" in window) {
-      requestIdleCallback(initPostHog, { timeout: 4000 });
+      requestIdleCallback(boot, { timeout: 8000 });
     } else {
-      setTimeout(initPostHog, 4000);
+      setTimeout(boot, 6000);
     }
-  }
+  })();
 </script>
+)}

@@ -1,5 +1,4 @@
 ---
-import { Icon } from "astro-icon/components";
 import Label from "./Label.astro";
 import Avatar from "./Avatar.astro";
 import { resumeData, getSocialLink } from "../data/resume";
@@ -25,12 +24,19 @@ const linkedIn = getSocialLink("LinkedIn");
             target='_blank'
           >
             <span class='sr-only'>(opens in new tab)</span>
-            <Icon
+            <svg
               slot='icon'
               class='h-5 w-5'
-              name='tabler:briefcase'
+              viewBox='0 0 24 24'
               aria-hidden='true'
-            />
+              fill='none'
+              stroke='currentColor'
+              stroke-linecap='round'
+              stroke-linejoin='round'
+              stroke-width='2'
+            >
+              <path d='M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm5-2V3.5A1.5 1.5 0 0 1 9.5 2h5A1.5 1.5 0 0 1 16 3.5V5M12 12v.01M3 13a20 20 0 0 0 18 0' />
+            </svg>
           </Label>
         )
       }
@@ -56,12 +62,22 @@ const linkedIn = getSocialLink("LinkedIn");
         target='_blank'
       >
         <span class='sr-only'>(opens in new tab)</span>
-        <Icon
+        <svg
           slot='icon'
           class='h-5 w-5 text-foreground/75'
-          name='tabler:brand-linkedin'
+          viewBox='0 0 24 24'
           aria-hidden='true'
-        />
+          fill='none'
+          stroke='currentColor'
+          stroke-linecap='round'
+          stroke-linejoin='round'
+          stroke-width='2'
+        >
+          <path d='M8 11v5m0-8v.01M12 16v-5m4 5v-3a2 2 0 1 0-4 0' />
+          <path
+            d='M3 7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z'
+          />
+        </svg>
       </Label>
 
       <Label

@@ -235,8 +235,9 @@ export const resumeData: ResumeData = {
       imagePath: "/src/assets/coming-soon.png",
     },
     {
-      title: "Loading...",
-      description: "",
+      title: "POC Sandbox",
+      description: "POC for Bun and Turborepo.",
+      url: "https://funkstyr.me/bun-mono/",
       imagePath: "/src/assets/coming-soon.png",
     },
   ],

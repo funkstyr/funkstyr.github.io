@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getAllPosts, getUniqueTags } from "../utils/post";
+import { getAllPosts, getUniqueTags, sortMDByDate } from "../utils/post";
 
 export const prerender = true;
 
@@ -40,10 +40,19 @@ export const GET: APIRoute = async ({ site }) => {
   }
 
   const now = new Date().toISOString();
-  const posts = await getAllPosts();
+  const posts = sortMDByDate(await getAllPosts());
   const tags = getUniqueTags(posts);
 
+  const POST_PRIORITY_MAX = 0.7;
+  const POST_PRIORITY_MIN = 0.2;
+
   const entries: SitemapEntry[] = [
+    {
+      loc: joinUrl(site, "/resume/"),
+      lastmod: now,
+      changefreq: "monthly",
+      priority: 1.0,
+    },
     {
       loc: joinUrl(site, "/"),
       lastmod: now,
@@ -51,42 +60,46 @@ export const GET: APIRoute = async ({ site }) => {
       priority: 1.0,
     },
     {
-      loc: joinUrl(site, "/blog/"),
+      loc: joinUrl(site, "/contracting/"),
       lastmod: now,
-      changefreq: "weekly",
+      changefreq: "monthly",
       priority: 0.9,
     },
     {
-      loc: joinUrl(site, "/tags/"),
+      loc: joinUrl(site, "/blog/"),
       lastmod: now,
       changefreq: "weekly",
-      priority: 0.6,
+      priority: 0.8,
     },
     {
       loc: joinUrl(site, "/tools/"),
       lastmod: now,
       changefreq: "monthly",
-      priority: 0.6,
+      priority: 0.5,
     },
     {
-      loc: joinUrl(site, "/resume/"),
+      loc: joinUrl(site, "/tags/"),
       lastmod: now,
-      changefreq: "monthly",
-      priority: 0.8,
+      changefreq: "weekly",
+      priority: 0.1,
     },
   ];
 
-  for (const post of posts) {
+  const lastPostIndex = Math.max(posts.length - 1, 1);
+  posts.forEach((post, index) => {
     const lastmod = new Date(
       post.data.updatedDate ?? post.data.publishDate,
     ).toISOString();
+    const ratio = index / lastPostIndex;
+    const priority =
+      POST_PRIORITY_MAX - (POST_PRIORITY_MAX - POST_PRIORITY_MIN) * ratio;
     entries.push({
       loc: joinUrl(site, `/blog/${post.id}/`),
       lastmod,
       changefreq: "monthly",
-      priority: 0.7,
+      priority: Math.round(priority * 10) / 10,
     });
-  }
+  });
 
   const blogPages = Math.ceil(posts.length / PAGE_SIZE);
   for (let page = 2; page <= blogPages; page++) {
@@ -105,14 +118,14 @@ export const GET: APIRoute = async ({ site }) => {
       loc: joinUrl(site, `/tags/${tag}/`),
       lastmod: now,
       changefreq: "weekly",
-      priority: 0.5,
+      priority: 0.1,
     });
     for (let page = 2; page <= tagPages; page++) {
       entries.push({
         loc: joinUrl(site, `/tags/${tag}/${page}/`),
         lastmod: now,
         changefreq: "weekly",
-        priority: 0.4,
+        priority: 0.1,
       });
     }
   }

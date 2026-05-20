@@ -77,21 +77,11 @@
 
 <script>
   import { trackResumeNavClick, trackHeaderNavClick } from "../../utils/analytics";
+  import { toggleTheme } from "../../utils/theme";
 
-  function getCurrentTheme() {
-    return localStorage.getItem("theme");
-  }
-
-  const toggleDarkModeButton = document.getElementById("toggleDarkMode");
-
-  toggleDarkModeButton?.addEventListener("click", () => {
-    const theme = getCurrentTheme() === "light" ? "dark" : "light";
-
-    const toggleDarkModeEvent = new CustomEvent("theme-change", {
-      detail: { theme },
-    });
-    document.dispatchEvent(toggleDarkModeEvent);
-  });
+  document
+    .getElementById("toggleDarkMode")
+    ?.addEventListener("click", toggleTheme);
 
   // Track navigation link clicks
   document.querySelectorAll("[data-track-nav]").forEach((link) => {

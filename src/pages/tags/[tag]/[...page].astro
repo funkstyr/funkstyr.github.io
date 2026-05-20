@@ -8,7 +8,12 @@ import Pagination from "../../../components/Paginator.astro";
 import PostPreview from "../../../components/blog/PostPreview.astro";
 import PageLayout from "../../../layouts/BaseLayout.astro";
 import Button from "../../../components/Button.astro";
-import { getAllPosts, getUniqueTags, sortMDByDate } from "../../../utils";
+import {
+  buildPaginationLinks,
+  getAllPosts,
+  getUniqueTags,
+  sortMDByDate,
+} from "../../../utils";
 
 export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
   const allPosts = await getAllPosts();
@@ -38,20 +43,7 @@ const meta = {
   title: `Tag: ${tag}`,
 };
 
-const paginationProps = {
-  ...(page.url.prev && {
-    prevUrl: {
-      text: `← Previous Tags`,
-      url: page.url.prev,
-    },
-  }),
-  ...(page.url.next && {
-    nextUrl: {
-      text: `Next Tags →`,
-      url: page.url.next,
-    },
-  }),
-};
+const paginationProps = buildPaginationLinks(page, "Tags");
 ---
 
 <PageLayout meta={meta}>

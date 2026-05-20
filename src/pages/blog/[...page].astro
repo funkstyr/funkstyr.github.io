@@ -9,7 +9,12 @@ import FeaturedClaudeSeries from "../../components/FeaturedClaudeSeries.astro";
 import Pagination from "../../components/Paginator.astro";
 import PostPreview from "../../components/blog/PostPreview.astro";
 import PageLayout from "../../layouts/BaseLayout.astro";
-import { getAllPosts, getUniqueTags, sortMDByDate } from "../../utils";
+import {
+  buildPaginationLinks,
+  getAllPosts,
+  getUniqueTags,
+  sortMDByDate,
+} from "../../utils";
 
 export const getStaticPaths = (async ({ paginate }) => {
   const allPosts = await getAllPosts();
@@ -30,20 +35,7 @@ const meta = {
   title: "Blog",
 };
 
-const paginationProps = {
-  ...(page.url.prev && {
-    prevUrl: {
-      text: `← Previous Posts`,
-      url: page.url.prev,
-    },
-  }),
-  ...(page.url.next && {
-    nextUrl: {
-      text: `Next Posts →`,
-      url: page.url.next,
-    },
-  }),
-};
+const paginationProps = buildPaginationLinks(page, "Posts");
 ---
 
 <PageLayout meta={meta}>

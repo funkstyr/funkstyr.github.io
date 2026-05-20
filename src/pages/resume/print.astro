@@ -1,13 +1,13 @@
 ---
 /**
- * Print-optimized resume page for PDF generation
- * ATS-friendly: single-column, no graphics, standard headings
- * Excludes: About section, Projects section, experiences marked excludeFromPrint
+ * Print-optimized resume page for PDF generation.
+ * ATS-friendly: single-column, no graphics, standard headings.
+ * Inclusion/order/filtering rules live in getResumeView("print").
  */
-import { resumeData, getPrintExperience } from "../../data/resume";
+import { getResumeView } from "../../data/resume";
 
-const { contact, summary, education, skills } = resumeData;
-const printExperience = getPrintExperience();
+const view = getResumeView("print");
+const { contact } = view;
 ---
 
 <!doctype html>
@@ -237,67 +237,78 @@ const printExperience = getPrintExperience();
       </p>
     </header>
 
-    <section class='section'>
-      <h2 class='section-title'>Professional Summary</h2>
-      <p class='summary'>{summary.detailed}</p>
-    </section>
-
-    <section class='section'>
-      <h2 class='section-title'>Experience</h2>
-
-      {
-        printExperience.map((exp) => (
-          <div class='job'>
-            <div class='job-header'>
-              <span class='job-title'>{exp.position}</span>
-              <span class='job-date'>
-                {exp.startDate} -{" "}
-                {exp.endDate === "Current" ? "Present" : exp.endDate}
-              </span>
-            </div>
-            <p class='job-company'>
-              {exp.company}
-              {exp.location ? `, ${exp.location}` : ""}
-            </p>
-            <ul class='job-achievements'>
-              {exp.achievements.map((achievement) => (
-                <li>{achievement}</li>
-              ))}
-            </ul>
-          </div>
-        ))
-      }
-    </section>
-
-    <section class='section'>
-      <h2 class='section-title'>Skills</h2>
-      <div class='skills-grid'>
-        {
-          skills.map((category) => (
-            <div class='skill-row'>
-              <span class='skill-category'>{category.title}:</span>{" "}
-              {category.skills.join(", ")}
-            </div>
-          ))
+    {
+      view.sections.map((section) => {
+        switch (section.kind) {
+          case "summary":
+            return (
+              <section class='section'>
+                <h2 class='section-title'>{section.title}</h2>
+                <p class='summary'>{section.lines.join(" ")}</p>
+              </section>
+            );
+          case "experience":
+            return (
+              <section class='section'>
+                <h2 class='section-title'>{section.title}</h2>
+                {section.experiences.map((exp) => (
+                  <div class='job'>
+                    <div class='job-header'>
+                      <span class='job-title'>{exp.position}</span>
+                      <span class='job-date'>
+                        {exp.startDate} -{" "}
+                        {exp.endDate === "Current" ? "Present" : exp.endDate}
+                      </span>
+                    </div>
+                    <p class='job-company'>
+                      {exp.company}
+                      {exp.location ? `, ${exp.location}` : ""}
+                    </p>
+                    <ul class='job-achievements'>
+                      {exp.achievements.map((achievement) => (
+                        <li>{achievement}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </section>
+            );
+          case "skills":
+            return (
+              <section class='section'>
+                <h2 class='section-title'>{section.title}</h2>
+                <div class='skills-grid'>
+                  {section.categories.map((category) => (
+                    <div class='skill-row'>
+                      <span class='skill-category'>{category.title}:</span>{" "}
+                      {category.skills.join(", ")}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          case "education":
+            return (
+              <section class='section'>
+                <h2 class='section-title'>{section.title}</h2>
+                {section.education.map((edu) => (
+                  <div class='education-item'>
+                    <span class='education-school'>{edu.institution}</span>
+                    <br />
+                    <span class='education-degree'>
+                      {edu.degree}
+                      {edu.minor ? ` | Minor: ${edu.minor}` : ""}
+                    </span>
+                  </div>
+                ))}
+              </section>
+            );
+          case "projects":
+            // Projects are excluded from the print view by getResumeView.
+            return null;
         }
-      </div>
-    </section>
-
-    <section class='section'>
-      <h2 class='section-title'>Education</h2>
-      {
-        education.map((edu) => (
-          <div class='education-item'>
-            <span class='education-school'>{edu.institution}</span>
-            <br />
-            <span class='education-degree'>
-              {edu.degree}
-              {edu.minor ? ` | Minor: ${edu.minor}` : ""}
-            </span>
-          </div>
-        ))
-      }
-    </section>
+      })
+    }
 
     <script>
       // Auto-trigger print dialog when page loads (optional - user can dismiss)

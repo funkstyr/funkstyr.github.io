@@ -9,8 +9,9 @@ import ThemeProvider from "../components/ThemeProvider.astro";
 import Posthog from "../components/PostHog.astro";
 
 // Inline theme-resolution script — must run before <body> paints to avoid
-// a flash of the wrong theme. Keep this tiny and synchronous.
-const noFlashTheme = `(()=>{try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark")t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="dark")document.documentElement.classList.add("dark");}catch(e){}})();`;
+// a flash of the wrong theme. Cannot import modules; keep in sync with
+// resolveTheme + applyTheme in src/utils/theme.ts.
+const noFlashTheme = `(()=>{try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark")t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.dataset.theme=t;}catch(e){}})();`;
 
 interface Props {
   meta: SiteMeta;

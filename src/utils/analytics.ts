@@ -242,21 +242,6 @@ export function trackContractingCtaClick(method: "email" | "linkedin"): void {
 // ============================================
 
 /**
- * Get the current scroll percentage of the page
- */
-export function getScrollPercent(): number {
-  if (typeof window === "undefined" || typeof document === "undefined") {
-    return 0;
-  }
-  const h = document.documentElement;
-  const b = document.body;
-  const scrollTop = h.scrollTop || b.scrollTop;
-  const scrollHeight = h.scrollHeight || b.scrollHeight;
-  const clientHeight = h.clientHeight;
-  return (scrollTop / (scrollHeight - clientHeight)) * 100;
-}
-
-/**
  * Detect platform from URL
  */
 export function detectPlatformFromUrl(url: string): ExternalPlatform {

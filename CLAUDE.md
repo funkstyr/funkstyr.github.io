@@ -101,12 +101,12 @@ The resume uses a centralized data architecture with a single source of truth:
 - `ResumeSummary` - short version (web About section) and detailed version (print Professional Summary)
 
 **Helper Functions:**
-- `getPrintExperience()` - filters experiences, excluding those with `excludeFromPrint: true`
-- `getSkillsByCategory(title)` - retrieves skills for a specific category
+- `getResumeView(target)` - returns a `ResumeView` with `contact` and ordered, filtered `sections` for `"web"` or `"print"`. Both resume pages iterate `view.sections` and switch on `section.kind`. Per-target inclusion / order / filtering rules live in this one function.
+- `getSocialLink(platform)` / `getSocialUrls()` / `getAllSkills()` - helpers used by `ProfileHeader`, `Footer`, and the schema components
 
 **Print/PDF Version (`/resume/print`):**
 - ATS-friendly format: single-column, no graphics, standard fonts (Arial)
-- Excludes: About section, Projects section, experiences marked `excludeFromPrint`
+- Excludes: About section, Projects section, experiences marked `excludeFromPrint` — encoded in `getResumeView("print")`
 - Uses `<style is:global>` to ensure styles apply to html/body elements
 - Optimized for single-page output with 36px padding
 
@@ -187,11 +187,12 @@ import { Icon } from "astro-icon/components";
 
 ### Theme / Dark Mode
 
-**Implementation:** `ThemeProvider.astro` handles theme with inline script (no hydration):
-- Reads from `localStorage` key `theme` and system `prefers-color-scheme`
-- Sets `dark` class on document root
-- Custom event `theme-change` for cross-component communication
-- Handles View Transitions with `astro:after-swap` hook
+**Implementation:** `src/utils/theme.ts` is the deep module — exports `Theme`, `resolveTheme`, `getCurrentTheme`, `applyTheme`, `setTheme`, `toggleTheme`, and the `THEME_STORAGE_KEY` / `THEME_CHANGE_EVENT` constants. Callers:
+- `BaseLayout.astro` runs an inline no-flash script in `<head>` to apply the theme before paint. The script cannot import modules; it must stay in sync with `resolveTheme` + `applyTheme`.
+- `ThemeProvider.astro` (end of body) re-applies the theme on `astro:after-swap` and follows system pref changes when the user hasn't picked.
+- `Header.astro` toggle button calls `toggleTheme()` directly.
+- `applyTheme` writes BOTH the `.dark` class (for Tailwind) AND the `data-theme` attribute (for Expressive Code's per-theme CSS).
+- A `theme-change` `CustomEvent` is dispatched on user toggle for any external listeners.
 
 **CSS Variables:** Defined in `global.css` using HSL format:
 - Light mode in `:root`, dark mode overrides in `.dark`
@@ -230,11 +231,11 @@ export function cn(...inputs: ClassValue[]) {
 
 **`src/utils/date.ts`** - Date formatting using `Intl.DateTimeFormat` with config from `site.config.ts`.
 
-**`src/utils/domElement.ts`** - DOM helpers:
-- `toggleClass()`, `elementHasClass()`
-- `rootInDarkMode()` - checks `data-theme` attribute (not class)
+**`src/utils/theme.ts`** - The deep theme module. See "Theme / Dark Mode" section above.
 
 **`src/utils/generateToc.ts`** - Generates hierarchical table of contents from markdown headings. Uses `<Astro.self>` for recursive rendering in `TOCHeading.astro`.
+
+**`src/utils/pagination.ts`** - `buildPaginationLinks(page, itemNoun)` builds prev/next props for `Paginator.astro` from an Astro `Page`. Used by `blog/[...page].astro` and `tags/[tag]/[...page].astro`.
 
 **`src/utils/post.ts`** - Post collection management:
 - `getAllPosts()` - Fetches posts, filters drafts in production
@@ -242,10 +243,17 @@ export function cn(...inputs: ClassValue[]) {
 - `getUniqueTags()` / `getUniqueTagsWithCount()` - Tag extraction utilities
 - `getPostNavigation()` - Gets prev/next posts for navigation
 
-**`src/utils/analytics.ts`** - PostHog tracking utilities:
+**`src/utils/analytics.ts`** - PostHog tracking utilities (the typed event contract):
 - All functions check `typeof window !== "undefined"` before calling PostHog
 - Event properties use snake_case convention
 - Organized by feature: `trackBlogScrollDepth()`, `trackBlogPostCompleted()`, `trackExternalLinkClick()`, etc.
+- The `trackEvent(name, props)` function is the transport seam. Backend swap (PostHog → other) only changes that function's body.
+
+**`src/utils/tracking/`** - DOM-aware observer modules; analytics-agnostic (take callbacks, no PostHog import):
+- `scrollDepth.ts` - `observeScrollDepth({ milestones?, onMilestone })`; rAF-coalesced. Returns unsubscribe.
+- `visibility.ts` - `observeVisibility({ target, threshold?, once?, onVisible })`; wraps `IntersectionObserver`.
+- `linkClicks.ts` - `trackLinkClicks({ root, filter?, onClick })`; event-delegated.
+- `blogReading.ts` - `bootBlogReading()` orchestration; wires the above observers to typed analytics calls. `BlogPost.astro` imports and invokes it once.
 
 ### Accessibility Patterns
 

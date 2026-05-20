@@ -1,32 +1,13 @@
-<script is:inline>
-  (() => {
-    const root = document.documentElement;
-    const darkPref = window.matchMedia("(prefers-color-scheme: dark)");
+<script>
+  import { applyTheme, resolveTheme } from "../utils/theme";
 
-    const resolve = () => {
-      const stored = localStorage.getItem("theme");
-      if (stored === "light" || stored === "dark") return stored;
-      return darkPref.matches ? "dark" : "light";
-    };
+  // Re-apply theme after Astro view transitions so multi-tab pref changes
+  // catch up on navigation.
+  document.addEventListener("astro:after-swap", () => applyTheme(resolveTheme()));
 
-    const apply = (theme) => {
-      root.classList.toggle("dark", theme === "dark");
-    };
-
-    apply(resolve());
-
-    document.addEventListener("astro:after-swap", () => apply(resolve()));
-
-    document.addEventListener("theme-change", (e) => {
-      const next = e.detail?.theme;
-      if (next !== "light" && next !== "dark") return;
-      localStorage.setItem("theme", next);
-      apply(next);
-    });
-
-    darkPref.addEventListener("change", (e) => {
-      if (localStorage.getItem("theme")) return;
-      apply(e.matches ? "dark" : "light");
-    });
-  })();
+  // Follow system preference changes only when the user hasn't picked a theme.
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    if (localStorage.getItem("theme")) return;
+    applyTheme(e.matches ? "dark" : "light");
+  });
 </script>

@@ -156,154 +156,21 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
 </PageLayout>
 
 <script>
-  import {
-    trackBlogScrollDepth,
-    trackBlogPostCompleted,
-    trackBlogPostView,
-    trackBlogNavClick,
-    trackEvent,
-    getScrollPercent,
-    detectPlatformFromUrl,
-  } from "../utils/analytics";
+  import { bootBlogReading } from "../utils/tracking/blogReading";
 
   const scrollBtn = document.getElementById("to-top-btn") as HTMLButtonElement;
   const targetHeader = document.getElementById("blog-hero") as HTMLDivElement;
 
-  // Track blog post view
-  const postData = document.getElementById("post-data");
-  if (postData) {
-    const title = postData.dataset.title || "";
-    const slug = postData.dataset.slug || "";
-    const tags = JSON.parse(postData.dataset.tags || "[]");
-    const readingTimeStr = postData.dataset.readingTime || "0";
-    // Parse "X min read" to get just the number
-    const readingTime = parseInt(readingTimeStr.split(" ")[0], 10) || 0;
-    trackBlogPostView(title, slug, tags, readingTime);
-  }
-
-  function callback(entries: IntersectionObserverEntry[]) {
+  // Back-to-top button visibility — UI behaviour, not analytics.
+  const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      // only show the scroll to top button when the heading is out of view
       scrollBtn.dataset.show = (!entry.isIntersecting).toString();
     });
-  }
-
+  });
+  observer.observe(targetHeader);
   scrollBtn.addEventListener("click", () => {
     document.documentElement.scrollTo({ behavior: "smooth", top: 0 });
   });
 
-  const observer = new IntersectionObserver(callback);
-  observer.observe(targetHeader);
-
-  // ============================================
-  // Blog Post Analytics Tracking
-  // ============================================
-
-  const pageLoadTime = Date.now();
-  const postSlug = window.location.pathname
-    .split("/blog/")[1]
-    ?.replace(/\/$/, "");
-  const postTitle = document.title.split(" • ")[0];
-
-  // Track scroll depth milestones
-  const scrollDepths = [25, 50, 75, 100] as const;
-  const trackedDepths: number[] = [];
-
-  function handleScroll() {
-    const scrollPercent = getScrollPercent();
-
-    scrollDepths.forEach((depth) => {
-      if (scrollPercent >= depth && !trackedDepths.includes(depth)) {
-        trackedDepths.push(depth);
-        if (postSlug) {
-          trackBlogScrollDepth(
-            depth,
-            postSlug,
-            Math.round((Date.now() - pageLoadTime) / 1000)
-          );
-        }
-      }
-    });
-  }
-
-  // Coalesce scroll handling to the next animation frame so it runs once
-  // per paint and pauses automatically when the tab is backgrounded.
-  let scrollRaf = 0;
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (scrollRaf) return;
-      scrollRaf = requestAnimationFrame(() => {
-        handleScroll();
-        scrollRaf = 0;
-      });
-    },
-    { passive: true },
-  );
-
-  // Track post completion when user reaches the comments section.
-  // Use the mount div (always present) rather than `.giscus`, which only
-  // exists after the deferred script injects the iframe.
-  const commentsSection = document.getElementById("giscus-mount");
-  if (commentsSection) {
-    const completionObserver = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && postSlug) {
-          trackBlogPostCompleted(
-            postTitle,
-            postSlug,
-            Math.round((Date.now() - pageLoadTime) / 1000)
-          );
-          completionObserver.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    completionObserver.observe(commentsSection);
-  }
-
-  // Track print intent for blog posts
-  window.addEventListener("beforeprint", () => {
-    if (postSlug) {
-      trackEvent("blog_post_printed", { post_slug: postSlug });
-    }
-  });
-
-  // Track external link clicks within blog content
-  document.querySelectorAll("article a[href^='http']").forEach((link) => {
-    const href = (link as HTMLAnchorElement).href;
-    // Skip internal links
-    if (href.includes("funkstyr.me")) return;
-
-    link.addEventListener("click", () => {
-      const platform = detectPlatformFromUrl(href);
-      trackEvent("blog_external_link_clicked", {
-        platform,
-        url: href,
-        post_slug: postSlug,
-      });
-    });
-  });
-
-  // Track TOC link clicks
-  document.querySelectorAll('nav[aria-label="Table of Contents"] a').forEach((link) => {
-    link.addEventListener("click", () => {
-      const heading = (link as HTMLAnchorElement).textContent;
-      trackEvent("toc_link_clicked", {
-        heading,
-        post_slug: postSlug,
-      });
-    });
-  });
-
-  // Track blog post navigation (prev/next) clicks
-  document.querySelectorAll("[data-track-blog-nav]").forEach((link) => {
-    link.addEventListener("click", () => {
-      const direction = (link as HTMLElement).dataset.trackBlogNav as "previous" | "next";
-      const toSlug = (link as HTMLElement).dataset.toSlug;
-      if (direction && toSlug && postSlug) {
-        trackBlogNavClick(direction, postSlug, toSlug);
-      }
-    });
-  });
+  bootBlogReading();
 </script>

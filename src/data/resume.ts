@@ -296,16 +296,6 @@ export const resumeData: ResumeData = {
   ],
 };
 
-// Helper to get skills by category title
-export function getSkillsByCategory(title: string): string[] {
-  return resumeData.skills.find((cat) => cat.title === title)?.skills ?? [];
-}
-
-// Helper to get experience for print (excludes items marked excludeFromPrint)
-export function getPrintExperience(): Experience[] {
-  return resumeData.experience.filter((exp) => !exp.excludeFromPrint);
-}
-
 // Helper to get social link by platform
 export function getSocialLink(platform: string): SocialLink | undefined {
   return resumeData.socialLinks.find(
@@ -321,4 +311,74 @@ export function getSocialUrls(): string[] {
 // Helper to get all skills as flat array for schema.org knowsAbout
 export function getAllSkills(): string[] {
   return resumeData.skills.flatMap((cat) => cat.skills);
+}
+
+// ============================================
+// ResumeView: target-shaped resume data
+// ============================================
+//
+// Single source of truth for which sections appear, in what order, with what
+// filters, on each target (web vs print). Pages iterate `view.sections` and
+// render per kind — they do not decide what's included.
+
+export type ResumeTarget = "web" | "print";
+
+export type ResumeSection =
+  | { kind: "summary"; title: string; lines: string[] }
+  | { kind: "experience"; title: string; experiences: Experience[] }
+  | { kind: "education"; title: string; education: Education[] }
+  | { kind: "skills"; title: string; categories: SkillCategory[] }
+  | { kind: "projects"; title: string; projects: Project[] };
+
+export type ResumeView = {
+  contact: ContactInfo;
+  sections: ResumeSection[];
+};
+
+export function getResumeView(target: ResumeTarget): ResumeView {
+  if (target === "print") {
+    return {
+      contact: resumeData.contact,
+      sections: [
+        {
+          kind: "summary",
+          title: "Professional Summary",
+          lines: [resumeData.summary.detailed],
+        },
+        {
+          kind: "experience",
+          title: "Experience",
+          experiences: resumeData.experience.filter((e) => !e.excludeFromPrint),
+        },
+        { kind: "skills", title: "Skills", categories: resumeData.skills },
+        {
+          kind: "education",
+          title: "Education",
+          education: resumeData.education,
+        },
+      ],
+    };
+  }
+  return {
+    contact: resumeData.contact,
+    sections: [
+      { kind: "summary", title: "About", lines: resumeData.summary.short },
+      {
+        kind: "experience",
+        title: "Experience",
+        experiences: resumeData.experience,
+      },
+      { kind: "skills", title: "Skills", categories: resumeData.skills },
+      {
+        kind: "education",
+        title: "Education",
+        education: resumeData.education,
+      },
+      {
+        kind: "projects",
+        title: "Projects",
+        projects: resumeData.projects,
+      },
+    ],
+  };
 }

@@ -33,6 +33,7 @@ const { class: className, title, tools, ...props } = Astro.props;
           href={tool.href}
           id={tool.name}
           target='_blank'
+          rel='noopener noreferrer'
           data-track-tool={tool.name}
           data-tool-category={title}
         >

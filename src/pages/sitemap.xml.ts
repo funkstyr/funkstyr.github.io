@@ -44,11 +44,36 @@ export const GET: APIRoute = async ({ site }) => {
   const tags = getUniqueTags(posts);
 
   const entries: SitemapEntry[] = [
-    { loc: joinUrl(site, "/"), lastmod: now, changefreq: "weekly", priority: 1.0 },
-    { loc: joinUrl(site, "/blog/"), lastmod: now, changefreq: "weekly", priority: 0.9 },
-    { loc: joinUrl(site, "/tags/"), lastmod: now, changefreq: "weekly", priority: 0.6 },
-    { loc: joinUrl(site, "/tools/"), lastmod: now, changefreq: "monthly", priority: 0.6 },
-    { loc: joinUrl(site, "/resume/"), lastmod: now, changefreq: "monthly", priority: 0.8 },
+    {
+      loc: joinUrl(site, "/"),
+      lastmod: now,
+      changefreq: "weekly",
+      priority: 1.0,
+    },
+    {
+      loc: joinUrl(site, "/blog/"),
+      lastmod: now,
+      changefreq: "weekly",
+      priority: 0.9,
+    },
+    {
+      loc: joinUrl(site, "/tags/"),
+      lastmod: now,
+      changefreq: "weekly",
+      priority: 0.6,
+    },
+    {
+      loc: joinUrl(site, "/tools/"),
+      lastmod: now,
+      changefreq: "monthly",
+      priority: 0.6,
+    },
+    {
+      loc: joinUrl(site, "/resume/"),
+      lastmod: now,
+      changefreq: "monthly",
+      priority: 0.8,
+    },
   ];
 
   for (const post of posts) {

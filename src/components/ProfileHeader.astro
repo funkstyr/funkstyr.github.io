@@ -22,6 +22,7 @@ const linkedIn = getSocialLink("LinkedIn");
             aria-label={`${contact.currentCompany} website`}
             href={contact.currentCompanyUrl}
             target='_blank'
+            rel='noopener noreferrer'
           >
             <span class='sr-only'>(opens in new tab)</span>
             <svg
@@ -60,6 +61,7 @@ const linkedIn = getSocialLink("LinkedIn");
         aria-label='Linkedin profile'
         href={linkedIn?.url}
         target='_blank'
+        rel='noopener noreferrer'
       >
         <span class='sr-only'>(opens in new tab)</span>
         <svg
@@ -86,6 +88,7 @@ const linkedIn = getSocialLink("LinkedIn");
         aria-label='View resume as PDF (opens in new tab)'
         href='/resume/print'
         target='_blank'
+        rel='noopener noreferrer'
         data-track-print-resume
       >
         <span class='sr-only'>(opens in new tab)</span>

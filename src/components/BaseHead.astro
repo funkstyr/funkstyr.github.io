@@ -12,8 +12,15 @@ import avatarSrc from "../assets/avatar.jpg";
 
 type Props = SiteMeta;
 
-const { articleDate, articleTags, description, ogImage, ogImageAlt, title } =
-	Astro.props;
+const {
+  articleDate,
+  articleTags,
+  description,
+  noindex,
+  ogImage,
+  ogImageAlt,
+  title,
+} = Astro.props;
 
 const { contact } = resumeData;
 const titleSeparator = "•";
@@ -52,6 +59,14 @@ const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
   name='viewport'
 />
 <title>{siteTitle}</title>
+
+{/* Privacy / security defaults. GitHub Pages can't set response headers,
+    so we do what's possible via <meta>. */}
+<meta name='referrer' content='strict-origin-when-cross-origin' />
+<meta
+  http-equiv='Content-Security-Policy'
+  content="default-src 'self'; script-src 'self' 'unsafe-inline' https://giscus.app https://us-assets.i.posthog.com https://*.i.posthog.com; style-src 'self' 'unsafe-inline' https://giscus.app; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://us.i.posthog.com https://us-assets.i.posthog.com https://*.i.posthog.com; frame-src https://giscus.app; media-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+/>
 
 <link
   rel='apple-touch-icon'
@@ -106,8 +121,10 @@ const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 <meta content={siteTitle} name='title' />
 <meta content={description} name='description' />
 <meta content={siteConfig.author} name='author' />
+{noindex && <meta name='robots' content='noindex, nofollow' />}
 
 {/* Theme Colour */}
+<meta name='color-scheme' content='light dark' />
 <meta content='#0f172a' name='theme-color' media='(prefers-color-scheme: dark)' />
 <meta content='#f1f5f9' name='theme-color' media='(prefers-color-scheme: light)' />
 

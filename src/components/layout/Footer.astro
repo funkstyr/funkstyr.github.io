@@ -22,7 +22,7 @@ const github = getSocialLink("GitHub");
       <div class='flex items-center justify-between'>
         <!-- Social Brands -->
         <div class='flex items-center gap-x-4'>
-          <a href={linkedIn?.url} target='_blank' data-track-social='linkedin'>
+          <a href={linkedIn?.url} target='_blank' rel='noopener noreferrer' data-track-social='linkedin'>
             <span class='sr-only'
               >Go to my LinkedIn profile (opens in new tab)</span
             >
@@ -44,7 +44,7 @@ const github = getSocialLink("GitHub");
             </svg>
           </a>
 
-          <a href={github?.url} target='_blank' data-track-social='github'>
+          <a href={github?.url} target='_blank' rel='noopener noreferrer' data-track-social='github'>
             <span class='sr-only'
               >Go to my GitHub profile (opens in new tab)</span
             >

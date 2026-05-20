@@ -4,7 +4,7 @@ import type { SiteConfig } from "@/types";
 import { SITE_DESCRIPTION, SITE_TITLE } from "./consts";
 
 export const siteConfig: SiteConfig = {
-  // Used as both a meta property (src/components/BaseHead.astro L:31 + L:49) & the generated satori png (src/pages/og-image/[slug].png.ts)
+  // Used as a meta property (src/components/BaseHead.astro)
   author: "@funkstyr",
   // Meta property used to construct the meta title property, found in src/components/BaseHead.astro L:11
   title: SITE_TITLE,
@@ -48,6 +48,9 @@ export const menuLinks: Array<{ title: string; path: string }> = [
 export const expressiveCodeOptions: AstroExpressiveCodeOptions = {
   // One dark, one light theme => https://expressive-code.com/guides/themes/#available-themes
   themes: ["dracula", "github-light"],
+  // Fold the EC stylesheet into each page instead of emitting an extra
+  // render-blocking /_astro/ec.css request.
+  emitExternalStylesheet: false,
   themeCssSelector(theme, { styleVariants }) {
     // If one dark and one light theme are available
     // generate theme CSS selectors compatible with cactus-theme dark mode switch

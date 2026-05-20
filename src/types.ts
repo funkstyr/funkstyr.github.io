@@ -23,4 +23,5 @@ export type SiteMeta = {
   ogImageAlt?: string | undefined;
   articleDate?: string | undefined;
   articleTags?: string[] | undefined;
+  noindex?: boolean;
 };

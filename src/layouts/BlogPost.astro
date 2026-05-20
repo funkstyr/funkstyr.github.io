@@ -22,7 +22,9 @@ const {
   id,
 } = post;
 
-const socialImage = ogImage ?? `/og-image/${id}.png`;
+// No dynamic OG generator on GitHub Pages; fall back to the static social
+// card so shares never resolve a 404 image.
+const socialImage = ogImage ?? "/social_card.jpg";
 const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString();
 const { headings, remarkPluginFrontmatter } = await render(post);
 const readingTime = remarkPluginFrontmatter.minutesRead;
@@ -89,7 +91,7 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
     </div>
     <div class='mt-8 gap-x-10 lg:flex lg:items-start'>
       {!!headings.length && <TOC headings={headings} />}
-      <article class='flex-grow break-words' data-pagefind-body>
+      <article class='flex-grow break-words'>
         <div id='blog-hero'><BlogHero content={post} /></div>
         <div
           class='prose prose-base prose-zinc mt-12 text-muted-foreground dark:prose-invert prose-headings:font-medium prose-headings:text-foreground prose-headings:before:absolute prose-headings:before:-ms-4 prose-th:before:content-none'
@@ -224,18 +226,25 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
     });
   }
 
-  // Throttle scroll events for performance
-  let scrollTimeout: number | null = null;
-  window.addEventListener("scroll", () => {
-    if (scrollTimeout) return;
-    scrollTimeout = window.setTimeout(() => {
-      handleScroll();
-      scrollTimeout = null;
-    }, 100);
-  });
+  // Coalesce scroll handling to the next animation frame so it runs once
+  // per paint and pauses automatically when the tab is backgrounded.
+  let scrollRaf = 0;
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        handleScroll();
+        scrollRaf = 0;
+      });
+    },
+    { passive: true },
+  );
 
-  // Track post completion when user reaches the comments section
-  const commentsSection = document.querySelector(".giscus");
+  // Track post completion when user reaches the comments section.
+  // Use the mount div (always present) rather than `.giscus`, which only
+  // exists after the deferred script injects the iframe.
+  const commentsSection = document.getElementById("giscus-mount");
   if (commentsSection) {
     const completionObserver = new IntersectionObserver(
       (entries) => {

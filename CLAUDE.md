@@ -276,39 +276,47 @@ export function cn(...inputs: ClassValue[]) {
 
 **Giscus Comments:** GitHub Discussions-based comments in `Comments.astro`, repo: `funkstyr/funkstyr.github.io`.
 
-## Claude Commands & Skills
+## Claude Code Setup
 
-This project includes custom Claude Code slash commands and skills in `.claude/`.
+This project uses Claude Code with skills, hooks, and an LSP layer wired in `.claude/`.
 
-### Available Commands
+### Skills
 
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `/find <query>` | Search for code, patterns, or implementations | `/find polymorphic component` |
-| `/research <topic>` | Research and plan a feature or solution | `/research add search functionality` |
-| `/review <target>` | Review code with PR-quality feedback | `/review staged` or `/review src/components/Card.astro` |
-| `/test <target>` | Run verification checks (lint, type-check, build) | `/test src/utils/date.ts` |
-| `/understand <code>` | Deep explanation of code or patterns | `/understand content collections` |
-| `/write <description>` | Generate code following repo patterns | `/write new blog post component` |
-
-### Available Skills
-
-Skills activate automatically based on conversation context:
+Skills activate automatically based on conversation context. The project ships these in `.claude/skills/`:
 
 | Skill | Activates When |
 |-------|----------------|
-| `content` | Working with blog posts, MDX, frontmatter, tags |
-| `find` | Searching for code ("where is...", "find the...") |
-| `research` | Planning features, discussing architecture |
-| `review` | Reviewing code, checking quality |
-| `test` | Testing, verification, build issues |
-| `type-safety` | Type errors, TypeScript patterns |
-| `understand` | Explaining code ("what does this do", "how does X work") |
-| `write` | Creating new code, components, pages |
+| `house-style` | Writing or refactoring code in this repo — Astro components, polymorphic patterns, Tailwind, content collections |
+| `diagnose` | Bugs, perf regressions, "debug this", "something is broken/throwing/failing" |
+| `pr-review` | Reviewing the current branch before push ("review my branch", "code review this") |
+| `pr-review-pr` | Reviewing an open GitHub PR via `gh pr diff` |
+| `pr-ready` | Pre-PR merge-ready gate (lint + types + clean rebase) |
+| `prototype` | Throwaway design/state exploration before committing to an approach |
+| `grill-me` / `grill-with-docs` | Stress-test a plan; the `-with-docs` variant updates `CONTEXT.md` / ADRs inline |
+| `improve-codebase-architecture` | Find refactoring/deepening opportunities |
+| `triage` / `to-issues` / `to-prd` | Issue workflow (GitHub via `gh`) |
+| `caveman` | Ultra-compressed reply mode |
+| `zoom-out` / `write-a-skill` / `setup-matt-pocock-skills` | Meta / authoring |
+
+Built-in Claude Code skills (`run`, `verify`, `simplify`, `loop`, `schedule`, `update-config`, etc.) are also available.
+
+### Automation
+
+`.claude/hooks/stop-fix-and-check.sh` runs **automatically** at turn end:
+
+1. `bun run lint:fix` — Biome auto-fixes.
+2. `bun run type-check` — `tsc --noEmit`.
+
+If either fails, the hook exits 2 and Claude must address it before stopping. Run `bun run build` before declaring a task done — content schema validation only fires at build.
+
+### LSP
+
+`.claude/cclsp.json` wires:
+
+- `typescript-language-server` for `.ts` / `.tsx` / `.js` / `.jsx`.
+- `@astrojs/language-server` for `.astro`.
 
 ### Adding New Blog Posts
-
-Use the `/write` command or follow this pattern:
 
 1. Create file in `src/content/post/` with naming: `YYYY_MM_DD_post-slug.mdx`
 2. Include required frontmatter:
@@ -316,11 +324,11 @@ Use the `/write` command or follow this pattern:
 ---
 title: "Post Title"
 description: "Brief description for SEO"
-publishDate: "2025-01-15"
+publishDate: "2026-05-20"
 tags: ["tag1", "tag2"]
 ---
 ```
-3. Run `bun run build` to verify content schema validation
+3. Run `bun run build` to verify content schema validation.
 
 ### Pagination Patterns
 

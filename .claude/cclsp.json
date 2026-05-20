@@ -1,0 +1,14 @@
+{
+  "servers": [
+    {
+      "extensions": ["ts", "tsx", "js", "jsx", "mts", "cts", "mjs", "cjs"],
+      "command": ["bunx", "typescript-language-server", "--stdio"],
+      "rootDir": "."
+    },
+    {
+      "extensions": ["astro"],
+      "command": ["bunx", "@astrojs/language-server", "--stdio"],
+      "rootDir": "."
+    }
+  ]
+}

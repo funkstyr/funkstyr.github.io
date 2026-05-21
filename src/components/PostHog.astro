@@ -2,8 +2,10 @@
 // PostHog Analytics Configuration
 // Docs: https://posthog.com/docs/libraries/js
 //
-// Loading strategy: do nothing until the browser is idle OR the user makes
-// a meaningful interaction (click / scroll / keydown), then lazy-init.
+// Loading strategy: do nothing until the user makes a meaningful interaction
+// (pointerdown / scroll / keydown), then lazy-init. No idle fallback — the
+// SDK is heavy enough that loading it for bounced sessions tanks Lighthouse
+// scores without giving us useful analytics in return.
 // Session recording is disabled to avoid shipping rrweb on every page.
 const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 ---
@@ -118,14 +120,6 @@ const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 
     for (const e of events)
       document.addEventListener(e, boot, { once: true, passive: true });
-
-    // Fallback for users who never interact: wait until the browser is
-    // genuinely idle, with a generous timeout so we never block real work.
-    if ("requestIdleCallback" in window) {
-      requestIdleCallback(boot, { timeout: 8000 });
-    } else {
-      setTimeout(boot, 6000);
-    }
   })();
 </script>
 )}

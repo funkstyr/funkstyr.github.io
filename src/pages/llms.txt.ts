@@ -1,7 +1,6 @@
 import type { APIRoute } from "astro";
 import { contractingData } from "../data/contracting";
 import { resumeData } from "../data/resume";
-import { siteConfig } from "../site.config";
 import { getAllPosts, sortMDByDate } from "../utils/post";
 
 export const prerender = true;
@@ -130,7 +129,7 @@ ${post.data.description}${tags}`;
 
 ---
 
-This file is auto-generated from ${siteConfig.title} for LLM consumption.
+This file is auto-generated for LLM consumption.
 `;
 
   return new Response(markdown, {

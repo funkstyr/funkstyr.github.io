@@ -1,13 +1,26 @@
-<script>
-  import { applyTheme, resolveTheme } from "../utils/theme";
-
-  // Re-apply theme after Astro view transitions so multi-tab pref changes
-  // catch up on navigation.
-  document.addEventListener("astro:after-swap", () => applyTheme(resolveTheme()));
-
-  // Follow system preference changes only when the user hasn't picked a theme.
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
-    if (localStorage.getItem("theme")) return;
-    applyTheme(e.matches ? "dark" : "light");
-  });
+<script is:inline>
+  // Inline by design: keeping this out of the module graph removes an extra
+  // entry from the network dependency tree on every page. Must stay in sync
+  // with resolveTheme + applyTheme in src/utils/theme.ts.
+  (() => {
+    const root = document.documentElement;
+    function resolve() {
+      const t = localStorage.getItem("theme");
+      if (t === "light" || t === "dark") return t;
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+    function apply(t) {
+      root.classList.toggle("dark", t === "dark");
+      root.dataset.theme = t;
+    }
+    document.addEventListener("astro:after-swap", () => apply(resolve()));
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        if (localStorage.getItem("theme")) return;
+        apply(e.matches ? "dark" : "light");
+      });
+  })();
 </script>

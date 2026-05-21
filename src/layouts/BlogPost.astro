@@ -19,26 +19,16 @@ interface Props {
 const { post, prev, next } = Astro.props;
 const {
   data: { description, ogImage, publishDate, tags, title, updatedDate },
-  id,
 } = post;
 
 // No dynamic OG generator on GitHub Pages; fall back to the static social
 // card so shares never resolve a 404 image.
 const socialImage = ogImage ?? "/social_card.jpg";
 const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString();
-const { headings, remarkPluginFrontmatter } = await render(post);
-const readingTime = remarkPluginFrontmatter.minutesRead;
+const { headings } = await render(post);
 ---
 
 <PageLayout meta={{ articleDate, articleTags: tags, description, ogImage: socialImage, title }}>
-  <div
-    id="post-data"
-    data-title={title}
-    data-slug={id}
-    data-tags={JSON.stringify(tags || [])}
-    data-reading-time={readingTime}
-    hidden
-  />
   <BlogPostSchema post={post} url={Astro.url.href} />
   <BreadcrumbSchema
     items={[
@@ -69,8 +59,6 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
         <a
           href={`/blog/${prev.id}`}
           class='text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1'
-          data-track-blog-nav='previous'
-          data-to-slug={prev.id}
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -127,8 +115,6 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
         <a
           href={`/blog/${next.id}`}
           class='text-muted-foreground hover:text-foreground transition-colors flex items-center justify-end gap-1'
-          data-track-blog-nav='next'
-          data-to-slug={next.id}
         >
           <span>Next: {next.data.title}</span>
           <svg
@@ -156,12 +142,9 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
 </PageLayout>
 
 <script>
-  import { bootBlogReading } from "../utils/tracking/blogReading";
-
   const scrollBtn = document.getElementById("to-top-btn") as HTMLButtonElement;
   const targetHeader = document.getElementById("blog-hero") as HTMLDivElement;
 
-  // Back-to-top button visibility — UI behaviour, not analytics.
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       scrollBtn.dataset.show = (!entry.isIntersecting).toString();
@@ -171,6 +154,4 @@ const readingTime = remarkPluginFrontmatter.minutesRead;
   scrollBtn.addEventListener("click", () => {
     document.documentElement.scrollTo({ behavior: "smooth", top: 0 });
   });
-
-  bootBlogReading();
 </script>

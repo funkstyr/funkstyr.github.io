@@ -243,18 +243,6 @@ export function cn(...inputs: ClassValue[]) {
 - `getUniqueTags()` / `getUniqueTagsWithCount()` - Tag extraction utilities
 - `getPostNavigation()` - Gets prev/next posts for navigation
 
-**`src/utils/analytics.ts`** - PostHog tracking utilities (the typed event contract):
-- All functions check `typeof window !== "undefined"` before calling PostHog
-- Event properties use snake_case convention
-- Organized by feature: `trackBlogScrollDepth()`, `trackBlogPostCompleted()`, `trackExternalLinkClick()`, etc.
-- The `trackEvent(name, props)` function is the transport seam. Backend swap (PostHog → other) only changes that function's body.
-
-**`src/utils/tracking/`** - DOM-aware observer modules; analytics-agnostic (take callbacks, no PostHog import):
-- `scrollDepth.ts` - `observeScrollDepth({ milestones?, onMilestone })`; rAF-coalesced. Returns unsubscribe.
-- `visibility.ts` - `observeVisibility({ target, threshold?, once?, onVisible })`; wraps `IntersectionObserver`.
-- `linkClicks.ts` - `trackLinkClicks({ root, filter?, onClick })`; event-delegated.
-- `blogReading.ts` - `bootBlogReading()` orchestration; wires the above observers to typed analytics calls. `BlogPost.astro` imports and invokes it once.
-
 ### Accessibility Patterns
 
 **Skip Links:** Present in Header and Resume pages:
@@ -270,17 +258,7 @@ export function cn(...inputs: ClassValue[]) {
 
 ### Analytics
 
-**PostHog:** Configured in `PostHog.astro` with `VITE_POSTHOG_KEY` environment variable.
-- Respects Do Not Track (DNT) browser setting
-- Uses `person_profiles: "identified_only"` for cost efficiency
-- Session recording enabled with privacy controls (`maskAllInputs`, `maskTextSelector`)
-
-**Blog Analytics (in `BlogPost.astro`):**
-- Scroll depth tracking at 25%, 50%, 75%, 100% milestones with time-to-reach
-- Post completion tracking when comments section enters viewport
-- External link click tracking with platform detection
-- TOC link click tracking
-- Print intent tracking
+Pageview / referrer / country analytics are handled server-side by Cloudflare Web Analytics (auto-injected by the Cloudflare proxy). No client-side analytics SDK ships with the site — keep it that way unless a deliberate decision is made to add one, since each SDK costs LCP/TBT budget. The CSP allows `https://static.cloudflareinsights.com` for the beacon script.
 
 **Giscus Comments:** GitHub Discussions-based comments in `Comments.astro`, repo: `funkstyr/funkstyr.github.io`.
 

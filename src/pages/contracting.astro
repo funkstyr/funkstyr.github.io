@@ -89,7 +89,6 @@ const serviceSchema = {
                 as='a'
                 title={cta.label}
                 href={cta.href}
-                data-track-contracting-cta={cta.method}
               />
             ))
           }
@@ -98,24 +97,3 @@ const serviceSchema = {
     </Section>
   </div>
 </PageLayout>
-
-<script>
-  import {
-    trackContractingView,
-    trackContractingCtaClick,
-  } from "../utils/analytics";
-
-  trackContractingView();
-
-  document
-    .querySelectorAll<HTMLAnchorElement>("[data-track-contracting-cta]")
-    .forEach((link) => {
-      link.addEventListener("click", () => {
-        const method = link.dataset.trackContractingCta as
-          | "email"
-          | "linkedin"
-          | undefined;
-        if (method) trackContractingCtaClick(method);
-      });
-    });
-</script>

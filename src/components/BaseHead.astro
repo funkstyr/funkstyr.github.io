@@ -49,8 +49,6 @@ const preloadAvatar = showsAvatar
       quality: 33,
     })
   : null;
-
-const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 ---
 
 <meta charset='utf-8' />
@@ -65,7 +63,7 @@ const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 <meta name='referrer' content='strict-origin-when-cross-origin' />
 <meta
   http-equiv='Content-Security-Policy'
-  content="default-src 'self'; script-src 'self' 'unsafe-inline' https://giscus.app https://us-assets.i.posthog.com https://*.i.posthog.com; style-src 'self' 'unsafe-inline' https://giscus.app; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://us.i.posthog.com https://us-assets.i.posthog.com https://*.i.posthog.com; frame-src https://giscus.app; media-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+  content="default-src 'self'; script-src 'self' 'unsafe-inline' https://giscus.app https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://giscus.app; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; frame-src https://giscus.app; media-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
 />
 
 <link
@@ -100,15 +98,6 @@ const posthogKey = (import.meta.env.VITE_POSTHOG_KEY ?? "").trim();
 
 {/* Font preloads */}
 <Font cssVariable="--font-sans" preload />
-
-{/* Open early connections to PostHog endpoints so the eventual analytics
-    request doesn't pay full DNS + TLS RTT when it fires. */}
-{posthogKey && (
-  <>
-    <link rel='preconnect' href='https://us.i.posthog.com' crossorigin />
-    <link rel='preconnect' href='https://us-assets.i.posthog.com' crossorigin />
-  </>
-)}
 
 {/* Canonical URL */}
 <link rel='canonical' href={canonicalURL} />

@@ -89,7 +89,6 @@ const linkedIn = getSocialLink("LinkedIn");
         href='/resume/print'
         target='_blank'
         rel='noopener noreferrer'
-        data-track-print-resume
       >
         <span class='sr-only'>(opens in new tab)</span>
         <svg
@@ -107,12 +106,3 @@ const linkedIn = getSocialLink("LinkedIn");
     </div>
   </div>
 </section>
-
-<script>
-  import { trackResumePrintLinkClick } from "../utils/analytics";
-
-  const printResumeLink = document.querySelector("[data-track-print-resume]");
-  printResumeLink?.addEventListener("click", () => {
-    trackResumePrintLinkClick();
-  });
-</script>

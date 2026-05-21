@@ -22,7 +22,7 @@ const github = getSocialLink("GitHub");
       <div class='flex items-center justify-between'>
         <!-- Social Brands -->
         <div class='flex items-center gap-x-4'>
-          <a href={linkedIn?.url} target='_blank' rel='noopener noreferrer' data-track-social='linkedin'>
+          <a href={linkedIn?.url} target='_blank' rel='noopener noreferrer'>
             <span class='sr-only'
               >Go to my LinkedIn profile (opens in new tab)</span
             >
@@ -44,7 +44,7 @@ const github = getSocialLink("GitHub");
             </svg>
           </a>
 
-          <a href={github?.url} target='_blank' rel='noopener noreferrer' data-track-social='github'>
+          <a href={github?.url} target='_blank' rel='noopener noreferrer'>
             <span class='sr-only'
               >Go to my GitHub profile (opens in new tab)</span
             >
@@ -70,20 +70,3 @@ const github = getSocialLink("GitHub");
     </div>
   </div>
 </footer>
-
-<script>
-  import { trackFooterSocialClick } from "../../utils/analytics";
-
-  document.querySelectorAll("[data-track-social]").forEach((link) => {
-    link.addEventListener("click", () => {
-      const platform = (link as HTMLElement).dataset.trackSocial as
-        | "linkedin"
-        | "github"
-        | "twitter"
-        | "instagram";
-      if (platform) {
-        trackFooterSocialClick(platform);
-      }
-    });
-  });
-</script>

@@ -43,7 +43,7 @@ export const GET: APIRoute = async ({ site }) => {
   const posts = sortMDByDate(await getAllPosts());
   const tags = getUniqueTags(posts);
 
-  const POST_PRIORITY_MAX = 0.7;
+  const POST_PRIORITY_MAX = 0.5;
   const POST_PRIORITY_MIN = 0.2;
 
   const entries: SitemapEntry[] = [
@@ -66,10 +66,16 @@ export const GET: APIRoute = async ({ site }) => {
       priority: 0.9,
     },
     {
+      loc: joinUrl(site, "/llms.txt"),
+      lastmod: now,
+      changefreq: "monthly",
+      priority: 0.8,
+    },
+    {
       loc: joinUrl(site, "/blog/"),
       lastmod: now,
       changefreq: "weekly",
-      priority: 0.8,
+      priority: 0.6,
     },
     {
       loc: joinUrl(site, "/tools/"),
@@ -97,7 +103,7 @@ export const GET: APIRoute = async ({ site }) => {
       loc: joinUrl(site, `/blog/${post.id}/`),
       lastmod,
       changefreq: "monthly",
-      priority: Math.round(priority * 10) / 10,
+      priority: Math.round(priority * 20) / 20,
     });
   });
 
@@ -137,7 +143,7 @@ export const GET: APIRoute = async ({ site }) => {
       if (entry.changefreq)
         parts.push(`    <changefreq>${entry.changefreq}</changefreq>`);
       if (entry.priority !== undefined)
-        parts.push(`    <priority>${entry.priority.toFixed(1)}</priority>`);
+        parts.push(`    <priority>${entry.priority.toFixed(2)}</priority>`);
       return `  <url>\n${parts.join("\n")}\n  </url>`;
     })
     .join("\n");

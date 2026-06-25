@@ -21,9 +21,9 @@ const {
   data: { description, ogImage, publishDate, tags, title, updatedDate },
 } = post;
 
-// No dynamic OG generator on GitHub Pages; fall back to the static social
-// card so shares never resolve a 404 image.
-const socialImage = ogImage ?? "/social_card.jpg";
+// Per-post OG card generated at build (src/pages/og/[...slug].png.ts).
+// Explicit frontmatter ogImage still wins when set.
+const socialImage = ogImage ?? `/og/post/${post.id}.png`;
 const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString();
 const { headings } = await render(post);
 ---

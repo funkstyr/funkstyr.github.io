@@ -204,9 +204,20 @@ import { Icon } from "astro-icon/components";
 
 **BaseHead.astro** handles all meta tags:
 - Canonical URL from `Astro.url.pathname` + `Astro.site`
-- OpenGraph image fallback: `/social_card.jpg`
+- OpenGraph image: an explicit `ogImage` prop wins; otherwise BaseHead maps the
+  pathname to a build-time card via `ogSlugForPathname()` (see Dynamic OG Images)
 - Conditional article metadata when `articleDate` prop exists
 - Title format: `Page Title • Site Title`
+
+**Dynamic OG Images:** `src/pages/og/[...slug].png.ts` prerenders 1200×630
+social cards at build via `renderOgImage()` in `src/utils/og.ts` (satori →
+SVG → `sharp` → PNG), branded with the bundled Satoshi font in
+`src/assets/fonts/`. It emits one card per blog post (`/og/post/<id>.png`) plus
+named page cards (`/og/default.png`, `/og/resume.png`, `/og/contracting.png`).
+`BlogPost.astro` points each post at its `/og/post/<id>.png`; `BaseHead`
+resolves non-post pages through `ogSlugForPathname()`. To add a named card:
+add an entry to `getStaticPaths` in the endpoint AND a pathname branch in
+`ogSlugForPathname()` so the two stay in sync.
 
 **JSON-LD Schemas:**
 - `JsonLd.astro` - Person schema with skills, job title, social profiles
@@ -215,8 +226,6 @@ import { Icon } from "astro-icon/components";
 - `BreadcrumbSchema.astro` - Generic breadcrumb builder (takes array of `{name, url}`)
 
 All schemas use `set:html` with `JSON.stringify()`. Multiple schema scripts can exist on the same page.
-
-**Pagefind Search:** Blog content uses `data-pagefind-body` and `data-pagefind-filter='tag'` attributes.
 
 ### Utility Functions
 

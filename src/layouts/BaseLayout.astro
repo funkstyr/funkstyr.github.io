@@ -1,4 +1,6 @@
 ---
+import { ClientRouter } from "astro:transitions";
+
 import { siteConfig } from "../site.config";
 import type { SiteMeta } from "../types";
 
@@ -36,6 +38,7 @@ const {
       ogImage={ogImage}
       title={title}
     />
+    <ClientRouter />
     <script is:inline set:html={noFlashTheme}></script>
   </head>
 

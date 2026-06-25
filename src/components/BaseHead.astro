@@ -7,6 +7,7 @@ import { Font, getImage } from "astro:assets";
 import { siteConfig } from "../site.config";
 import { resumeData } from "../data/resume";
 import type { SiteMeta } from "../types";
+import { ogImagePath, ogSlugForPathname } from "../utils/og";
 import JsonLd from "./JsonLd.astro";
 import avatarSrc from "../assets/avatar.jpg";
 
@@ -29,8 +30,10 @@ const siteTitle = isHomepage
 	? `${contact.name} - Senior Software Engineer ${titleSeparator} ${siteConfig.title}`
 	: `${title} ${titleSeparator} ${siteConfig.title}`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+// Pages pass an explicit ogImage (blog posts use their generated per-post
+// card); otherwise fall back to the build-time card for this pathname.
 const socialImageURL = new URL(
-  ogImage ? ogImage : "/avatar.jpg",
+  ogImage ?? ogImagePath(ogSlugForPathname(Astro.url.pathname)),
   Astro.url
 ).href;
 

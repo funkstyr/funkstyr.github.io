@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import tailwindcss from "@tailwindcss/vite";
@@ -6,14 +5,23 @@ import { defineConfig, fontProviders } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import rehypeExternalLinks from "rehype-external-links";
+import { loadEnv } from "vite";
 // import remarkUnwrapImages from "remark-unwrap-images";
 
 import { expressiveCodeOptions } from "./src/site.config";
 import { remarkReadingTime } from "./src/utils/remarkReadingTime.ts";
 
+// Astro doesn't expose .env vars to the config file itself, so load them
+// explicitly via Vite (replaces the dotenv dependency).
+const { SITE_URL } = loadEnv(
+  process.env.NODE_ENV || "production",
+  process.cwd(),
+  "",
+);
+
 // https://astro.build/config
 export default defineConfig({
-  site: process.env.SITE_URL,
+  site: SITE_URL,
   prefetch: true,
 
   // Inline all CSS to eliminate render-blocking stylesheets

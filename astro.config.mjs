@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, fontProviders } from "astro/config";
@@ -37,28 +38,23 @@ export default defineConfig({
     },
   ],
 
-  experimental: {
-    rustCompiler: true,
-    queuedRendering: {
-      enabled: true,
-    },
-  },
-
   markdown: {
-    remarkPlugins: [remarkReadingTime],
-    rehypePlugins: [
-      [
-        rehypeExternalLinks,
-        {
-          target: "_blank",
-          rel: ["nofollow, noopener, noreferrer"],
-        },
+    processor: unified({
+      remarkPlugins: [remarkReadingTime],
+      rehypePlugins: [
+        [
+          rehypeExternalLinks,
+          {
+            target: "_blank",
+            rel: ["nofollow, noopener, noreferrer"],
+          },
+        ],
       ],
-    ],
-    remarkRehype: {
-      footnoteLabelProperties: {
-        className: [""],
+      remarkRehype: {
+        footnoteLabelProperties: {
+          className: [""],
+        },
       },
-    },
+    }),
   },
 });

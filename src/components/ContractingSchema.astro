@@ -1,0 +1,39 @@
+---
+import { contractingData } from "../data/contracting";
+import { resumeData } from "../data/resume";
+
+const { services } = contractingData;
+const { contact } = resumeData;
+
+const siteUrl = "https://funkstyr.me";
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: `${contact.name} — Contract software engineering`,
+  url: `${siteUrl}/contracting/`,
+  provider: {
+    "@type": "Person",
+    name: contact.name,
+    url: `${siteUrl}/`,
+    email: contact.email,
+    jobTitle: contact.title,
+  },
+  areaServed: "Remote",
+  serviceType: services.map((service) => service.title),
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Contract services",
+    itemListElement: services.map((service) => ({
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: service.title,
+        description: service.description,
+      },
+    })),
+  },
+};
+---
+
+<script type='application/ld+json' set:html={JSON.stringify(serviceSchema)} />

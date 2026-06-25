@@ -4,29 +4,10 @@ import Section from "../components/Section.astro";
 import ProfileHeader from "../components/ProfileHeader.astro";
 import Button from "../components/Button.astro";
 import SkillLayout from "../components/SkillLayout.astro";
+import ContractingSchema from "../components/ContractingSchema.astro";
 import { contractingData } from "../data/contracting";
-import { resumeData } from "../data/resume";
 
 const { intro, services, stack, ctas } = contractingData;
-const { contact } = resumeData;
-
-const siteUrl = "https://funkstyr.me";
-
-const serviceSchema = {
-  "@context": "https://schema.org",
-  "@type": "ProfessionalService",
-  name: `${contact.name} — Contract software engineering`,
-  url: `${siteUrl}/contracting/`,
-  provider: {
-    "@type": "Person",
-    name: contact.name,
-    url: `${siteUrl}/`,
-    email: contact.email,
-    jobTitle: contact.title,
-  },
-  areaServed: "Remote",
-  serviceType: services.map((s) => s.title),
-};
 ---
 
 <PageLayout
@@ -36,10 +17,7 @@ const serviceSchema = {
       "Available for contract and consulting work — TypeScript, React, .NET, Node, and Claude LLM features.",
   }}
 >
-  <script
-    type='application/ld+json'
-    set:html={JSON.stringify(serviceSchema)}
-  />
+  <ContractingSchema />
 
   <a
     href='#contact'

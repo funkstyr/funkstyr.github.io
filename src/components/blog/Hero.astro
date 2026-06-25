@@ -33,6 +33,7 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
         layout='constrained'
         width={960}
         sizes='(min-width: 1024px) 700px, 100vw'
+        transition:name={`post-image-${content.id}`}
       />
     </div>
   )
@@ -46,7 +47,10 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
     {remarkPluginFrontmatter.minutesRead}
   </p>
 </div>
-<h1 class='mt-2 text-3xl font-medium sm:mb-1'>
+<h1
+  class='mt-2 text-3xl font-medium sm:mb-1'
+  transition:name={`post-title-${content.id}`}
+>
   {data.title}
 </h1>
 

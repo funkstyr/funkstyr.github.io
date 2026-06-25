@@ -1,0 +1,27 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import PostPreview from "./PostPreview.astro";
+
+type Props = {
+  posts: Array<CollectionEntry<"post">>;
+};
+
+const { posts } = Astro.props;
+---
+
+{
+  posts.length > 0 && (
+    <section
+      aria-label='Related posts'
+      class='not-prose mt-12 border-t border-border pt-8'
+    >
+      <h2 class='mb-4 text-lg font-semibold'>Related posts</h2>
+      <ul class='flex flex-col gap-y-4 text-start'>
+        {posts.map((post) => (
+          <PostPreview post={post} withDesc />
+        ))}
+      </ul>
+    </section>
+  )
+}

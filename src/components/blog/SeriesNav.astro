@@ -1,0 +1,42 @@
+---
+import type { SeriesContext } from "../../utils";
+
+type Props = {
+  series: SeriesContext;
+  currentId: string;
+};
+
+const { series, currentId } = Astro.props;
+---
+
+<nav
+  aria-label={`${series.label} navigation`}
+  class='not-prose rounded-2xl border border-border bg-primary-foreground px-5 py-4'
+>
+  <p class='text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+    {series.label} · Part {series.part} of {series.total}
+  </p>
+
+  <ol class='mt-3 flex flex-col gap-y-1.5'>
+    {
+      series.parts.map((part, i) => (
+        <li class='flex gap-x-2 text-sm'>
+          <span class='tabular-nums text-muted-foreground'>{i + 1}.</span>
+          {part.id === currentId ? (
+            <span class='font-semibold text-foreground' aria-current='true'>
+              {part.data.title}
+            </span>
+          ) : (
+            <a
+              href={`/blog/${part.id}/`}
+              class='text-muted-foreground transition-colors hover:text-foreground'
+              data-astro-prefetch
+            >
+              {part.data.title}
+            </a>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>

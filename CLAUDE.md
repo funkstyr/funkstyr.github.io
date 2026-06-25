@@ -33,9 +33,10 @@ bun run clean            # Clean node_modules
 - Posts are stored in `src/content/post/` and support both `.md` and `.mdx` formats
 - Draft posts are filtered out in production via `getAllPosts()` in `src/utils/post.ts`
 - Required frontmatter: `title` (max 60 chars), `description` (10-160 chars), `publishDate`
-- Optional frontmatter: `updatedDate`, `coverImage`, `tags`, `ogImage`, `draft`, `order`
-- `order` field (number, default 0): Controls display order for posts on the same day - higher values appear first
+- Optional frontmatter: `updatedDate`, `coverImage`, `tags`, `ogImage`, `draft`, `order`, `subtitle`, `series`
+- `order` field (number, default 0): Controls display order for posts on the same day - higher values appear first. For posts in a series this doubles as the 1-indexed part number.
 - **Post identifier**: Use `post.id` (not `post.slug`) to reference post identifiers
+- **Series**: A second collection, `series` (`src/content/series/*.md`), holds named multi-part series (`title`, `heading`, `description`). Posts join via `series: <series-id>` (a typed `reference("series")`) and are sequenced by their `order` field. Helpers live in `src/utils/post.ts`: `getSeriesPosts`, `getSeriesContext` (part number + within-series prev/next, used by `BlogPost.astro` → `SeriesNav`), and `getRelatedPosts` (shared-tag ranking, used by `RelatedPosts.astro`). Don't reintroduce the old stringly-typed `subtitle: "… · Part N"` convention for series — derive the label from the series reference.
 - **Rendering content**: Use `render(entry)` from `astro:content`, not `entry.render()`:
 ```typescript
 import { render } from "astro:content";
@@ -44,7 +45,7 @@ const { Content, headings, remarkPluginFrontmatter } = await render(entry);
 
 ### Key Configuration Files
 
-- `src/content.config.ts`: Content Layer API configuration with `glob()` loader and Zod schema
+- `src/content.config.ts`: Content Layer API configuration with `glob()` loader and Zod schema (`post` + `series` collections)
 - `src/site.config.ts`: Central configuration for site metadata, menu links, and Expressive Code theme settings
 - `astro.config.mjs`: Astro configuration including integrations (MDX, sitemap, expressive-code, icon)
 - The site URL is loaded from `.env` via `SITE_URL` environment variable (see `.env.sample`)
@@ -172,6 +173,12 @@ const images = import.meta.glob<{ default: ImageMetadata }>("/src/assets/*.{jpeg
 **Image Loading Priority:**
 - `loading='eager'` + `fetchpriority='high'` for above-fold images (avatar, blog hero)
 - Default lazy loading for below-fold content
+
+**Responsive Images:** `astro.config.mjs` sets a global `image.layout: "constrained"`, so every `<Image>`/`<Picture>` emits a `srcset` + `sizes` by default. Add an explicit `sizes` to content-width images (blog hero, ProjectCard) for accurate selection. Small fixed-size assets (avatar 224px, Card logos 48px) opt out with `layout="fixed"` so they don't generate pointless wide variants.
+
+### Search
+
+**Pagefind:** Static full-text search over blog posts. The index is generated *after* `astro build` — the `build` script is `astro build && pagefind --site dist`, writing to `dist/pagefind/`. `BlogPost.astro`'s `<article>` carries `data-pagefind-body`, which scopes the index to post content only (Pagefind ignores pages without that attribute); the in-post `SeriesNav` is marked `data-pagefind-ignore`. The search box (`components/blog/Search.astro`) loads Pagefind's Default UI and re-inits on `astro:page-load` for View Transitions. Search only returns results in the built/preview site, **not** in `astro dev` (no index yet).
 
 ### Icon Usage
 

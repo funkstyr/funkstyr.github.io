@@ -1,0 +1,59 @@
+---
+// Static full-text search over blog posts, powered by Pagefind.
+// The index is generated *after* `astro build` (see the `build` script) into
+// `/pagefind`, so results appear in the built/preview site — not in `astro dev`.
+---
+
+<div id='search' class='pagefind-search'></div>
+
+<link rel='stylesheet' href='/pagefind/pagefind-ui.css' />
+
+<style is:global>
+  /* Match Pagefind UI to the site theme via its CSS custom properties. */
+  .pagefind-search {
+    --pagefind-ui-scale: 0.85;
+    --pagefind-ui-primary: hsl(var(--primary));
+    --pagefind-ui-text: hsl(var(--foreground));
+    --pagefind-ui-background: hsl(var(--primary-foreground));
+    --pagefind-ui-border: hsl(var(--border));
+    --pagefind-ui-tag: hsl(var(--muted));
+    --pagefind-ui-border-radius: 0.75rem;
+    --pagefind-ui-font: inherit;
+  }
+</style>
+
+<script is:inline>
+  function initPagefindUI() {
+    // PagefindUI is attached to window by the UMD bundle.
+    new window.PagefindUI({
+      element: "#search",
+      showImages: false,
+      showSubResults: true,
+      resetStyles: false,
+    });
+  }
+
+  function loadPagefind() {
+    const el = document.getElementById("search");
+    if (!el || el.dataset.pagefind) return;
+    el.dataset.pagefind = "1";
+
+    if (window.PagefindUI) {
+      initPagefindUI();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "/pagefind/pagefind-ui.js";
+    script.onload = initPagefindUI;
+    document.head.appendChild(script);
+  }
+
+  // Register once — this inline script re-executes on every View Transition
+  // swap, so guard against stacking duplicate listeners.
+  if (!window.__pagefindBound) {
+    window.__pagefindBound = true;
+    // Fires on initial load and after every View Transition navigation.
+    document.addEventListener("astro:page-load", loadPagefind);
+  }
+</script>

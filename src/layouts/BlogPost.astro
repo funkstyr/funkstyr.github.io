@@ -2,9 +2,12 @@
 import type { CollectionEntry } from "astro:content";
 import { render } from "astro:content";
 
+import type { SeriesContext } from "../utils";
 import BlogHero from "../components/blog/Hero.astro";
 import BlogPostSchema from "../components/BlogPostSchema.astro";
 import BreadcrumbSchema from "../components/BreadcrumbSchema.astro";
+import RelatedPosts from "../components/blog/RelatedPosts.astro";
+import SeriesNav from "../components/blog/SeriesNav.astro";
 import TOC from "../components/blog/TOC.astro";
 import Button from "../components/Button.astro";
 import Comments from "../components/Comments.astro";
@@ -14,9 +17,11 @@ interface Props {
   post: CollectionEntry<"post">;
   prev?: CollectionEntry<"post"> | null;
   next?: CollectionEntry<"post"> | null;
+  series?: SeriesContext | null;
+  related?: Array<CollectionEntry<"post">>;
 }
 
-const { post, prev, next } = Astro.props;
+const { post, prev, next, series, related = [] } = Astro.props;
 const {
   data: { description, ogImage, publishDate, tags, title, updatedDate },
 } = post;
@@ -79,8 +84,15 @@ const { headings } = await render(post);
     </div>
     <div class='mt-8 gap-x-10 lg:flex lg:items-start'>
       {!!headings.length && <TOC headings={headings} />}
-      <article class='flex-grow break-words'>
+      <article class='flex-grow break-words' data-pagefind-body>
         <div id='blog-hero'><BlogHero content={post} /></div>
+        {
+          series && (
+            <div class='mt-8' data-pagefind-ignore>
+              <SeriesNav series={series} currentId={post.id} />
+            </div>
+          )
+        }
         <div
           class='prose prose-base prose-zinc mt-12 text-muted-foreground dark:prose-invert prose-headings:font-medium prose-headings:text-foreground prose-headings:before:absolute prose-headings:before:-ms-4 prose-th:before:content-none'
         >
@@ -133,6 +145,8 @@ const { headings } = await render(post);
         </a>
       </div>
     )}
+
+    <RelatedPosts posts={related} />
 
     <br />
     <br />

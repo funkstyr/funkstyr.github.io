@@ -29,6 +29,13 @@ export default defineConfig({
     inlineStylesheets: "always",
   },
 
+  // Responsive images by default: every <Image>/<Picture> emits a srcset +
+  // sizes unless it opts into a fixed layout. Small fixed-size assets
+  // (avatar, logos) set layout="fixed" at the call site.
+  image: {
+    layout: "constrained",
+  },
+
   //   output: "server",
 
   integrations: [expressiveCode(expressiveCodeOptions), icon(), mdx()],

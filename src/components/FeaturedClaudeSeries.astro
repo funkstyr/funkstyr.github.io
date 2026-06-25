@@ -1,32 +1,33 @@
 ---
-import { getAllPosts, sortMDByDate } from "../utils/post";
+import { getEntry } from "astro:content";
+
+import { getAllPosts, getSeriesPosts } from "../utils/post";
+
+const SERIES_ID = "claude-code";
 
 const allPosts = await getAllPosts();
-const sortedPosts = sortMDByDate(allPosts);
+const seriesPosts = getSeriesPosts(allPosts, SERIES_ID);
+const series = await getEntry("series", SERIES_ID);
 
-const claudeCodeSeries = sortedPosts
-  .filter((post) => post.data.subtitle?.includes("Claude Code Series"))
-  .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
-
-const claudeFirstPost = claudeCodeSeries[0];
+const firstPost = seriesPosts[0];
 ---
 
 <div class='flex flex-col gap-4'>
-  {claudeCodeSeries.length > 0 && (
+  {series && firstPost && (
     <div class='rounded-2xl border border-border bg-primary-foreground px-5 py-4'>
       <div>
         <a
-          href={`/blog/${claudeFirstPost?.id}/`}
+          href={`/blog/${firstPost.id}/`}
           class='text-lg font-bold transition-all hover:text-muted-foreground'
           data-astro-prefetch
         >
-          AI-Assisted Development with Claude Code
+          {series.data.heading}
         </a>
         <p class='text-sm text-muted-foreground mt-1'>
-          A guide on building a development workflow that's faster and more reliable. Covers plan-based development, TypeScript, Turborepo, testing LLM outputs, and juggling this across packages.
+          {series.data.description}
         </p>
         <a
-          href={`/blog/${claudeFirstPost?.id}/`}
+          href={`/blog/${firstPost.id}/`}
           class='inline-block mt-3 text-sm font-medium transition-all hover:text-muted-foreground'
           data-astro-prefetch
         >
@@ -35,5 +36,4 @@ const claudeFirstPost = claudeCodeSeries[0];
       </div>
     </div>
   )}
-
 </div>

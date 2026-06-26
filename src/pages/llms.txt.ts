@@ -34,9 +34,9 @@ export const GET: APIRoute = async ({ site }) => {
 
 > ${contact.title} — fullstack TypeScript/React with .NET and Node, LLM features against Claude, and the monorepo / DX work that keeps small teams shipping.
 
-${site ? `Website: ${site}` : ""}
-${site ? `Sitemap: ${joinUrl(site, "/sitemap.xml")}` : ""}
-${site ? `RSS: ${joinUrl(site, "/rss.xml")}` : ""}
+${site ? `- [Website](${site})` : ""}
+${site ? `- [Sitemap](${joinUrl(site, "/sitemap.xml")})` : ""}
+${site ? `- [RSS feed](${joinUrl(site, "/rss.xml")})` : ""}
 
 ## About Me
 
@@ -60,7 +60,7 @@ ${stack.map((group) => `#### ${group.title}\n${group.items.join(", ")}`).join("\
 
 ### Get in touch
 
-${ctas.map((cta) => `- ${cta.label}: ${cta.href}${cta.hint ? ` (${cta.hint})` : ""}`).join("\n")}
+${ctas.map((cta) => `- [${cta.label}](${cta.href})${cta.hint ? ` — ${cta.hint}` : ""}`).join("\n")}
 
 ## Professional Summary
 
@@ -69,8 +69,8 @@ ${summary.detailed}
 ## Contact
 
 - Name: ${contact.name}
-- Email: ${contact.email}
-- LinkedIn: ${contact.linkedInUrl}
+- Email: [${contact.email}](mailto:${contact.email})
+- LinkedIn: [${contact.name}](${contact.linkedInUrl})
 - Location: ${contact.location}${contact.currentCompany ? `\n- Current Company: [${contact.currentCompany}](${contact.currentCompanyUrl})` : ""}
 
 ## Skills
@@ -83,7 +83,7 @@ ${experience
   .map(
     (exp) => `### ${exp.position} at ${exp.company}
 ${exp.startDate} - ${exp.endDate}${exp.location ? ` | ${exp.location}` : ""}
-${exp.website ? `${exp.website}` : ""}
+${exp.website ? `[${exp.company}](${exp.website})` : ""}
 
 ${exp.achievements.map((achievement) => `- ${achievement}`).join("\n")}
 
@@ -97,7 +97,7 @@ ${education
   .map(
     (edu) => `### ${edu.institution}
 ${edu.degree}${edu.minor ? ` | Minor: ${edu.minor}` : ""}
-${edu.website ? `${edu.website}` : ""}`,
+${edu.website ? `[${edu.institution}](${edu.website})` : ""}`,
   )
   .join("\n\n")}
 
@@ -108,7 +108,7 @@ ${projects
   .map(
     (project) => `### ${project.title}
 ${project.description}
-${project.url ? `${project.url}` : ""}`,
+${project.url ? `[${project.title}](${project.url})` : ""}`,
   )
   .join("\n\n")}
 
@@ -119,13 +119,11 @@ ${posts
     const url = joinUrl(site, `/blog/${post.id}/`);
     const date = formatDate(post.data.publishDate);
     const tags = post.data.tags.length
-      ? `\nTags: ${post.data.tags.join(", ")}`
+      ? ` (tags: ${post.data.tags.join(", ")})`
       : "";
-    return `### ${date} — ${post.data.title}
-${url}
-${post.data.description}${tags}`;
+    return `- [${post.data.title}](${url}): ${post.data.description} — ${date}${tags}`;
   })
-  .join("\n\n")}
+  .join("\n")}
 
 ---
 
